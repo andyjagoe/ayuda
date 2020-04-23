@@ -1,5 +1,3 @@
-const uuidv4 = require('uuid/v4');
-
 exports.handler = function(event, database, firestoreDb, admin) {
     //console.log(event);
 
@@ -11,13 +9,7 @@ exports.handler = function(event, database, firestoreDb, admin) {
         signedUpTime: admin.firestore.Timestamp.fromDate(new Date()),
     })
     .then(() => {
-        console.log('newUserSignup succeeded');
-        return database.ref('/users').child(event.uid).set({
-            apiKey: uuidv4()
-        });    
-    })
-    .then(() => {
-        console.log('newUserSignup apiKey added');
+        //console.log('newUserSignup succeeded');
         return true;
     })
     .catch(error => {

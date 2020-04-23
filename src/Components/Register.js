@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useContext, useState, useEffect, useRef } from 'react';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -14,7 +14,8 @@ import Container from '@material-ui/core/Container';
 import OnboardingAppBar from './OnboardingAppBar';
 import { navigate } from "@reach/router"
 import { makeStyles } from '@material-ui/core/styles';
-
+import { UserContext } from "../providers/UserProvider";
+import { firestore } from "../firebase"
 
 
 const useStyles = makeStyles((theme) => ({
@@ -39,16 +40,17 @@ const useStyles = makeStyles((theme) => ({
 
  
 export default function Register() {
+  const user = useContext(UserContext);
+  const {photoURL, displayName, email, uid} = user;
+
   const classes = useStyles();
+
   const [firstName, setFirstName] = useState("");
   const [firstNameError, setFirstNameError] = useState(null)
   const [lastName, setLastName] = useState("");
   const [lastNameError, setLastNameError] = useState(null)
   const [service, setService] = React.useState("");
   const [serviceNameError, setServiceNameError] = useState(null)
-  const [state, setIsBanked] = React.useState({
-    isBanked: true,
-  });
 
   const firstRender = useRef(true)
   const [disable, setDisabled] = useState(true)
@@ -98,13 +100,24 @@ export default function Register() {
   const stripeConnectUrl = new URL("https://connect.stripe.com/express/oauth/authorize");
   stripeConnectUrl.searchParams.set("redirect_uri", "https://ayuda-9ea45.web.app/connect-stripe");
   stripeConnectUrl.searchParams.set("client_id", "ca_H6rAXET2pmOzBHnNrhEnwYPfPLEiZohY");
-  stripeConnectUrl.searchParams.set("stripe_user[email]", "ian@jagoe.com");
-  stripeConnectUrl.searchParams.set("stripe_user[url]", "https://ayuda-9ea45.web.app");
+  stripeConnectUrl.searchParams.set("stripe_user[email]", email);
+  stripeConnectUrl.searchParams.set("stripe_user[url]", `https://ayuda-9ea45.web.app/p/${uid}`); //TODO: fix url
   stripeConnectUrl.searchParams.set("stripe_user[business_type]", "individual");
   stripeConnectUrl.searchParams.set("stripe_user[country]", "US");
   
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
+
+    try {
+      await firestore.collection('/users').doc(uid).set({
+        firstName: firstName,
+        lastName: lastName,    
+        service: service,
+    }, { merge: true });
+    } catch (error) {
+      console.log(error.message);
+    }
+
     stripeConnectUrl.searchParams.set("stripe_user[first_name]", firstName);
     stripeConnectUrl.searchParams.set("stripe_user[last_name]", lastName);
     console.log(stripeConnectUrl.href);

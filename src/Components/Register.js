@@ -6,8 +6,6 @@ import TextField from '@material-ui/core/TextField';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import InputLabel from '@material-ui/core/InputLabel';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Switch from '@material-ui/core/Switch';
 import Link from '@material-ui/core/Link';
 import Grid from '@material-ui/core/Grid';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
@@ -68,12 +66,6 @@ export default function Register() {
   const handleSelectChange = (event) => {
     setService(event.target.value);
   };
-
-  /*
-  const handleSwitchChange = (event) => {
-    setIsBanked({ ...state, [event.target.name]: event.target.checked });
-  };
-  */
 
   // here we run any validation, returning true/false
   const formValidation = () => {
@@ -191,21 +183,6 @@ export default function Register() {
                       We use Stripe to make sure you get paid on time and to keep your personal bank and details secure. Click Save and continue to set up your payments on Stripe.
                     </Typography>
                   </Grid>
-                  {/*
-                  <Grid item xs={12}>
-                  <FormControlLabel
-                      control={ 
-                        <Switch
-                          checked={state.isBanked}
-                          onChange={handleSwitchChange}
-                          name="isBanked"
-                          color="primary"
-                        />
-                      }
-                      label="Yes, I have a checking account or debit card"
-                    />
-                  </Grid>
-                    */}
             </Grid>
             <Button
                 type="submit"

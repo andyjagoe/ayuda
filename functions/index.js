@@ -11,3 +11,10 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'newUserSignup')
         return newUserSignup.handler(event, database, firestoreDb, admin);
     });
 }
+
+if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'connectStripe') {
+    const connectStripe = require('./connectStripe');
+    exports.connectStripe = functions.https.onCall((data, context) => {
+        return connectStripe.handler(data, context, firestoreDb);
+    });
+}

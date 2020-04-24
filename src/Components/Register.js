@@ -16,6 +16,7 @@ import { navigate } from "@reach/router"
 import { makeStyles } from '@material-ui/core/styles';
 import { UserContext } from "../providers/UserProvider";
 import { firestore } from "../firebase"
+var uuid4 = require('uuid4');
 
 
 const useStyles = makeStyles((theme) => ({
@@ -39,7 +40,7 @@ const useStyles = makeStyles((theme) => ({
   }));
 
  
-export default function Register() {
+export default function Register(props) {
   const user = useContext(UserContext);
   const {photoURL, displayName, email, uid} = user;
 
@@ -97,8 +98,9 @@ export default function Register() {
 
   }
 
+
   const stripeConnectUrl = new URL("https://connect.stripe.com/express/oauth/authorize");
-  stripeConnectUrl.searchParams.set("redirect_uri", "https://ayuda-9ea45.web.app/connect-stripe");
+  stripeConnectUrl.searchParams.set("redirect_uri", `${props.location.origin}/connect-stripe`);
   stripeConnectUrl.searchParams.set("client_id", "ca_H6rAXET2pmOzBHnNrhEnwYPfPLEiZohY");
   stripeConnectUrl.searchParams.set("stripe_user[email]", email);
   stripeConnectUrl.searchParams.set("stripe_user[url]", `https://ayuda-9ea45.web.app/p/${uid}`); //TODO: fix url
@@ -108,19 +110,22 @@ export default function Register() {
   async function handleSubmit(event) {
     event.preventDefault();
 
+    const state = uuid4();
+
     try {
       await firestore.collection('/users').doc(uid).set({
         firstName: firstName,
         lastName: lastName,    
         service: service,
+        state: state,
     }, { merge: true });
     } catch (error) {
       console.log(error.message);
     }
-
     stripeConnectUrl.searchParams.set("stripe_user[first_name]", firstName);
     stripeConnectUrl.searchParams.set("stripe_user[last_name]", lastName);
-    console.log(stripeConnectUrl.href);
+    stripeConnectUrl.searchParams.set("state", state);
+    //console.log(stripeConnectUrl.href);
     navigate(stripeConnectUrl.href);
   }
 
@@ -134,7 +139,7 @@ export default function Register() {
             <LockOutlinedIcon />
             </Avatar>
             <Typography component="h1" variant="h5">
-            Complete your profile
+              Complete your profile
             </Typography>
             <form 
               className={classes.form} 

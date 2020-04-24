@@ -10,6 +10,7 @@ import {
 */
 import SignIn from "./SignIn";
 import Register from "./Register";
+import ConnectStripe from "./ConnectStripe";
 import MainPage from "./MainPage";
 import { UserContext } from "../providers/UserProvider";
 
@@ -21,6 +22,7 @@ function Application() {
     user ?
     <Router>
       <Register path="/register" />
+      <ConnectStripe path="/connect-stripe" />
       <MainPage path="/" />
     </Router>
   :      

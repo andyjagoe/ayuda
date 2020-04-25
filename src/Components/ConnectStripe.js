@@ -5,7 +5,7 @@ import OnboardingAppBar from './OnboardingAppBar';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Grid from '@material-ui/core/Grid';
 import Alert from '@material-ui/lab/Alert';
-import { Router, Link, navigate } from "@reach/router";
+import { navigate } from "@reach/router";
 import { makeStyles } from '@material-ui/core/styles';
 import { UserContext } from "../providers/UserProvider";
 import firebase from 'firebase/app';
@@ -56,7 +56,7 @@ export default function ConnectStripe(props) {
                 setResultMessage('Stripe connected successfully')
                 setResultSeverity('success')
                 setIsLoading(false)
-                //TODO: Handle user navigation for success state
+                navigate('/');
             }).catch(function(error) {
                 var code = error.code;
                 var details = error.details;

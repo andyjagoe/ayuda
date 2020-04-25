@@ -38,33 +38,40 @@ export default function ConnectStripe(props) {
     const user = useContext(UserContext);
     const {photoURL, displayName, email, uid} = user;
 
+    const [isLoading, setIsLoading] = React.useState(true);
+    const [didTryrequest, setDidTryrequest] = React.useState(false);
     const [resultMessage, setResultMessage] = React.useState('Verifying Stripe account');
     const [resultSeverity, setResultSeverity] = React.useState('info');
-
 
     const queryString = require('query-string');
     const parsed = queryString.parse(props.location.search);
 
     async function handleSubmit() {
-        var connectStripe = firebase.functions().httpsCallable('connectStripe');
-        await connectStripe({code: parsed.code, state: parsed.state}).then(function(result) {
-            var sanitizedMessage = result.data;
-            console.log(result.data);
-            setResultMessage('Stripe connected successfully')
-            setResultSeverity('success')
-        }).catch(function(error) {
-            var code = error.code;
-            var details = error.details;
-            console.log(error.message);
-            setResultMessage(error.message)
-            setResultSeverity('error')
-        });
+        if (!didTryrequest) {
+            setDidTryrequest(true)
+            var connectStripe = firebase.functions().httpsCallable('connectStripe');
+            await connectStripe({code: parsed.code, state: parsed.state}).then(function(result) {
+                var sanitizedMessage = result.data;
+                console.log(result.data);
+                setResultMessage('Stripe connected successfully')
+                setResultSeverity('success')
+                setIsLoading(false)
+                //TODO: Handle user navigation for success state
+            }).catch(function(error) {
+                var code = error.code;
+                var details = error.details;
+                console.log(error.message);
+                setResultMessage(error.message)
+                setResultSeverity('error')
+                setIsLoading(false)
+                //TODO: Handle user navigation for error state
+            });
+        }            
     }
 
     useEffect(() => { 
         if ('code' in parsed && 'state' in parsed) {
-            //console.log(`yes, continue ${parsed.code}`);
-            handleSubmit() //TODO: add checks so this isn't called multiple times
+            handleSubmit()
         }  else {
             setResultMessage('Invalid request')
             setResultSeverity('error')
@@ -78,8 +85,17 @@ export default function ConnectStripe(props) {
         <Container component="main" maxWidth="xs">
         <CssBaseline />
         <div className={classes.paper}>
-            <CircularProgress />
-            <CircularProgress color="secondary" />
+            {isLoading ?
+                <React.Fragment>
+                    <CircularProgress />
+                    <CircularProgress color="secondary" />
+                </React.Fragment>
+            :
+                <React.Fragment>
+                    <CircularProgress variant="determinate" value={100} />
+                    <CircularProgress variant="determinate" value={100} color="secondary" />
+                </React.Fragment>                            
+            }
             <Grid container spacing={2} style={{ padding: 40}}>
                 <Grid item xs={12}>
                     <Alert severity={resultSeverity}>

@@ -41,10 +41,10 @@ const useStyles = makeStyles((theme) => ({
 
  
 export default function Register(props) {
-  const user = useContext(UserContext);
-  const {photoURL, displayName, email, uid} = user;
-
   const classes = useStyles();
+  const user = useContext(UserContext);
+
+  const {photoURL, displayName, email, uid} = user;
 
   const [firstName, setFirstName] = useState("");
   const [firstNameError, setFirstNameError] = useState(null)

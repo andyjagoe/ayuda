@@ -1,12 +1,13 @@
-import React, { useContext, useState, useEffect, useRef } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Container from '@material-ui/core/Container';
 import OnboardingAppBar from './OnboardingAppBar';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import Grid from '@material-ui/core/Grid';
+import Alert from '@material-ui/lab/Alert';
 import { Router, Link, navigate } from "@reach/router";
 import { makeStyles } from '@material-ui/core/styles';
 import { UserContext } from "../providers/UserProvider";
-import { firestore } from "../firebase"
 import firebase from 'firebase/app';
 import 'firebase/functions';
  
@@ -33,50 +34,44 @@ const useStyles = makeStyles((theme) => ({
 
 
 export default function ConnectStripe(props) {
-  const user = useContext(UserContext);
-  const {photoURL, displayName, email, uid} = user;
-  const classes = useStyles();
+    const classes = useStyles();
+    const user = useContext(UserContext);
+    const {photoURL, displayName, email, uid} = user;
 
-  const queryString = require('query-string');
-  const parsed = queryString.parse(props.location.search);
-  console.log(parsed);
+    const [resultMessage, setResultMessage] = React.useState('Verifying Stripe account');
+    const [resultSeverity, setResultSeverity] = React.useState('info');
 
-  if ('code' in parsed) {
-      console.log(`yes, continue ${parsed.code}`);
-      var connectStripe = firebase.functions().httpsCallable('connectStripe');
-      connectStripe({code: parsed.code, state: parsed.state}).then(function(result) {
-        var sanitizedMessage = result.data;
-        console.log(result.data);
-      }).catch(function(error) {
-        // Getting the Error details.
-        var code = error.code;
-        var message = error.message;
-        var details = error.details;
-        console.log(error.message);
-      });
-  } else {
-    console.log('no, redirect')
-    navigate('/register'); //TODO: fix this to show error message
-  }
 
-  /*
-  async function handleSubmit(event) {
-    event.preventDefault();
+    const queryString = require('query-string');
+    const parsed = queryString.parse(props.location.search);
 
-    try {
-      await firestore.collection('/users').doc(uid).set({
-        firstName: firstName,
-        lastName: lastName,    
-        service: service,
-    }, { merge: true });
-    } catch (error) {
-      console.log(error.message);
+    async function handleSubmit() {
+        var connectStripe = firebase.functions().httpsCallable('connectStripe');
+        await connectStripe({code: parsed.code, state: parsed.state}).then(function(result) {
+            var sanitizedMessage = result.data;
+            console.log(result.data);
+            setResultMessage('Stripe connected successfully')
+            setResultSeverity('success')
+        }).catch(function(error) {
+            var code = error.code;
+            var details = error.details;
+            console.log(error.message);
+            setResultMessage(error.message)
+            setResultSeverity('error')
+        });
     }
 
-    navigate('/');
-  }
-  */
-
+    useEffect(() => { 
+        if ('code' in parsed && 'state' in parsed) {
+            //console.log(`yes, continue ${parsed.code}`);
+            handleSubmit() //TODO: add checks so this isn't called multiple times
+        }  else {
+            setResultMessage('Invalid request')
+            setResultSeverity('error')
+        }    
+    }, [parsed]);
+    
+  
   return (
     <React.Fragment>
         <OnboardingAppBar />      
@@ -85,6 +80,13 @@ export default function ConnectStripe(props) {
         <div className={classes.paper}>
             <CircularProgress />
             <CircularProgress color="secondary" />
+            <Grid container spacing={2} style={{ padding: 40}}>
+                <Grid item xs={12}>
+                    <Alert severity={resultSeverity}>
+                        {resultMessage}
+                    </Alert>  
+                </Grid>
+            </Grid>            
         </div>
         </Container>
     </React.Fragment>

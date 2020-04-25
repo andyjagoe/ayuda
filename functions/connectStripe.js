@@ -36,7 +36,32 @@ exports.handler = function(data, context, firestoreDb) {
     console.log(code);
     console.log(state);
 
-    return true;
+    //check if state value is valid
+    return firestoreDb.collection('/users').doc(uid).get()
+    .then(doc => {
+        if (!doc.exists) {
+        console.log('No such document!');
+        throw new functions.https.HttpsError('failed-precondition', 'Unable to verify state.');
+        } else if (doc.data().state === state) {
+            console.log('State verification successful.');
+            console.log('Document data:', doc.data());
+        } else {
+            console.log('State verification failed.');
+            console.log('Document data:', doc.data());
+            throw new functions.https.HttpsError('permission-denied', 'State verification failed.');
+        }
+
+        return true;
+    })
+    .catch(err => {
+        console.log('Error getting document', err);
+        throw new functions.https.HttpsError('failed-precondition', 'Error verifying state.');
+    });
+
+    //api call to connect stripe account
+
+    //api call to look up additional stripe accoutn details
+
 
     /*
     // Phone number lookup to confirm eligibility

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from "react";
 import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -8,6 +8,9 @@ import MenuIcon from '@material-ui/icons/Menu';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
+import { UserContext } from "../providers/UserProvider";
+import {signOut} from '../firebase';
+
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -23,6 +26,10 @@ const useStyles = makeStyles((theme) => ({
 
 export default function MenuAppBar() {
   const classes = useStyles();
+
+  const user = useContext(UserContext);
+  const {photoURL, displayName, email} = user;
+
   const [auth, setAuth] = React.useState(true);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);

@@ -1,4 +1,5 @@
 const functions = require('firebase-functions');
+const stripe = require('stripe')('sk_test_K0y591XvPNiX9UJaxdaZcSK6');
 
 
 exports.handler = function(data, context, firestoreDb) {
@@ -50,69 +51,35 @@ exports.handler = function(data, context, firestoreDb) {
             console.log('Document data:', doc.data());
             throw new functions.https.HttpsError('permission-denied', 'State verification failed.');
         }
-
+        return true;
+    })
+    .then(doc => {
+        //api call to connect stripe account
+        return response = stripe.oauth.token({
+            grant_type: 'authorization_code',
+            code: code,
+        });
+    })
+    .then(accountResponse => {
+        //Handle saving of necessary api details
+        console.log('accountResponse: ', accountResponse);
+        return firestoreDb.collection('/stripe').doc(uid).set({
+            stripe_user_id: accountResponse.stripe_user_id,
+            stripe_publishable_key: accountResponse.stripe_publishable_key,    
+            refresh_token: accountResponse.refresh_token,
+            access_token: accountResponse.access_token,
+            scope: accountResponse.scope,
+            token_type: accountResponse.token_type,
+            livemode: accountResponse.livemode,
+        }, { merge: true });
+    })
+    .then(result => {
+        console.log('DbResponse: ', result);
         return true;
     })
     .catch(err => {
-        console.log('Error getting document', err);
+        console.log('Error: ', err);
         throw new functions.https.HttpsError('failed-precondition', 'Error verifying state.');
     });
 
-    //api call to connect stripe account
-
-    //api call to look up additional stripe accoutn details
-
-
-    /*
-    // Phone number lookup to confirm eligibility
-    const twilioClient = new twilio(
-        functions.config().twilio.accountsid, 
-        functions.config().twilio.authtoken
-    );
-
-    return twilioClient.lookups.phoneNumbers(phoneNumber)      
-    .fetch({type: 'carrier'})      
-    .then(phone_number => {
-        console.log(phone_number);
-
-        if (phone_number.carrier.error_code !== null) {
-            throw new functions.https.HttpsError('failed-precondition', 'Cannot get carrier ' 
-            + 'information for this number.');      
-        } else if (phone_number.carrier.type === 'mobile') {
-            throw new functions.https.HttpsError('failed-precondition', 'We cannot add texting to' 
-            + ' mobile numbers.');            
-        }
-
-        //Authy start call for one time passcode to verify phone number possession     
-        return authyClient.startPhoneVerification({ countryCode: 'US', locale: 'en', phone: phoneNumber, via: enums.verificationVia.CALL });
-    })
-    .then((response) => {            
-        console.log('Phone information', response);
-        const d = new Date();
-        database.ref('/users').child(uid).child('loa').child('request').update({
-            "tn": phoneNumber,
-            "ip": ipAddress,
-            "time": d.toISOString(),
-            "authy": response,
-            "screenshotPath": screenshotPath
-        });
-        if (response.success === true) {
-            return response;
-        }
-        throw new functions.https.HttpsError('failed-precondition', 'Could not begin ' 
-        + ' voice one time passcode verification.');
-    })
-    .catch((error) => {
-        console.log(error);
-        // remove screenshot from storage...
-        const file = bucket.file(screenshotPath);
-        file.delete();
-        if (error.name === 'HttpsError') {            
-            throw new functions.https.HttpsError(error.code, error.message);
-        } else {
-            throw new functions.https.HttpsError('unknown', error.message);
-        }        
-    });
-
-    */
 }

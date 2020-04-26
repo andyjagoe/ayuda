@@ -96,14 +96,14 @@ const ProfilePage = () => {
         </Grid>
 
         <Grid container direction="row" className={classes.jobs}>
-          <Grid item xs={6} fullwidth>
+          <Grid item xs={6}>
             <Grid container justify = "flex-start">
               <Typography variant="h6">
                 Upcoming Jobs
               </Typography>
             </Grid>
           </Grid>
-          <Grid item xs={6} fullwidth>
+          <Grid item xs={6}>
             <Grid container justify = "flex-end">
               <Button
                 ><AddIcon />      
@@ -113,7 +113,7 @@ const ProfilePage = () => {
         </Grid>
         
         <Grid container spacing={0} direction="column">          
-          <Grid item xs={12} fullwidth>
+          <Grid item xs={12}>
             <Card variant="outlined">
               <StyledCardHeader
                 className={classes.jobheader}
@@ -123,7 +123,10 @@ const ProfilePage = () => {
                 title="John Smith"
                 subheader="May 14, 2:00PM"
                 action={
-                  <IconButton aria-label="settings">
+                  <IconButton 
+                    aria-label="settings"
+                    onClick={() => { console.log('onClick'); }}
+                  >
                     <ArrowForwardIosIcon />
                   </IconButton>
                 }

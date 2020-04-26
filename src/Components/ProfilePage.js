@@ -1,14 +1,15 @@
 import React, { useContext } from "react";
 import { makeStyles } from '@material-ui/core/styles';
+import { withStyles } from '@material-ui/core/styles';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import IconButton from '@material-ui/core/IconButton';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import AddIcon from '@material-ui/icons/Add';
-import Box from '@material-ui/core/Box';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
+import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos';
 import CardHeader from '@material-ui/core/CardHeader';
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
@@ -42,8 +43,15 @@ const useStyles = makeStyles((theme) => ({
   },
   jobheader: {
     padding: theme.spacing(1),
-  }
+  },
 }));
+
+const StyledCardHeader = withStyles({
+  action: {
+    margin: 0,
+    alignSelf: 'auto'
+  },
+})(CardHeader);
 
 
 const ProfilePage = () => {
@@ -52,7 +60,7 @@ const ProfilePage = () => {
   const {photoURL, displayName, email} = user;
   
   return (
-    <Container component="main" maxWidth="xs">
+    <Container component="main" maxWidth="xs">      
       <div className={classes.paper}>
         <Grid container spacing={2} className={classes.account}>
           <Grid item xs={12}>
@@ -107,7 +115,7 @@ const ProfilePage = () => {
         <Grid container spacing={0} direction="column">          
           <Grid item xs={12} fullwidth>
             <Card variant="outlined">
-              <CardHeader
+              <StyledCardHeader
                 className={classes.jobheader}
                 avatar={
                   <Avatar className={classes.avatar} src={photoURL || 'https://res.cloudinary.com/dqcsk8rsc/image/upload/v1577268053/avatar-1-bitmoji_upgwhc.png'}/>
@@ -116,14 +124,14 @@ const ProfilePage = () => {
                 subheader="May 14, 2:00PM"
                 action={
                   <IconButton aria-label="settings">
-                    <MoreVertIcon />
+                    <ArrowForwardIosIcon />
                   </IconButton>
                 }
               >
-              </CardHeader>
+              </StyledCardHeader>
             </Card>
             <Card>
-              <CardHeader
+              <StyledCardHeader
                 className={classes.jobheader}
                 avatar={
                   <Avatar className={classes.avatar} src={photoURL || 'https://res.cloudinary.com/dqcsk8rsc/image/upload/v1577268053/avatar-1-bitmoji_upgwhc.png'}/>
@@ -132,11 +140,11 @@ const ProfilePage = () => {
                 subheader="May 15, 11:00AM"
                 action={
                   <IconButton aria-label="settings">
-                    <MoreVertIcon />
+                    <ArrowForwardIosIcon />
                   </IconButton>
                 }
               >
-              </CardHeader>
+              </StyledCardHeader>
             </Card>
           </Grid>
         </Grid>

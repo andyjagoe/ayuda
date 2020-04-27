@@ -2,11 +2,11 @@ import React from "react";
 import MenuAppBar from './MenuAppBar';
 
 
-const ProfilePage = () => {
+const GetJobPage = () => {
   return (
     <React.Fragment>
       <MenuAppBar />
     </React.Fragment>
   ) 
 };
-export default ProfilePage;
+export default GetJobPage;

@@ -9,6 +9,7 @@ import AccountCircle from '@material-ui/icons/AccountCircle';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
 import { UserContext } from "../providers/UserProvider";
+import { navigate } from "@reach/router";
 import {signOut} from '../firebase';
 
 
@@ -50,12 +51,14 @@ export default function MenuAppBar() {
     <div className={classes.root}>
       <AppBar position="static">
         <Toolbar>
+          {/*
           <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" className={classes.title}>
-            Ayuda
-          </Typography>
+          */}
+            <Typography variant="h6" className={classes.title}>
+              Ayuda
+            </Typography>
           {auth && (
             <div>
               <IconButton
@@ -82,8 +85,16 @@ export default function MenuAppBar() {
                 open={open}
                 onClose={handleClose}
               >
-                <MenuItem onClick={handleClose}>Profile</MenuItem>
-                <MenuItem onClick={handleClose}>My account</MenuItem>
+                <MenuItem 
+                  onClick={() => { handleClose();navigate('/'); }}
+                >Home</MenuItem>
+                <MenuItem 
+                  onClick={() => { handleClose();navigate('/profile'); }}
+                >Profile</MenuItem>
+                <MenuItem 
+                  onClick={() => { handleClose();navigate('/account'); }}
+                >Account</MenuItem>
+                <MenuItem onClick={() => {signOut()}}>Sign out</MenuItem>                
               </Menu>
             </div>
           )}

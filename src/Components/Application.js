@@ -11,7 +11,12 @@ import {
 import SignIn from "./SignIn";
 import Register from "./Register";
 import ConnectStripe from "./ConnectStripe";
-import MainPage from "./MainPage";
+import HomePage from "./HomePage";
+import ProfilePage from "./ProfilePage";
+import AccountPage from "./AccountPage";
+import JobPage from "./JobPage";
+import GetJobPage from "./GetJobPage";
+import AddJobPage from "./AddJobPage";
 import { UserContext } from "../providers/UserProvider";
 
 
@@ -23,7 +28,12 @@ function Application() {
     <Router>
       <Register path="/register" />
       <ConnectStripe path="/connect-stripe" />
-      <MainPage path="/" />
+      <HomePage path="/" />
+      <ProfilePage path="/profile" />
+      <AccountPage path="/account" />
+      <JobPage path="/job" />
+      <GetJobPage path="/getjob" />
+      <AddJobPage path="/addjob" />
     </Router>
   :      
     <Router>

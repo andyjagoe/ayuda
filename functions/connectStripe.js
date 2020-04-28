@@ -1,5 +1,7 @@
 const functions = require('firebase-functions');
 const stripe = require('stripe')('sk_test_K0y591XvPNiX9UJaxdaZcSK6');
+const axios = require('axios');
+const zoomToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOm51bGwsImlzcyI6IkFUZ2l2aEhuUUh5SDlYOXE0Z0E3aHciLCJleHAiOjE1ODg2NDk0MjQsImlhdCI6MTU4ODA0NDYyNH0.6riecbQKpVXkHPO_N2F0EiQFV3EwZBzi04qVLnPjL3k';
 
 
 exports.handler = function(data, context, firestoreDb) {
@@ -37,6 +39,8 @@ exports.handler = function(data, context, firestoreDb) {
     console.log(code);
     console.log(state);
 
+    var userDoc = null;
+
     //check if state value is valid
     return firestoreDb.collection('/users').doc(uid).get()
     .then(doc => {
@@ -51,9 +55,10 @@ exports.handler = function(data, context, firestoreDb) {
             console.log('Document data:', doc.data());
             throw new functions.https.HttpsError('permission-denied', 'State verification failed.');
         }
+        userDoc = doc.data();
         return true;
     })
-    .then(doc => {
+    .then(result => {
         //api call to connect stripe account
         return response = stripe.oauth.token({
             grant_type: 'authorization_code',
@@ -75,6 +80,31 @@ exports.handler = function(data, context, firestoreDb) {
     })
     .then(result => {
         console.log('DbResponse: ', result);
+        // Create Zoom  Account
+        //TODO: refresh Zoom bearer token capability
+        return axios({
+            method: 'post',
+            url: 'https://api.zoom.us/v2/users',
+            data: {
+                "action": "custCreate",
+                "user_info": {
+                  "email": email,
+                  "type": 1,
+                  "first_name": userDoc.firstName,
+                  "last_name": userDoc.lastName
+                }
+            },
+            headers: {
+              'Authorization': `Bearer ${zoomToken}`,
+              'User-Agent': 'Zoom-api-Jwt-Request',
+              'content-type': 'application/json'
+            }
+          });
+    })
+    .then(response => {
+        console.log('response: ', response);
+
+        //catch 409 error if zoom user has already been created
         return true;
     })
     .catch(err => {

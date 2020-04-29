@@ -47,23 +47,23 @@ const StyledCardHeader = withStyles({
   })(CardHeader);
   
 
-const JobTableCell = ({jobRecord}) => {
+const JobCell = ({jobRecord, jobKey}) => {
     const classes = useStyles();
-
+    
     return (
     <React.Fragment>
-        <Card>
+        <Card variant="outlined">
             <StyledCardHeader
             className={classes.jobheader}
             avatar={
-                <Avatar className={classes.avatar} src={'https://res.cloudinary.com/dqcsk8rsc/image/upload/v1577268053/avatar-1-bitmoji_upgwhc.png'}/>
+                <Avatar className={classes.avatar} src={jobRecord.topic || 'https://res.cloudinary.com/dqcsk8rsc/image/upload/v1577268053/avatar-1-bitmoji_upgwhc.png'}/>
             }
-            title={jobRecord.title}
-            subheader={jobRecord.subtitle}
+            title={jobRecord.topic}
+            subheader={jobRecord.topic}
             action={
                 <IconButton 
                 aria-label="settings"
-                onClick={() => { navigate('/job'); }}
+                onClick={() => { navigate(`/job/${jobKey}`); }}
                 >
                 <ArrowForwardIosIcon />
                 </IconButton>
@@ -74,4 +74,4 @@ const JobTableCell = ({jobRecord}) => {
     </React.Fragment>
   ) 
 };
-export default JobTableCell;
+export default JobCell;

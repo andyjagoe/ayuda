@@ -16,7 +16,8 @@ import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
 import { navigate } from "@reach/router";
 import { UserContext } from "../providers/UserProvider";
-import JobTableCell from './JobTableCell';
+import Jobs from './Jobs';
+import JobCell from './JobCell';
 import {signOut} from '../firebase';
 
 
@@ -62,10 +63,6 @@ const HomePage = () => {
   const user = useContext(UserContext);
   const {photoURL, displayName, email} = user;
 
-  const dummyData = {
-    title: "Andy Jagoe",
-    subtitle: "May 30, 9:00AM"
-  }
   
   return (
     <React.Fragment>
@@ -125,50 +122,7 @@ const HomePage = () => {
         
         <Grid container spacing={0} direction="column">          
           <Grid item xs={12}>
-            <Card variant="outlined">
-              <StyledCardHeader
-                className={classes.jobheader}
-                avatar={
-                  <Avatar className={classes.avatar} src={photoURL || 'https://res.cloudinary.com/dqcsk8rsc/image/upload/v1577268053/avatar-1-bitmoji_upgwhc.png'}/>
-                }
-                title="John Smith"
-                subheader="May 14, 2:00PM"
-                action={
-                  <IconButton 
-                    aria-label="settings"
-                    onClick={() => { navigate('/job'); }}
-                  >
-                    <ArrowForwardIosIcon />
-                  </IconButton>
-                }
-              >
-              </StyledCardHeader>
-            </Card>
-            <Card>
-              <StyledCardHeader
-                className={classes.jobheader}
-                avatar={
-                  <Avatar className={classes.avatar} src={photoURL || 'https://res.cloudinary.com/dqcsk8rsc/image/upload/v1577268053/avatar-1-bitmoji_upgwhc.png'}/>
-                }
-                title="John Smith"
-                subheader="May 15, 11:00AM"
-                action={
-                  <IconButton 
-                    aria-label="settings"
-                    onClick={() => { navigate('/job'); }}
-                  >
-                    <ArrowForwardIosIcon />
-                  </IconButton>
-                }
-              >
-              </StyledCardHeader>
-            </Card>
-            <JobTableCell 
-              jobRecord={dummyData}
-            />
-            <JobTableCell 
-              jobRecord={dummyData}
-            />
+            <Jobs />
           </Grid>
         </Grid>
 

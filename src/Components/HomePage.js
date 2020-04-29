@@ -16,6 +16,7 @@ import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
 import { navigate } from "@reach/router";
 import { UserContext } from "../providers/UserProvider";
+import JobTableCell from './JobTableCell';
 import {signOut} from '../firebase';
 
 
@@ -60,6 +61,11 @@ const HomePage = () => {
   const classes = useStyles();
   const user = useContext(UserContext);
   const {photoURL, displayName, email} = user;
+
+  const dummyData = {
+    title: "Andy Jagoe",
+    subtitle: "May 30, 9:00AM"
+  }
   
   return (
     <React.Fragment>
@@ -157,6 +163,12 @@ const HomePage = () => {
               >
               </StyledCardHeader>
             </Card>
+            <JobTableCell 
+              jobRecord={dummyData}
+            />
+            <JobTableCell 
+              jobRecord={dummyData}
+            />
           </Grid>
         </Grid>
 

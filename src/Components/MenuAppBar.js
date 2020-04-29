@@ -56,7 +56,13 @@ export default function MenuAppBar() {
             <MenuIcon />
           </IconButton>
           */}
-            <Typography variant="h6" className={classes.title}>
+            <Typography 
+              variant="h6" 
+              className={classes.title}
+              onClick={() => {
+                navigate('/')
+              }}
+            >
               Ayuda
             </Typography>
           {auth && (

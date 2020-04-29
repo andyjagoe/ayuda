@@ -18,3 +18,10 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'connectStripe')
         return connectStripe.handler(data, context, firestoreDb);
     });
 }
+
+if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'addJob') {
+    const addJob = require('./addJob');
+    exports.addJob = functions.https.onCall((data, context) => {
+        return addJob.handler(data, context, firestoreDb, admin);
+    });
+}

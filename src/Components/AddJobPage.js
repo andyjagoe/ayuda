@@ -11,12 +11,12 @@ import Container from '@material-ui/core/Container';
 import { navigate } from "@reach/router"
 import { makeStyles } from '@material-ui/core/styles';
 import { UserContext } from "../providers/UserProvider";
-import { firestore } from "../firebase"
 import MenuAppBar from './MenuAppBar';
 import { DateTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import MomentUtils from '@date-io/moment';
+import firebase from 'firebase/app';
+import 'firebase/functions';
 var moment = require('moment');
-
 
 
 const useStyles = makeStyles((theme) => ({
@@ -46,6 +46,7 @@ export default function AddJobPage(props) {
 
   const {photoURL, displayName, email, uid} = user;
 
+  const [didTryrequest, setDidTryrequest] = React.useState(false);
   const [payer, setPayer] = useState("");
   const [payerError, setPayerError] = useState(null)
   const [topic, setTopic] = useState("");
@@ -87,8 +88,6 @@ export default function AddJobPage(props) {
     setDisabled(formValidation())
     
   }, [payer, topic, start, end])
-
-
 
 
   // here we run any validation, returning true/false
@@ -140,28 +139,43 @@ export default function AddJobPage(props) {
     console.log(`payer: ${payer}`);
     console.log(`topic: ${topic}`);
     console.log(`start: ${start}`);
-    console.log(`end: ${end}`);
+    console.log(`duration: ${moment(end).diff(moment(start), 'minutes')}`);
     console.log(`notes: ${notes}`);
 
     /* Send to Firebase via cloud function which: 
         1) tries to schedule on zoom
         2) If successful, writes to Firestore, returns success, displays snackbar, show home
         3) If error, displays error message
-    /*
-    
-    /*
-    try {
-      await firestore.collection('/users').doc(uid).set({
-        firstName: firstName,
-        lastName: lastName,    
-        service: service,
-        state: state,
-    }, { merge: true });
-    } catch (error) {
-      console.log(error.message);
-    }
-    navigate(stripeConnectUrl.href);
     */
+
+    if (!didTryrequest) {
+        setDidTryrequest(true)
+        var addJob = firebase.functions().httpsCallable('addJob');
+        await addJob({payer: payer, 
+          topic: topic,
+          start: start.toISOString(),
+          duration: moment(end).diff(moment(start), 'minutes'),
+          notes: notes
+        })
+        .then(function(result) {
+            var sanitizedMessage = result.data;
+            console.log(result.data);
+            //setResultMessage('Stripe connected successfully')
+            //setResultSeverity('success')
+            //setIsLoading(false)
+            navigate('/');
+        })
+        .catch(function(error) {
+            var code = error.code;
+            var details = error.details;
+            console.log(error.message);
+            //setResultMessage(error.message)
+            //setResultSeverity('error')
+            //setIsLoading(false)
+            //TODO: Handle user navigation for error state
+        });
+    }            
+
   }
 
   return (
@@ -221,7 +235,11 @@ export default function AddJobPage(props) {
                       id="start"
                       name="start"
                       value={start}
-                      onChange={handleStartDateChange}
+                      //onChange={handleStartDateChange}
+                      onChange={val => {
+                        handleStartDateChange(val);
+                        handleEndDateChange(val);
+                      }}
                       />
                   </MuiPickersUtilsProvider>
                 </Grid>
@@ -230,6 +248,7 @@ export default function AddJobPage(props) {
                     <DateTimePicker 
                       required
                       disablePast
+                      openTo="hours"
                       maxDate={maxDate}
                       maxDateMessage="Schedule only availble for one year."
                       inputVariant="outlined"

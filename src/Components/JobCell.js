@@ -70,7 +70,7 @@ const JobCell = ({props, jobRecord, jobKey}) => {
                 aria-label="settings"
                 onClick={() => { navigate(
                                   `/job/${jobKey}`,
-                                  { state: { jobRecord: jobRecord } }
+                                  { state: { jobRecord: jobRecord} }
                                   ); 
                                 }
                               }

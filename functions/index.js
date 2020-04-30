@@ -25,3 +25,10 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'addJob') {
         return addJob.handler(data, context, firestoreDb, admin);
     });
 }
+
+if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'removeJob') {
+    const removeJob = require('./removeJob');
+    exports.removeJob = functions.https.onCall((data, context) => {
+        return removeJob.handler(data, context, firestoreDb, admin);
+    });
+}

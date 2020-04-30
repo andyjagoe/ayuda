@@ -24,6 +24,8 @@ import { makeStyles } from '@material-ui/core/styles';
 import { UserContext } from "../providers/UserProvider";
 import { DateTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import MomentUtils from '@date-io/moment';
+import firebase from 'firebase/app';
+import 'firebase/functions';
 
 
 function CopyIcon(props) {
@@ -66,15 +68,33 @@ const JobPage = (props) => {
   console.log(jobRecord)
 
   const [open, setOpen] = React.useState(false);
-
+  
   const handleClickOpen = () => {
     setOpen(true);
   };
-
+  
   const handleClose = () => {
     setOpen(false);
   };
 
+  async function removeJob() {
+    setOpen(false);
+
+    var removeJob = firebase.functions().httpsCallable('removeJob');
+    await removeJob({id: props.jobId, zoom_id: jobRecord.id})
+    .then(function(result) {
+        var sanitizedMessage = result.data;
+        console.log(result.data);
+        navigate('/');
+    })
+    .catch(function(error) {
+        var code = error.code;
+        var details = error.details;
+        console.log(error.message);
+        //TODO: Handle user navigation for error state
+    });
+
+  }
 
   return (
     <React.Fragment>
@@ -291,7 +311,7 @@ const JobPage = (props) => {
                 <Button onClick={handleClose} color="primary">
                   Cancel
                 </Button>
-                <Button onClick={handleClose} color="primary" autoFocus>
+                <Button onClick={removeJob} color="primary" autoFocus>
                   OK
                 </Button>
               </DialogActions>

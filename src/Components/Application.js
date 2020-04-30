@@ -31,7 +31,7 @@ function Application() {
       <HomePage path="/" />
       <ProfilePage path="/profile" />
       <AccountPage path="/account" />
-      <JobPage path="/job/*" />
+      <JobPage path="/job/:jobId" />
       <GetJobPage path="/getjob" />
       <AddJobPage path="/addjob" />
     </Router>

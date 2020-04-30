@@ -17,6 +17,7 @@ import InputAdornment from "@material-ui/core/InputAdornment";
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import Snackbar from '@material-ui/core/Snackbar';
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
 import { navigate } from "@reach/router"
@@ -26,6 +27,8 @@ import { DateTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import MomentUtils from '@date-io/moment';
 import firebase from 'firebase/app';
 import 'firebase/functions';
+import copy from 'copy-to-clipboard';
+var moment = require('moment');
 
 
 function CopyIcon(props) {
@@ -67,12 +70,47 @@ const JobPage = (props) => {
   //TODO: If jobRecord not set then try to retrieve from Firestore using url params
   console.log(jobRecord)
 
+  // Handle updateable form elements
+
+  const [start, handleStartDateChange] = useState(moment
+    .unix(jobRecord.t.seconds)
+    .tz(jobRecord.tz)  
+    .toDate()
+  );
+  const [startError, setStartError] = useState(null)
+  const [end, handleEndDateChange] = useState(moment
+    .unix(jobRecord.t.seconds)
+    .tz(jobRecord.tz)
+    .add(jobRecord.d,"m")
+    .toDate()
+  );
+
+
+  // Handle copying and snackbar messages
+  const [openSnackbar, setOpenSnackbar] = React.useState(false);
+  const [snackbarMessage, setSnackbarMessage] = React.useState(false);
+  const [snackbarKey, setSnackbarKey] = React.useState(false);
+  const handleSnackbarClick = (text, message, key) => {
+    copy(text);
+    setSnackbarMessage(message);
+    setSnackbarKey(key);
+    setOpenSnackbar(true);
+  };
+
+  const handleSnackbarClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setOpenSnackbar(false);
+  };
+
+
+  // Handle Remove jobs dialog
   const [open, setOpen] = React.useState(false);
-  
   const handleClickOpen = () => {
     setOpen(true);
   };
-  
+
   const handleClose = () => {
     setOpen(false);
   };
@@ -152,7 +190,7 @@ const JobPage = (props) => {
                       label="When does it start?"
                       id="start"
                       name="start"
-                      //value={start}
+                      value={start}
                       //onChange={val => {
                       //  handleStartDateChange(val);
                       //  handleEndDateChange(val);
@@ -172,7 +210,7 @@ const JobPage = (props) => {
                       label="When does it end?"
                       id="end"
                       name="end"
-                      //value={end}
+                      value={end}
                       //onChange={handleEndDateChange}
                     />
                   </MuiPickersUtilsProvider>
@@ -227,7 +265,12 @@ const JobPage = (props) => {
                     value={jobRecord.start_url}
                     InputProps={{endAdornment:
                       <InputAdornment>
-                        <IconButton>
+                        <IconButton
+                          onClick={() => { handleSnackbarClick(
+                            jobRecord.start_url,
+                            'Start URL copied.',
+                            'start_url'); }}
+                        >
                           <CopyIcon />
                         </IconButton>
                         <IconButton
@@ -250,8 +293,13 @@ const JobPage = (props) => {
                     value={jobRecord.join_url}
                     InputProps={{endAdornment:
                       <InputAdornment>
-                        <IconButton>
-                          <CopyIcon />
+                        <IconButton
+                          onClick={() => { handleSnackbarClick(
+                            jobRecord.join_url,
+                            'Join URL copied.',
+                            'join_url'); }}
+                        >
+                          <CopyIcon />                                                  
                         </IconButton>
                         <IconButton
                           onClick={() => { navigate(jobRecord.join_url); }}
@@ -309,6 +357,16 @@ const JobPage = (props) => {
                 </Button>
               </DialogActions>
             </Dialog>
+
+            <Snackbar
+              anchorOrigin= {{ vertical: 'top', horizontal: 'center' }}
+              key={snackbarKey}
+              autoHideDuration={6000}
+              open={openSnackbar}
+              onClose={handleSnackbarClose}
+              message={snackbarMessage}
+            />
+
         </div>
         </Container>
     </React.Fragment>

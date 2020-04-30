@@ -228,7 +228,7 @@ const JobPage = (props) => {
                     InputProps={{endAdornment:
                       <InputAdornment>
                         <IconButton>
-                          <ShareIcon />
+                          <CopyIcon />
                         </IconButton>
                         <IconButton
                           onClick={() => { navigate(jobRecord.start_url); }}
@@ -251,7 +251,7 @@ const JobPage = (props) => {
                     InputProps={{endAdornment:
                       <InputAdornment>
                         <IconButton>
-                          <ShareIcon />
+                          <CopyIcon />
                         </IconButton>
                         <IconButton
                           onClick={() => { navigate(jobRecord.join_url); }}
@@ -291,13 +291,6 @@ const JobPage = (props) => {
             >
                 Delete Job
             </Button>
-            <Grid container justify="flex-end">
-                <Grid item>
-                <Link href="#" variant="body2">
-                    Need help?
-                </Link>
-                </Grid>
-            </Grid>
             </form>
 
             <Dialog

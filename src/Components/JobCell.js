@@ -8,6 +8,7 @@ import IconButton from '@material-ui/core/IconButton';
 import { navigate } from "@reach/router";
 import { makeStyles } from '@material-ui/core/styles';
 import { withStyles } from '@material-ui/core/styles';
+var moment = require('moment');
 
 
 const useStyles = makeStyles((theme) => ({
@@ -47,7 +48,7 @@ const StyledCardHeader = withStyles({
   })(CardHeader);
   
 
-const JobCell = ({jobRecord, jobKey}) => {
+const JobCell = ({props, jobRecord, jobKey}) => {
     const classes = useStyles();
     
     return (
@@ -59,11 +60,20 @@ const JobCell = ({jobRecord, jobKey}) => {
                 <Avatar className={classes.avatar} src={jobRecord.topic || 'https://res.cloudinary.com/dqcsk8rsc/image/upload/v1577268053/avatar-1-bitmoji_upgwhc.png'}/>
             }
             title={jobRecord.topic}
-            subheader={jobRecord.topic}
+            subheader={moment(jobRecord
+                      .t
+                      .toDate())
+                      .tz(jobRecord.tz)
+                      .format(('MMMM Do, h:mm a'))} 
             action={
                 <IconButton 
                 aria-label="settings"
-                onClick={() => { navigate(`/job/${jobKey}`); }}
+                onClick={() => { navigate(
+                                  `/job/${jobKey}`,
+                                  { state: { jobRecord: jobRecord } }
+                                  ); 
+                                }
+                              }
                 >
                 <ArrowForwardIosIcon />
                 </IconButton>

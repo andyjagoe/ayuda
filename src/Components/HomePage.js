@@ -106,7 +106,7 @@ const HomePage = () => {
           <Grid item xs={6}>
             <Grid container justify = "flex-start">
               <Typography variant="h6">
-                Upcoming Jobs
+                Your Schedule
               </Typography>
             </Grid>
           </Grid>

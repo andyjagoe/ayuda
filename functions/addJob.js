@@ -18,10 +18,11 @@ exports.handler = function(data, context, firestoreDb, admin) {
     //console.log(JSON.stringify(context.rawRequest.headers, null, 2));
 
     const payer = data.payer;
+    const payer_id = data.payer_id;
     const topic = data.topic;
     const start = data.start;
     const duration = data.duration;
-    const notes = data.notes;
+    const notes = data.notes || '';
 
     // Authentication / user information is automatically added to the request.
     const uid = context.auth.uid;
@@ -49,6 +50,9 @@ exports.handler = function(data, context, firestoreDb, admin) {
         throw new functions.https.HttpsError('invalid-argument', 'The function must be called with ' +
             'one argument "topic" containing the state value from the app.');
     }
+
+    //TODO:  Add error checking for valid start and duratiobn values 
+
     //console.log(payer);
     //console.log(topic);
     //console.log(start);
@@ -108,8 +112,10 @@ exports.handler = function(data, context, firestoreDb, admin) {
             .add({
                 uuid: response.data.uuid,
                 id: response.data.id,
-                topic: response.data.topic,
-                agenda: response.data.agenda,
+                payer: payer,
+                payer_id: payer_id,
+                topic: topic,
+                agenda: notes,
                 t: admin.firestore.Timestamp.fromDate(new Date(response.data.start_time)),
                 d: response.data.duration,
                 tz: response.data.timezone,

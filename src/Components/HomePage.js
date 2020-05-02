@@ -2,23 +2,15 @@ import React, { useContext } from "react";
 import { makeStyles } from '@material-ui/core/styles';
 import { withStyles } from '@material-ui/core/styles';
 import MenuAppBar from './MenuAppBar';
-import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
-import IconButton from '@material-ui/core/IconButton';
-import MoreVertIcon from '@material-ui/icons/MoreVert';
 import AddIcon from '@material-ui/icons/Add';
-import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
-import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos';
 import CardHeader from '@material-ui/core/CardHeader';
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
 import { navigate } from "@reach/router";
 import { UserContext } from "../providers/UserProvider";
 import Jobs from './Jobs';
-import JobCell from './JobCell';
-import {signOut} from '../firebase';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -49,13 +41,6 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(1),
   },
 }));
-
-const StyledCardHeader = withStyles({
-  action: {
-    margin: 0,
-    alignSelf: 'auto'
-  },
-})(CardHeader);
 
 
 const HomePage = () => {

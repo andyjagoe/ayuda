@@ -18,12 +18,14 @@ import { navigate } from "@reach/router"
 import { makeStyles } from '@material-ui/core/styles';
 import { UserContext } from "../providers/UserProvider";
 import MenuAppBar from './MenuAppBar';
-import CustomerChooser from './CustomerChooser';
 import { DateTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import MomentUtils from '@date-io/moment';
 import firebase from 'firebase/app';
 import 'firebase/functions';
 var moment = require('moment');
+
+
+const filter = createFilterOptions();
 
 
 const useStyles = makeStyles((theme) => ({
@@ -50,6 +52,8 @@ const useStyles = makeStyles((theme) => ({
 export default function AddJobPage(props) {
   const classes = useStyles();
   const user = useContext(UserContext);
+
+  const {photoURL, displayName, email, uid} = user;
 
   const [didTryrequest, setDidTryrequest] = React.useState(false);
   const [payer, setPayer] = useState("");
@@ -96,7 +100,7 @@ export default function AddJobPage(props) {
 
   // here we run any validation, returning true/false
   const formValidation = () => {
-    if (payer.name === "") {
+    if (payer === "") {
       setPayerError('Payer name is required')
     } else {
       setPayerError (null)
@@ -140,7 +144,7 @@ export default function AddJobPage(props) {
   async function handleSubmit(event) {
     event.preventDefault();
 
-    console.log(`payer: ${payer.name}`);
+    console.log(`payer: ${payer}`);
     console.log(`topic: ${topic}`);
     console.log(`start: ${start}`);
     console.log(`duration: ${moment(end).diff(moment(start), 'minutes')}`);
@@ -155,12 +159,11 @@ export default function AddJobPage(props) {
     if (!didTryrequest) {
         setDidTryrequest(true)
         var addJob = firebase.functions().httpsCallable('addJob');
-        await addJob({payer: payer.name,
-          payer_id: payer.id, 
+        await addJob({payer: payer, 
           topic: topic,
           start: start.toISOString(),
           duration: moment(end).diff(moment(start), 'minutes'),
-          notes: notes,
+          notes: notes
         })
         .then(function(result) {
             var sanitizedMessage = result.data;
@@ -183,15 +186,32 @@ export default function AddJobPage(props) {
 
   }
 
-  // Receive customer data from child component
-  const callbackFunction = (childData) => {
-    console.log(childData.name);
-    console.log(childData.id);
-    console.log(childData.email);
-    console.log(childData.phone);
-    setPayer(childData)
-  }
+  // Handle adding new customers
+  const [openCustomerDialog, toggleOpenCustomerDialog] = React.useState(false);
 
+  const handleCloseCustomerDialog = () => {
+    setCustomerDialogValue({
+      name: '',
+      id: '',
+    });
+
+    toggleOpenCustomerDialog(false);
+  };
+
+  const [customerDialogValue, setCustomerDialogValue] = React.useState({
+    name: '',
+    id: '',
+  });
+
+  const handleSubmitCustomerDialog = (event) => {
+    event.preventDefault();
+    setPayer({
+      name: customerDialogValue.name,
+      id: customerDialogValue.id,
+    });
+
+    handleCloseCustomerDialog();
+  };  
 
   return (
     <React.Fragment>
@@ -225,7 +245,84 @@ export default function AddJobPage(props) {
                   />
                 </Grid>
                 <Grid item xs={6}>
-                  <CustomerChooser parentCallback={callbackFunction} />
+                <Autocomplete
+                  value={payer}
+                  onChange={(event, newValue) => {
+                    if (typeof newValue === 'string') {
+                      // timeout to avoid instant validation of the dialog's form.
+                      setTimeout(() => {
+                        toggleOpenCustomerDialog(true);
+                        setCustomerDialogValue({
+                          name: newValue,
+                          id: '',
+                        });
+                      });
+                      return;
+                    }
+          
+                    if (newValue && newValue.inputValue) {
+                      toggleOpenCustomerDialog(true);
+                      setCustomerDialogValue({
+                        name: newValue.inputValue,
+                        id: '',
+                      });
+          
+                      return;
+                    }
+          
+                    setPayer(newValue);
+                  }}
+                  filterOptions={(options, params) => {
+                    const filtered = filter(options, params);
+          
+                    if (params.inputValue !== '') {
+                      filtered.push({
+                        inputValue: params.inputValue,
+                        name: `Add "${params.inputValue}"`,
+                        });
+                    }
+          
+                    return filtered;
+                  }}
+                  renderOption={(option) => option.name}          
+                  options={customers}
+                  getOptionLabel={(option) => {
+                    // e.g value selected with enter, right from the input
+                    if (typeof option === 'string') {
+                      return option;
+                    }
+                    if (option.inputValue) {
+                      return option.inputValue;
+                    }
+
+                    return option.name;
+                  }}
+                  selectOnFocus
+                  freeSolo
+                  id="payer"
+                  renderInput={(params) => (
+                    <TextField {...params} 
+                      label="Who's paying?" 
+                      variant="outlined"
+                      required 
+                      fullWidth
+                    />
+                  )}
+                />
+                {/*
+                <TextField
+                    autoComplete="payer"
+                    name="payer"
+                    variant="outlined"
+                    required
+                    fullWidth
+                    id="payer"
+                    label="Who's paying?"
+                    autoFocus
+                    value={payer}
+                    onChange={e => setPayer(e.target.value)}
+                />
+                */}
                 </Grid>
                 <Grid item xs={6}>
                 <Autocomplete
@@ -316,11 +413,75 @@ export default function AddJobPage(props) {
             </form>
         </div>
 
+          <Dialog open={openCustomerDialog} 
+            onClose={handleCloseCustomerDialog} 
+            aria-labelledby="form-dialog-add-customer"
+            fullWidth
+            maxWidth="xs"
+          >
+          <form onSubmit={handleSubmitCustomerDialog}>
+            <DialogTitle id="form-dialog-add-customer-title">Add new customer</DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+              </DialogContentText>
+              <div>
+              <TextField
+                autoFocus
+                margin="dense"
+                id="name"
+                fullWidth
+                value={customerDialogValue.name}
+                onChange={(event) => setCustomerDialogValue({ ...customerDialogValue, 
+                  name: event.target.value })}
+                label="Name"
+                type="text"
+              />
+              </div>
+
+              <div>
+              <TextField
+                margin="dense"
+                id="email"
+                fullWidth
+                value={customerDialogValue.id}
+                onChange={(event) => setCustomerDialogValue({ ...customerDialogValue, 
+                  id: event.target.value })}
+                label="Email"
+                type="text"
+              />
+              </div>
+              <div>
+              <TextField
+                margin="dense"
+                id="phone"
+                fullWidth
+                label="Phone"
+                type="text"
+              />
+              </div>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleCloseCustomerDialog} color="primary">
+                Cancel
+              </Button>
+              <Button type="submit" color="primary">
+                Add
+              </Button>
+            </DialogActions>
+          </form>
+        </Dialog>
+
         </Container>
     </React.Fragment>
 
   );
 }
+
+const customers = [
+  { name: 'John White', id: '0' },
+  { name: 'Mary Jones', id: '1' },
+  { name: 'Mike D', id: '2' },
+]
 
 const rates = [
   { rate_name: 'Free', rate_id: 0 },

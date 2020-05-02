@@ -14,6 +14,8 @@ import SaveIcon from '@material-ui/icons/Save';
 import IconButton from "@material-ui/core/IconButton";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import Dialog from '@material-ui/core/Dialog';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Snackbar from '@material-ui/core/Snackbar';
@@ -25,6 +27,7 @@ import { UserContext } from "../providers/UserProvider";
 import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import { DateTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import Autocomplete from '@material-ui/lab/Autocomplete';
 import MomentUtils from '@date-io/moment';
 import firebase from 'firebase/app';
 import 'firebase/functions';
@@ -67,6 +70,8 @@ const useStyles = makeStyles((theme) => ({
 const JobPage = (props) => {
   const classes = useStyles();
   const user = useContext(UserContext);
+  const {displayName, email} = user;
+
   const jobRecord = props.location.state.jobRecord;
   //TODO: If jobRecord not set then try to retrieve from Firestore using url params
   console.log(jobRecord)
@@ -88,6 +93,27 @@ const JobPage = (props) => {
     .add(jobRecord.d,"m")
     .toDate()
   );
+
+  // Handle copying preformatted invitation
+  const [invitation, setInvitation] = useState("")
+  
+  function getInvitationMarkup () {  
+    const formattedstart = moment
+      .unix(jobRecord.t.seconds)
+      .tz(jobRecord.tz)  
+      .format(('MMMM Do, h:mm a'));
+    return `${displayName} (${email}) is inviting you to a scheduled Ayuda Zoom meeting.
+
+Topic: ${jobRecord.topic}
+Time: ${formattedstart}
+    
+Join Ayuda Zoom Meeting
+${jobRecord.join_url}
+    
+Meeting ID: ${jobRecord.id}
+Password: ${jobRecord.password}
+    ` //TODO: remove hardcoding of Ayuda in template
+  }
 
   // Handle password show/hide
   const handleClickShowPassword = () => {
@@ -116,6 +142,23 @@ const JobPage = (props) => {
     setOpenSnackbar(false);
   };
 
+
+  // Handle copy invitation
+  const [openCopyDialog, toggleOpenCopyDialog] = React.useState(false);
+
+  const handleOpenCopyDialog = () => {
+    setInvitation(getInvitationMarkup())
+    toggleOpenCopyDialog(true);
+  };
+
+  const handleCloseCopyDialog = () => {
+    toggleOpenCopyDialog(false);
+  };
+
+  function handleCopy (event) {    
+    event.preventDefault();
+    console.log("copying")
+  }
 
   // Handle Remove jobs dialog
   const [open, setOpen] = React.useState(false);
@@ -166,20 +209,6 @@ const JobPage = (props) => {
             <Grid container spacing={2} className={classes.details_container}>
                 <Grid item xs={12}>
                 <TextField
-                    autoComplete="payer"
-                    name="payer"
-                    variant="outlined"
-                    required
-                    fullWidth
-                    id="payer"
-                    label="Who's paying?"
-                    autoFocus
-                    //value={payer}
-                    //onChange={e => setPayer(e.target.value)}
-                />
-                </Grid>
-                <Grid item xs={12}>
-                <TextField
                     autoComplete="topic"
                     name="topic"
                     variant="outlined"
@@ -189,6 +218,33 @@ const JobPage = (props) => {
                     label="What's the call about?"
                     value={jobRecord.topic}
                     //onChange={e => setTopic(e.target.value)}
+                />
+                </Grid>
+                <Grid item xs={6}>
+                <TextField
+                    autoComplete="payer"
+                    name="payer"
+                    variant="outlined"
+                    required
+                    fullWidth
+                    id="payer"
+                    label="Who's paying?"
+                    value={jobRecord.payer}
+                    //onChange={e => setPayer(e.target.value)}
+                />
+                </Grid>
+                <Grid item xs={6}>
+                <Autocomplete
+                  id="rate"
+                  options={rates.map((option) => option.rate_name)}
+                  renderInput={(params) => (
+                    <TextField {...params} 
+                      label="Hourly rate" 
+                      variant="outlined"
+                      required 
+                      fullWidth
+                    />
+                  )}
                 />
                 </Grid>
                 <Grid item xs={6}>
@@ -292,7 +348,7 @@ const JobPage = (props) => {
                         <IconButton
                           onClick={() => { handleSnackbarClick(
                             jobRecord.start_url,
-                            'Start URL copied.',
+                            'Start URL copied',
                             'start_url'); }}
                         >
                           <CopyIcon />
@@ -320,7 +376,7 @@ const JobPage = (props) => {
                         <IconButton
                           onClick={() => { handleSnackbarClick(
                             jobRecord.join_url,
-                            'Join URL copied.',
+                            'Join URL copied',
                             'join_url'); }}
                         >
                           <CopyIcon />                                                  
@@ -336,7 +392,7 @@ const JobPage = (props) => {
                 </Grid>
                 <Grid container justify="flex-end">
                   <Grid item>
-                  <Link href="#" variant="body2">
+                  <Link onClick={handleOpenCopyDialog} variant="body2">
                       Copy the invitation
                   </Link>
                   </Grid>
@@ -392,8 +448,52 @@ const JobPage = (props) => {
             />
 
         </div>
+
+        <Dialog open={openCopyDialog} 
+            onClose={handleCloseCopyDialog} 
+            aria-labelledby="form-dialog-copy-invitation"
+            fullWidth
+            maxWidth="sm"
+          >
+            <DialogTitle id="form-dialog-copy-invitation">Copy meeting invitation</DialogTitle>
+            <DialogContent>
+              <div>
+              <TextField
+                    name="invitation"
+                    variant="outlined"
+                    fullWidth
+                    disabled
+                    multiline
+                    id="invitation"
+                    label="Meeting Invitation"
+                    value={invitation}
+                />
+              </div>
+            </DialogContent>
+            <DialogActions>
+              <Button 
+                onClick={() => { handleSnackbarClick(
+                            invitation,
+                            'Invitation copied',
+                            'invitation'); }}                             
+                color="primary"                
+              >
+                Copy Meeting Invitation
+              </Button>
+              <Button onClick={handleCloseCopyDialog} color="default">
+                Cancel
+              </Button>
+            </DialogActions>
+        </Dialog>
+
         </Container>
     </React.Fragment>
   ) 
 };
 export default JobPage;
+
+const rates = [
+  { rate_name: 'Free', rate_id: 0 },
+  { rate_name: '$15', rate_id: 1 },
+  { rate_name: '$20', rate_id: 2 },
+]

@@ -28,6 +28,7 @@ import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import { DateTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import Autocomplete from '@material-ui/lab/Autocomplete';
+import CustomerChooser from './CustomerChooser';
 import MomentUtils from '@date-io/moment';
 import firebase from 'firebase/app';
 import 'firebase/functions';
@@ -81,6 +82,7 @@ const JobPage = (props) => {
     showPassword: false,
   });
 
+  const [payer, setPayer] = useState("");
   const [start, handleStartDateChange] = useState(moment
     .unix(jobRecord.t.seconds)
     .tz(jobRecord.tz)  
@@ -155,10 +157,6 @@ Password: ${jobRecord.password}
     toggleOpenCopyDialog(false);
   };
 
-  function handleCopy (event) {    
-    event.preventDefault();
-    console.log("copying")
-  }
 
   // Handle Remove jobs dialog
   const [open, setOpen] = React.useState(false);
@@ -188,6 +186,16 @@ Password: ${jobRecord.password}
     });
 
   }
+
+  // Receive customer data from child component
+  const callbackFunction = (childData) => {
+    console.log(childData.name);
+    console.log(childData.id);
+    console.log(childData.email);
+    console.log(childData.phone);
+    setPayer(childData)
+  }
+  
 
   return (
     <React.Fragment>
@@ -221,6 +229,8 @@ Password: ${jobRecord.password}
                 />
                 </Grid>
                 <Grid item xs={6}>
+                <CustomerChooser parentCallback={callbackFunction} initialCustomerId={jobRecord.payer_id}/>
+                  {/*
                 <TextField
                     autoComplete="payer"
                     name="payer"
@@ -232,6 +242,7 @@ Password: ${jobRecord.password}
                     value={jobRecord.payer}
                     //onChange={e => setPayer(e.target.value)}
                 />
+                  */}
                 </Grid>
                 <Grid item xs={6}>
                 <Autocomplete
@@ -478,7 +489,7 @@ Password: ${jobRecord.password}
                             'invitation'); }}                             
                 color="primary"                
               >
-                Copy Meeting Invitation
+                Copy Invitation
               </Button>
               <Button onClick={handleCloseCopyDialog} color="default">
                 Cancel

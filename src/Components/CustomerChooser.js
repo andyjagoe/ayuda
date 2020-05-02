@@ -150,6 +150,8 @@ export default function CustomerChooser(props) {
     handleCloseCustomerDialog();
   };  
 
+
+
   async function getCustomerList() {
       
     let customer_records = []
@@ -173,6 +175,11 @@ export default function CustomerChooser(props) {
     })
     .then(customer_records => {
         setCustomers(customer_records);
+        //Choose selected customer if available
+        if (props.initialCustomerId != null) {
+            let custIndex = customer_records.findIndex(x => x.id === props.initialCustomerId);
+            setPayerDetails(customer_records[custIndex])
+        }
     })
     .catch(err => {
         console.log('Error getting documents', err);

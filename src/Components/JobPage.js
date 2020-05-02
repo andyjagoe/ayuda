@@ -11,7 +11,6 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import { SvgIcon } from '@material-ui/core';
 import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos';
 import SaveIcon from '@material-ui/icons/Save';
-import ShareIcon from '@material-ui/icons/Share';
 import IconButton from "@material-ui/core/IconButton";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import Dialog from '@material-ui/core/Dialog';
@@ -23,7 +22,8 @@ import Container from '@material-ui/core/Container';
 import { navigate } from "@reach/router"
 import { makeStyles } from '@material-ui/core/styles';
 import { UserContext } from "../providers/UserProvider";
-import Autocomplete from '@material-ui/lab/Autocomplete';
+import Visibility from '@material-ui/icons/Visibility';
+import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import { DateTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import MomentUtils from '@date-io/moment';
 import firebase from 'firebase/app';
@@ -72,6 +72,9 @@ const JobPage = (props) => {
   console.log(jobRecord)
 
   // Handle updateable form elements
+  const [values, setValues] = useState({
+    showPassword: false,
+  });
 
   const [start, handleStartDateChange] = useState(moment
     .unix(jobRecord.t.seconds)
@@ -86,6 +89,14 @@ const JobPage = (props) => {
     .toDate()
   );
 
+  // Handle password show/hide
+  const handleClickShowPassword = () => {
+    setValues({ ...values, showPassword: !values.showPassword });
+  };
+
+  const handleMouseDownPassword = (event) => {
+    event.preventDefault();
+  };
 
   // Handle copying and snackbar messages
   const [openSnackbar, setOpenSnackbar] = React.useState(false);
@@ -248,11 +259,23 @@ const JobPage = (props) => {
                 <TextField
                     name="password"
                     variant="outlined"
+                    type={values.showPassword ? 'text' : 'password'}
                     disabled
                     fullWidth
                     id="password"
                     label="Meeting Password"
                     value={jobRecord.password}
+                    InputProps={{endAdornment:
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label="toggle password visibility"
+                          onClick={handleClickShowPassword}
+                          onMouseDown={handleMouseDownPassword}
+                        >
+                          {values.showPassword ? <Visibility /> : <VisibilityOff />}
+                        </IconButton>
+                      </InputAdornment>
+                    }}  
                 />
                 </Grid>
                 <Grid item xs={12}>

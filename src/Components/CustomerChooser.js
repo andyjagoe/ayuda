@@ -7,8 +7,6 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogActions from '@material-ui/core/DialogActions';
-import { navigate } from "@reach/router"
-import { makeStyles } from '@material-ui/core/styles';
 import { UserContext } from "../providers/UserProvider";
 import firebase from 'firebase/app';
 import { firestore } from "../firebase"
@@ -16,37 +14,20 @@ import 'firebase/functions';
 import MuiPhoneNumber from "material-ui-phone-number";
 
 
-const filter = createFilterOptions();
 
-const useStyles = makeStyles((theme) => ({
-  paper: {
-    marginTop: theme.spacing(8),
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-  },
-  avatar: {
-    margin: theme.spacing(1),
-    backgroundColor: theme.palette.secondary.main,
-  },
-  form: {
-    width: '100%', // Fix IE 11 issue.
-    marginTop: theme.spacing(3),
-  },
-  submit: {
-    margin: theme.spacing(3, 0, 2),
-  },
-}));
+const filter = createFilterOptions();
 
 
 export default function CustomerChooser(props) {
-  const classes = useStyles();
   const user = useContext(UserContext);
   const {uid} = user;
 
-  const [didTryrequest, setDidTryrequest] = useState(false);
   const [payerDetails, setPayerDetails] = useState(null);
-  const [payerError, setPayerError] = useState(null)
+  const [payerName, setPayerName] = useState("")
+  const [payerNameError, setPayerNameError] = useState(null)
+  const [payerEmail, setPayerEmail] = useState("")
+  const [payerEmailError, setPayerEmailError] = useState(null)
+
   const [customers, setCustomers] = useState([])
 
   const firstRender = useRef(true)
@@ -61,6 +42,14 @@ export default function CustomerChooser(props) {
     props.parentCallback(data);
   }
   
+
+  // Check for valid email
+  function validateEmail(email) {
+    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(email.toLowerCase());
+  }
+
+
   useEffect(() => {
     if (firstRender.current) {
         getCustomerList()
@@ -69,22 +58,34 @@ export default function CustomerChooser(props) {
     }
     setDisabled(formValidation())
     
-  }, [payerDetails])
+  }, [payerDetails, payerName, payerEmail])
 
 
   const formValidation = () => {
-    console.log("formValidation");
     sendData(payerDetails)
 
-    if (payerDetails == null) {
-        setPayerError('Payer name is required')
-        console.log("No value for payerDetails.")
+    if (payerName === "") {
+        setPayerNameError('Name is required')
     } else {
-      setPayerError (null)
-      console.log("payerDetails: " + payerDetails.name)
-    }
+        setPayerNameError (null)
+    }  
 
-    if (payerDetails == null
+    if (payerEmail === "") {
+        setPayerEmailError('Email is required')
+    } else {
+        setPayerEmailError (null)
+    }  
+
+    let isValidEmail = validateEmail(payerEmail)
+    if (!isValidEmail) {
+        setPayerEmailError('Invalid email address')
+    } else {
+        setPayerEmailError (null)
+    }  
+
+    if (payerName === ""
+        || payerEmail === ""
+        || !isValidEmail
         ) {
       return true
     } else {
@@ -129,7 +130,7 @@ export default function CustomerChooser(props) {
             t: firebase.firestore.Timestamp.fromDate(new Date()),
     })
     .then(ref => {        
-        console.log('Added document with ID: ', ref.id);
+        //console.log('Added document with ID: ', ref.id);
         let newCust = {
             name: customerDialogValue.name,
             id: ref.id,
@@ -171,7 +172,6 @@ export default function CustomerChooser(props) {
         return customer_records;
     })
     .then(customer_records => {
-        console.log(customer_records);        
         setCustomers(customer_records);
     })
     .catch(err => {
@@ -185,11 +185,11 @@ export default function CustomerChooser(props) {
                 <Autocomplete
                   value={payerDetails}
                   onChange={(event, newValue) => {
-                    console.log("onChange")
                     if (typeof newValue === 'string') {
                         // timeout to avoid instant validation of the dialog's form.
                       setTimeout(() => {
                         toggleOpenCustomerDialog(true);
+                        setPayerName(newValue);
                         setCustomerDialogValue({
                           name: newValue,
                           id: '',
@@ -202,6 +202,7 @@ export default function CustomerChooser(props) {
           
                     if (newValue && newValue.inputValue) {
                       toggleOpenCustomerDialog(true);
+                      setPayerName(newValue);
                       setCustomerDialogValue({
                         name: newValue.inputValue,
                         id: '',
@@ -266,12 +267,17 @@ export default function CustomerChooser(props) {
               <div>
               <TextField
                 autoFocus
+                required
                 margin="dense"
                 id="name"
                 fullWidth
                 value={customerDialogValue.name}
-                onChange={(event) => setCustomerDialogValue({ ...customerDialogValue, 
-                  name: event.target.value })}
+                onChange={(event) => {
+                    setCustomerDialogValue({ ...customerDialogValue, 
+                        name: event.target.value });
+                    setPayerName(event.target.value);
+                }
+                }
                 label="Name"
                 type="text"
               />
@@ -279,12 +285,18 @@ export default function CustomerChooser(props) {
 
               <div>
               <TextField
+                required
                 margin="dense"
                 id="email"
+                type="email"
                 fullWidth
                 value={customerDialogValue.email}
-                onChange={(event) => setCustomerDialogValue({ ...customerDialogValue, 
-                  email: event.target.value })}
+                onChange={(event) => {
+                    setCustomerDialogValue({ ...customerDialogValue, 
+                        email: event.target.value });
+                        setPayerEmail(event.target.value);
+                    }   
+                }
                 label="Email"
                 type="text"
               />
@@ -293,13 +305,13 @@ export default function CustomerChooser(props) {
               <MuiPhoneNumber
                 margin="dense"
                 id="phone"
+                type="tel"
                 fullWidth
                 defaultCountry={'us'}
                 value={customerDialogValue.phone}
                 onChange={event => setCustomerDialogValue({ ...customerDialogValue, 
                     phone: event })} 
                 label="Phone"
-                type="text"
               />
               </div>
             </DialogContent>
@@ -307,7 +319,7 @@ export default function CustomerChooser(props) {
               <Button onClick={handleCloseCustomerDialog} color="primary">
                 Cancel
               </Button>
-              <Button type="submit" color="primary">
+              <Button type="submit" color="primary" disabled={disable}>
                 Add
               </Button>
             </DialogActions>

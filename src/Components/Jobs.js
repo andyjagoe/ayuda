@@ -1,5 +1,6 @@
 import React, { Component, useContext } from "react";
 import JobCell from './JobCell';
+import { ConfigProvider } from 'react-avatar';
 import { UserContext } from "../providers/UserProvider";
 import { firestore } from "../firebase";
 var moment = require('moment');
@@ -65,4 +66,5 @@ export default class Jobs extends Component {
         );
     }
 }
+
 

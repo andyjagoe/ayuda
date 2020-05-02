@@ -1,9 +1,9 @@
 import React from "react";
 import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
 import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos';
 import CardHeader from '@material-ui/core/CardHeader';
-import Avatar from '@material-ui/core/Avatar';
+//import Avatar from '@material-ui/core/Avatar';
+import Avatar from 'react-avatar';
 import IconButton from '@material-ui/core/IconButton';
 import { navigate } from "@reach/router";
 import { makeStyles } from '@material-ui/core/styles';
@@ -49,7 +49,7 @@ const StyledCardHeader = withStyles({
   
 
 const JobCell = ({props, jobRecord, jobKey}) => {
-    const classes = useStyles();
+    const classes = useStyles();  
     
     return (
     <React.Fragment>
@@ -57,7 +57,12 @@ const JobCell = ({props, jobRecord, jobKey}) => {
             <StyledCardHeader
             className={classes.jobheader}
             avatar={
-                <Avatar className={classes.avatar} src={jobRecord.topic || 'https://res.cloudinary.com/dqcsk8rsc/image/upload/v1577268053/avatar-1-bitmoji_upgwhc.png'}/>
+                <Avatar 
+                  size="40" 
+                  round={true} 
+                  name={jobRecord.payer} 
+                  color={jobRecord.payer.toHex()} 
+                />
             }
             title={jobRecord.topic}
             subheader={moment(jobRecord
@@ -85,3 +90,20 @@ const JobCell = ({props, jobRecord, jobKey}) => {
   ) 
 };
 export default JobCell;
+
+
+// Generate consistent random color based on string
+String.prototype.toHex = function() {
+  var hash = 0;
+  if (this.length === 0) return hash;
+  for (var i = 0; i < this.length; i++) {
+      hash = this.charCodeAt(i) + ((hash << 5) - hash);
+      hash = hash & hash;
+  }
+  var color = '#';
+  for (var i = 0; i < 3; i++) {
+      var value = (hash >> (i * 8)) & 255;
+      color += ('00' + value.toString(16)).substr(-2);
+  }
+  return color;
+}

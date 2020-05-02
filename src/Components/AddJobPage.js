@@ -213,6 +213,7 @@ export default function AddJobPage(props) {
             <Grid container spacing={2}>
               <Grid item xs={12}>
                   <TextField
+                      autoFocus
                       autoComplete="topic"
                       name="topic"
                       variant="outlined"

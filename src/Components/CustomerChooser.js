@@ -44,9 +44,10 @@ export default function CustomerChooser(props) {
   const user = useContext(UserContext);
   const {uid} = user;
 
-  const [didTryrequest, setDidTryrequest] = React.useState(false);
+  const [didTryrequest, setDidTryrequest] = useState(false);
   const [payerDetails, setPayerDetails] = useState(null);
   const [payerError, setPayerError] = useState(null)
+  const [customers, setCustomers] = useState([])
 
   const firstRender = useRef(true)
   const [disable, setDisabled] = useState(true)
@@ -62,6 +63,7 @@ export default function CustomerChooser(props) {
   
   useEffect(() => {
     if (firstRender.current) {
+        getCustomerList()
         firstRender.current = false
       return
     }
@@ -128,12 +130,17 @@ export default function CustomerChooser(props) {
     })
     .then(ref => {        
         console.log('Added document with ID: ', ref.id);
-        setPayerDetails({
+        let newCust = {
             name: customerDialogValue.name,
             id: ref.id,
             email: customerDialogValue.name,
             phone: customerDialogValue.phone,
-        });    
+        };
+        setPayerDetails(newCust);
+        let tempCusts = customers;
+        tempCusts.push(newCust);
+        tempCusts.sort((a, b) => (a.name > b.name) ? 1 : -1)
+        setCustomers(tempCusts);
     })
     .catch(error => {
         console.error("Add customer error: ", error);
@@ -142,6 +149,36 @@ export default function CustomerChooser(props) {
     handleCloseCustomerDialog();
   };  
 
+  async function getCustomerList() {
+      
+    let customer_records = []
+    await firestore
+    .collection("/users")
+    .doc(uid)
+    .collection('customers')
+    .orderBy('name')
+    .get()
+    .then(snapshot => {
+        if (snapshot.empty) {
+            console.log('No matching documents.');
+            return customers;
+        }  
+        snapshot.forEach(doc => {
+            let customers = doc.data();
+            customers.id = doc.id;
+            customer_records.push(customers);
+        });
+        return customer_records;
+    })
+    .then(customer_records => {
+        console.log(customer_records);        
+        setCustomers(customer_records);
+    })
+    .catch(err => {
+        console.log('Error getting documents', err);
+    });            
+
+  }
 
   return (
     <React.Fragment>
@@ -281,9 +318,3 @@ export default function CustomerChooser(props) {
 
   );
 }
-
-const customers = [
-  { name: 'John White', id: '0', email: '123', phone: '234' },
-  { name: 'Mary Jones', id: '1', email: '123', phone: 'dwe' },
-  { name: 'Mike D', id: '2', email: '123', phone: 'dde' },
-]

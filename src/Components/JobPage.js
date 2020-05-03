@@ -231,20 +231,6 @@ Password: ${jobRecord.password}
                 </Grid>
                 <Grid item xs={6}>
                 <RateChooser parentCallback={rateCallbackFunction} initialRateId={jobRecord.rate_id}/>
-                  {/*
-                <Autocomplete
-                  id="rate"
-                  options={rates.map((option) => option.rate_name)}
-                  renderInput={(params) => (
-                    <TextField {...params} 
-                      label="Hourly rate" 
-                      variant="outlined"
-                      required 
-                      fullWidth
-                    />
-                  )}
-                />
-                  */}
                 </Grid>
                 <Grid item xs={6}>
                   <MuiPickersUtilsProvider variant="outlined" utils={MomentUtils}>

@@ -39,11 +39,11 @@ exports.handler = function(data, context, firestoreDb, admin) {
         throw new functions.https.HttpsError('failed-precondition', 'The function must be called ' +                                           
         'while authenticated.');      
     }
-    // Check that we have a code for stripe
-    if (!(typeof payer === 'string') || payer.length === 0) {
+    // Check that we have a payer_id value for customer
+    if (!(typeof payer_id === 'string') || payer_id.length === 0) {
         // Throwing an HttpsError so that the client gets the error details.
         throw new functions.https.HttpsError('invalid-argument', 'The function must be called with ' +
-            'one argument "payer".');
+            'one argument "payer_id".');
     }
     // Check that we have a state value for stripe to prevent CSRF attacks
     if (!(typeof topic === 'string') || topic.length === 0) {
@@ -51,8 +51,14 @@ exports.handler = function(data, context, firestoreDb, admin) {
         throw new functions.https.HttpsError('invalid-argument', 'The function must be called with ' +
             'one argument "topic" containing the state value from the app.');
     }
+    // Check that we have a rate_id value for rate
+    if (!(typeof rate_id === 'string') || rate_id.length === 0) {
+        // Throwing an HttpsError so that the client gets the error details.
+        throw new functions.https.HttpsError('invalid-argument', 'The function must be called with ' +
+            'one argument "rate_id".');
+    }
 
-    //TODO:  Add error checking for valid start, duration, payer and rate values 
+    //TODO:  Add error checking for valid start and duration values 
 
     //console.log(payer);
     //console.log(topic);

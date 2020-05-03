@@ -26,7 +26,6 @@ import { UserContext } from "../providers/UserProvider";
 import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import { DateTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
-import Autocomplete from '@material-ui/lab/Autocomplete';
 import CustomerChooser from './CustomerChooser';
 import RateChooser from './RateChooser';
 import MomentUtils from '@date-io/moment';

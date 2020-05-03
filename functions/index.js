@@ -12,6 +12,13 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'newUserSignup')
     });
 }
 
+if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'isRegistered') {
+    const isRegistered = require('./isRegistered');
+    exports.isRegistered = functions.https.onCall((data, context) => {
+        return isRegistered.handler(data, context, firestoreDb);
+    });
+}
+
 if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'connectStripe') {
     const connectStripe = require('./connectStripe');
     exports.connectStripe = functions.https.onCall((data, context) => {

@@ -44,8 +44,12 @@ const useStyles = makeStyles((theme) => ({
 const HomePage = () => {
   const classes = useStyles();
   const user = useContext(UserContext);
-  const {displayName} = user;
+  const {displayName, isRegistered} = user;
 
+  if (!isRegistered) {
+    //redirect user to registration if not yet registered
+    navigate('/register')
+  }
   
   return (
     <React.Fragment>

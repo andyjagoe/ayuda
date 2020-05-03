@@ -3,12 +3,6 @@ import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
-import Autocomplete from '@material-ui/lab/Autocomplete';
-import Dialog from '@material-ui/core/Dialog';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogActions from '@material-ui/core/DialogActions';
 import Link from '@material-ui/core/Link';
 import Grid from '@material-ui/core/Grid';
 import EventIcon from '@material-ui/icons/Event';
@@ -19,6 +13,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { UserContext } from "../providers/UserProvider";
 import MenuAppBar from './MenuAppBar';
 import CustomerChooser from './CustomerChooser';
+import RateChooser from './RateChooser';
 import { DateTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import MomentUtils from '@date-io/moment';
 import firebase from 'firebase/app';
@@ -54,6 +49,8 @@ export default function AddJobPage(props) {
   const [didTryrequest, setDidTryrequest] = React.useState(false);
   const [payer, setPayer] = useState("");
   const [payerError, setPayerError] = useState(null)
+  const [rate, setRate] = useState("");
+  const [rateError, setRateError] = useState(null)
   const [topic, setTopic] = useState("");
   const [topicError, setTopicError] = useState(null)
   const [start, handleStartDateChange] = useState(
@@ -83,7 +80,8 @@ export default function AddJobPage(props) {
 
   const firstRender = useRef(true)
   const [disable, setDisabled] = useState(true)
-    
+ 
+  
   useEffect(() => {
     if (firstRender.current) {
       firstRender.current = false
@@ -91,20 +89,24 @@ export default function AddJobPage(props) {
     }
     setDisabled(formValidation())
     
-  }, [payer, topic, start, end])
+  }, [payer, rate, topic, start, end])
 
 
-  // here we run any validation, returning true/false
   const formValidation = () => {
+    if (topic === "") {
+      setTopicError('Topic is required')
+    } else {
+      setTopicError (null)
+    }
     if (payer.name === "") {
       setPayerError('Payer name is required')
     } else {
       setPayerError (null)
     }
-    if (topic === "") {
-      setTopicError('Topic is required')
+    if (rate.name === "") {
+      setRateError('Rate is required')
     } else {
-      setTopicError (null)
+      setRateError (null)
     }
 
     var startBeforeEnd = moment(end).isBefore(start);
@@ -127,6 +129,7 @@ export default function AddJobPage(props) {
 
     if (payer === ""
         || topic === ""
+        || rate === ""
         || startBeforeEnd
         || startToFinish > 23
         ) {
@@ -146,52 +149,40 @@ export default function AddJobPage(props) {
     console.log(`duration: ${moment(end).diff(moment(start), 'minutes')}`);
     console.log(`notes: ${notes}`);
 
-    /* Send to Firebase via cloud function which: 
-        1) tries to schedule on zoom
-        2) If successful, writes to Firestore, returns success, displays snackbar, show home
-        3) If error, displays error message
-    */
-
+    
     if (!didTryrequest) {
         setDidTryrequest(true)
         var addJob = firebase.functions().httpsCallable('addJob');
         await addJob({payer: payer.name,
           payer_id: payer.id, 
           topic: topic,
+          rate_id: rate.id,
           start: start.toISOString(),
           duration: moment(end).diff(moment(start), 'minutes'),
           notes: notes,
         })
         .then(function(result) {
-            var sanitizedMessage = result.data;
             console.log(result.data);
-            //setResultMessage('Stripe connected successfully')
-            //setResultSeverity('success')
-            //setIsLoading(false)
             navigate('/');
         })
         .catch(function(error) {
-            var code = error.code;
-            var details = error.details;
             console.log(error.message);
-            //setResultMessage(error.message)
-            //setResultSeverity('error')
-            //setIsLoading(false)
             //TODO: Handle user navigation for error state
         });
     }            
 
   }
 
-  // Receive customer data from child component
-  const callbackFunction = (childData) => {
-    console.log(childData.name);
-    console.log(childData.id);
-    console.log(childData.email);
-    console.log(childData.phone);
+  // Receive customer data from customer child component
+  const customerCallbackFunction = (childData) => {
     setPayer(childData)
   }
 
+  // Receive customer data from rates child component
+  const rateCallbackFunction = (childData) => {
+    setRate(childData)
+  }
+  
 
   return (
     <React.Fragment>
@@ -226,21 +217,10 @@ export default function AddJobPage(props) {
                   />
                 </Grid>
                 <Grid item xs={6}>
-                  <CustomerChooser parentCallback={callbackFunction} />
+                  <CustomerChooser parentCallback={customerCallbackFunction} />
                 </Grid>
                 <Grid item xs={6}>
-                <Autocomplete
-                  id="rate"
-                  options={rates.map((option) => option.rate_name)}
-                  renderInput={(params) => (
-                    <TextField {...params} 
-                      label="Hourly rate" 
-                      variant="outlined"
-                      required 
-                      fullWidth
-                    />
-                  )}
-                />
+                  <RateChooser parentCallback={rateCallbackFunction} />
                 </Grid>
                 <Grid item xs={6}>
                   <MuiPickersUtilsProvider variant="outlined" utils={MomentUtils}>
@@ -322,9 +302,3 @@ export default function AddJobPage(props) {
 
   );
 }
-
-const rates = [
-  { rate_name: 'Free', rate_id: 0 },
-  { rate_name: '$15', rate_id: 1 },
-  { rate_name: '$20', rate_id: 2 },
-]

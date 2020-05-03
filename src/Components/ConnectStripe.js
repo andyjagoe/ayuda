@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useEffect } from 'react';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Container from '@material-ui/core/Container';
 import OnboardingAppBar from './OnboardingAppBar';
@@ -36,7 +36,6 @@ const useStyles = makeStyles((theme) => ({
 export default function ConnectStripe(props) {
     const classes = useStyles();
     const user = useContext(UserContext);
-    const {photoURL, displayName, email, uid} = user;
 
     const [isLoading, setIsLoading] = React.useState(true);
     const [didTryrequest, setDidTryrequest] = React.useState(false);
@@ -51,15 +50,12 @@ export default function ConnectStripe(props) {
             setDidTryrequest(true)
             var connectStripe = firebase.functions().httpsCallable('connectStripe');
             await connectStripe({code: parsed.code, state: parsed.state}).then(function(result) {
-                var sanitizedMessage = result.data;
                 console.log(result.data);
                 setResultMessage('Stripe connected successfully')
                 setResultSeverity('success')
                 setIsLoading(false)
                 navigate('/');
             }).catch(function(error) {
-                var code = error.code;
-                var details = error.details;
                 console.log(error.message);
                 setResultMessage(error.message)
                 setResultSeverity('error')

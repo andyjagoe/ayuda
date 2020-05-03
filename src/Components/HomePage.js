@@ -1,11 +1,9 @@
 import React, { useContext } from "react";
 import { makeStyles } from '@material-ui/core/styles';
-import { withStyles } from '@material-ui/core/styles';
 import MenuAppBar from './MenuAppBar';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import AddIcon from '@material-ui/icons/Add';
-import CardHeader from '@material-ui/core/CardHeader';
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
 import { navigate } from "@reach/router";
@@ -46,7 +44,7 @@ const useStyles = makeStyles((theme) => ({
 const HomePage = () => {
   const classes = useStyles();
   const user = useContext(UserContext);
-  const {photoURL, displayName, email} = user;
+  const {displayName} = user;
 
   
   return (

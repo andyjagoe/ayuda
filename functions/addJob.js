@@ -19,6 +19,7 @@ exports.handler = function(data, context, firestoreDb, admin) {
 
     const payer = data.payer;
     const payer_id = data.payer_id;
+    const rate_id = data.rate_id;
     const topic = data.topic;
     const start = data.start;
     const duration = data.duration;
@@ -51,7 +52,7 @@ exports.handler = function(data, context, firestoreDb, admin) {
             'one argument "topic" containing the state value from the app.');
     }
 
-    //TODO:  Add error checking for valid start and duratiobn values 
+    //TODO:  Add error checking for valid start, duration, payer and rate values 
 
     //console.log(payer);
     //console.log(topic);
@@ -114,6 +115,7 @@ exports.handler = function(data, context, firestoreDb, admin) {
                 id: response.data.id,
                 payer: payer,
                 payer_id: payer_id,
+                rate_id: rate_id,
                 topic: topic,
                 agenda: notes,
                 t: admin.firestore.Timestamp.fromDate(new Date(response.data.start_time)),

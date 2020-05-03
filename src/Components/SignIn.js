@@ -1,5 +1,4 @@
-import React, {useState} from "react";
-import BenefitsCarousel from './BenefitsCarousel';
+import React from "react";
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 import {auth} from '../firebase';
 import {provider} from '../firebase';
@@ -28,7 +27,7 @@ const uiConfig = {
 
 
 const SignIn = () => {
-    const [error, setError] = useState(null);
+//const [error, setError] = useState(null);
 
   return (
     <React.Fragment>

@@ -1,6 +1,5 @@
-import React, { Component, useContext } from "react";
+import React, { Component } from "react";
 import JobCell from './JobCell';
-import { ConfigProvider } from 'react-avatar';
 import { UserContext } from "../providers/UserProvider";
 import { firestore } from "../firebase";
 var moment = require('moment');
@@ -21,7 +20,7 @@ export default class Jobs extends Component {
 
     async componentDidMount() {
         const user = this.context
-        const {photoURL, displayName, email, uid} = user;
+        const {uid} = user;
         this.setState({ readError: null });
         let jobs = [];
 
@@ -40,14 +39,14 @@ export default class Jobs extends Component {
                     return jobs;
                 }  
                 snapshot.forEach(doc => {
-                    console.log(doc.id, '=>', doc.data());
+                    //console.log(doc.id, '=>', doc.data());
                     jobs.push({id: doc.id, data: doc.data()});
                 });
                 return jobs;
             })
             .then(jobs => {
-                this.setState({ jobs });
-                console.log(jobs);        
+                //console.log(jobs);                        
+                this.setState({ jobs });                
             })
             .catch(err => {
                 console.log('Error getting documents', err);

@@ -120,7 +120,7 @@ export default function CustomerChooser(props) {
     event.stopPropagation()
 
     // Add new customer to Firestore
-    let newDoc = await firestore.collection('/users')
+    await firestore.collection('/users')
         .doc(uid)
         .collection('customers')
         .add({
@@ -175,6 +175,8 @@ export default function CustomerChooser(props) {
     })
     .then(customer_records => {
         setCustomers(customer_records);
+        //console.log(customer_records)
+
         //Choose selected customer if available
         if (props.initialCustomerId != null) {
             let custIndex = customer_records.findIndex(x => x.id === props.initialCustomerId);

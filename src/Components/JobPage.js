@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect, useRef } from 'react';
+import React, { useContext, useState } from 'react';
 import MenuAppBar from './MenuAppBar';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
@@ -15,7 +15,6 @@ import IconButton from "@material-ui/core/IconButton";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import Dialog from '@material-ui/core/Dialog';
 import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Snackbar from '@material-ui/core/Snackbar';
@@ -29,6 +28,7 @@ import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import { DateTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import CustomerChooser from './CustomerChooser';
+import RateChooser from './RateChooser';
 import MomentUtils from '@date-io/moment';
 import firebase from 'firebase/app';
 import 'firebase/functions';
@@ -75,7 +75,6 @@ const JobPage = (props) => {
 
   const jobRecord = props.location.state.jobRecord;
   //TODO: If jobRecord not set then try to retrieve from Firestore using url params
-  console.log(jobRecord)
 
   // Handle updateable form elements
   const [values, setValues] = useState({
@@ -83,6 +82,7 @@ const JobPage = (props) => {
   });
 
   const [payer, setPayer] = useState("");
+  const [rate, setRate] = useState("");
   const [start, handleStartDateChange] = useState(moment
     .unix(jobRecord.t.seconds)
     .tz(jobRecord.tz)  
@@ -174,26 +174,24 @@ Password: ${jobRecord.password}
     var removeJob = firebase.functions().httpsCallable('removeJob');
     await removeJob({id: props.jobId, zoom_id: jobRecord.id})
     .then(function(result) {
-        var sanitizedMessage = result.data;
         console.log(result.data);
         navigate('/');
     })
     .catch(function(error) {
-        var code = error.code;
-        var details = error.details;
         console.log(error.message);
         //TODO: Handle user navigation for error state
     });
 
   }
 
-  // Receive customer data from child component
-  const callbackFunction = (childData) => {
-    console.log(childData.name);
-    console.log(childData.id);
-    console.log(childData.email);
-    console.log(childData.phone);
+  // Receive customer data from customer child component
+  const customerCallbackFunction = (childData) => {
     setPayer(childData)
+  }
+
+  // Receive customer data from rates child component
+  const rateCallbackFunction = (childData) => {
+    setRate(childData)
   }
   
 
@@ -229,22 +227,11 @@ Password: ${jobRecord.password}
                 />
                 </Grid>
                 <Grid item xs={6}>
-                <CustomerChooser parentCallback={callbackFunction} initialCustomerId={jobRecord.payer_id}/>
-                  {/*
-                <TextField
-                    autoComplete="payer"
-                    name="payer"
-                    variant="outlined"
-                    required
-                    fullWidth
-                    id="payer"
-                    label="Who's paying?"
-                    value={jobRecord.payer}
-                    //onChange={e => setPayer(e.target.value)}
-                />
-                  */}
+                <CustomerChooser parentCallback={customerCallbackFunction} initialCustomerId={jobRecord.payer_id}/>
                 </Grid>
                 <Grid item xs={6}>
+                <RateChooser parentCallback={rateCallbackFunction} initialRateId={jobRecord.rate_id}/>
+                  {/*
                 <Autocomplete
                   id="rate"
                   options={rates.map((option) => option.rate_name)}
@@ -257,6 +244,7 @@ Password: ${jobRecord.password}
                     />
                   )}
                 />
+                  */}
                 </Grid>
                 <Grid item xs={6}>
                   <MuiPickersUtilsProvider variant="outlined" utils={MomentUtils}>

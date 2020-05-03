@@ -45,7 +45,7 @@ export default function Register(props) {
   const classes = useStyles();
   const user = useContext(UserContext);
 
-  const {photoURL, displayName, email, uid} = user;
+  const {email, uid} = user;
 
   const [firstName, setFirstName] = useState("");
   const [firstNameError, setFirstNameError] = useState(null)

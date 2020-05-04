@@ -12,9 +12,11 @@ exports.handler = function(data, context, firestoreDb, admin) {
     const payer_id = data.payer_id;
     const rate_id = data.rate_id;
     const topic = data.topic;
-    //const start = data.start;
-    //const duration = data.duration;
+    const tz = data.tz;
     const notes = data.notes || '';
+    const start = data.start;
+    const duration = data.duration;
+    const zoom_id = data.zoom_id;
 
     // Authentication / user information is automatically added to the request.
     const uid = context.auth.uid;
@@ -32,55 +34,66 @@ exports.handler = function(data, context, firestoreDb, admin) {
         throw new functions.https.HttpsError('invalid-argument', 'The function must be called with ' +
             'one argument "job_id".');
     }
+    if (!(typeof payer === 'string') || payer.length === 0) {
+        // Throwing an HttpsError so that the client gets the error details.
+        throw new functions.https.HttpsError('invalid-argument', 'The function must be called with ' +
+            'one argument "payer".');
+    }
+    if (!(typeof payer_id === 'string') || payer_id.length === 0) {
+        // Throwing an HttpsError so that the client gets the error details.
+        throw new functions.https.HttpsError('invalid-argument', 'The function must be called with ' +
+            'one argument "payer_id".');
+    }
+    if (!(typeof rate_id === 'string') || rate_id.length === 0) {
+        // Throwing an HttpsError so that the client gets the error details.
+        throw new functions.https.HttpsError('invalid-argument', 'The function must be called with ' +
+            'one argument "rate_id".');
+    }
+    if (!(typeof topic === 'string') || topic.length === 0) {
+        // Throwing an HttpsError so that the client gets the error details.
+        throw new functions.https.HttpsError('invalid-argument', 'The function must be called with ' +
+            'one argument "topic" containing the state value from the app.');
+    }
+    if (!(typeof tz === 'string') || tz.length === 0) {
+        // Throwing an HttpsError so that the client gets the error details.
+        throw new functions.https.HttpsError('invalid-argument', 'The function must be called with ' +
+            'one argument "tz" containing the state value from the app.');
+    }
 
-    //TODO:  Add error checking for valid start and duration values 
+    //TODO:  Add error checking for valid start (check for < now()), duration (check for negative), zoom_id  
 
-    //console.log(payer);
+    const tzAdjustedStart = moment(start).tz(tz);  //TODO catch cases when tz missing
+
+
+    //console.log(zoom_id);   
     //console.log(topic);
-    //console.log(start);
+    //console.log(tzAdjustedStart);
     //console.log(duration);
     //console.log(notes);
 
-    var userDoc = null;
-
-    //check if state value is valid
-    return firestoreDb.collection('/users').doc(uid).get()
+    return firestoreDb.collection('/users')
+    .doc(uid)
+    .collection('meetings')
+    .doc(job_id)
+    .get()
     .then(doc => {
         if (!doc.exists) {
         console.log('No such document!');
         throw new functions.https.HttpsError('failed-precondition', 'Unable to verify state.');
         }
-        const zoomId = doc.data().zoomId;
-        if (!(typeof zoomId === 'string') || zoomId.length === 0) {
-            // Throwing an HttpsError so that the client gets the error details.
-            throw new functions.https.HttpsError('failed-precondition', 'No Zoom ID available.');
-        }
-        userDoc = doc.data();
+        console.log('Verified user owns this meeting');
         return true;
     })
-
-    //Update Zoom code here:
-    /*
     .then(result => {
-        const userTz = moment(start).tz(userDoc.tz).format();  //TODO catch cases when tz missing
         return axios({
-            method: 'post',
-            url: `https://api.zoom.us/v2/users/${userDoc.zoomId}/meetings`,
+            method: 'patch',
+            url: `https://api.zoom.us/v2/meetings/${zoom_id}`,
             data: {
                 "topic": topic,
-                "type": "2",
-                "start_time": userTz,
+                "start_time": tzAdjustedStart.format(),
                 "duration": duration,
-                "timezone": userDoc.tz,
-                "password": generatePassword(),
+                "timezone": tz,
                 "agenda": notes,
-                "settings": {
-                  "host_video": true,
-                  "participant_video": true,
-                  "join_before_host": false,
-                  "use_pmi": false,
-                  "audio": "voip"
-                }
             },
             headers: {
               'Authorization': `Bearer ${zoomToken}`,
@@ -89,7 +102,6 @@ exports.handler = function(data, context, firestoreDb, admin) {
             }
         });        
     })    
-    */
     .then(response => {
         //console.log('response data: ', response.data);
         return firestoreDb.collection('/users')
@@ -102,12 +114,13 @@ exports.handler = function(data, context, firestoreDb, admin) {
                 rate_id: rate_id,
                 topic: topic,
                 agenda: notes,
-                //d: response.data.duration,
-                //tz: response.data.timezone,
+                t: admin.firestore.Timestamp.fromDate(new Date(tzAdjustedStart.toDate())),
+                d: duration,
+                tz: tz,
         }, { merge: true });
     })  
     .then(ref => {
-        console.log('Updated job: ', ref);
+        console.log('updateJob success: ', ref);
         return true;
     })
     .catch(error => {

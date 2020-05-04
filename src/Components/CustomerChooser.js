@@ -36,9 +36,6 @@ export default function CustomerChooser(props) {
 
   // Share payer selected data with parent object
   const sendData = (data) => {
-    if (data == null) {
-        return
-    }
     props.parentCallback(data);
   }
   
@@ -236,7 +233,10 @@ export default function CustomerChooser(props) {
           
                     return filtered;
                   }}
-                  renderOption={(option) => option.name}          
+                  renderOption={(option) => option.name}
+                  onInputChange={(event) => {
+                    sendData(payerDetails);
+                  }}       
                   options={customers}
                   getOptionLabel={(option) => {
                     // e.g value selected with enter, right from the input

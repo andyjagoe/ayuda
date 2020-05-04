@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useRef, useEffect } from 'react';
 import MenuAppBar from './MenuAppBar';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
@@ -72,35 +72,120 @@ const JobPage = (props) => {
   const user = useContext(UserContext);
   const {displayName, email} = user;
 
-  const jobRecord = props.location.state.jobRecord;
-  const [topic, setTopic] = useState(jobRecord.topic);
-  const [notes, setNotes] = useState(jobRecord.agenda);
-
   //TODO: If jobRecord not set then try to retrieve from Firestore using url params
+  const jobRecord = props.location.state.jobRecord;
+
+  const firstRender = useRef(true)
 
   // Handle updateable form elements
+  const [disable, setDisabled] = useState(false)
+  const [topic, setTopic] = useState(jobRecord.topic);
+  const [payer, setPayer] = useState(null);
+  const [rate, setRate] = useState(null);
+  const [notes, setNotes] = useState(jobRecord.agenda);
   const [values, setValues] = useState({
     showPassword: false,
   });
-
-  const [payer, setPayer] = useState("");
-  const [rate, setRate] = useState("");
   const [start, handleStartDateChange] = useState(moment
     .unix(jobRecord.t.seconds)
     .tz(jobRecord.tz)  
     .toDate()
   );
-  const [startError, setStartError] = useState(null)
   const [end, handleEndDateChange] = useState(moment
     .unix(jobRecord.t.seconds)
     .tz(jobRecord.tz)
     .add(jobRecord.d,"m")
     .toDate()
   );
-
-  // Handle copying preformatted invitation
-  const [invitation, setInvitation] = useState("")
+  const [endError, setEndError] = useState(false)
+  const [endErrorLabel, setEndErrorLabel] = useState(null)
   
+
+  // Validate data before allowing save/update
+  useEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false
+      return
+    }
+    setDisabled(formValidation())
+    
+  }, [payer, rate, topic, start, end])
+
+  const formValidation = () => {
+    var startBeforeEnd = moment(end).isBefore(start);
+    var startToFinish = moment(end).diff(moment(start), 'hours');
+
+    if (startBeforeEnd) {
+      //TODO: to implement in ui
+      console.log("Call must start before it ends")
+      setEndErrorLabel("Call must start before it ends")
+      setEndError(true)
+    }
+
+    if (startToFinish > 23) {
+      //TODO: to implement in ui
+      console.log("Call cannot exceed 24 hours")
+      setEndErrorLabel("Call cannot exceed 24 hours")
+      setEndError(true)
+    }
+
+    if (payer == null
+        || topic === ""
+        || rate == null
+        || startBeforeEnd
+        || startToFinish > 23
+        ) {
+      return true
+    } else {
+      return false
+    }
+  }
+
+
+  // Set max date for start and end dates
+  const maxDate = moment().add(1,"Y");
+  function round(date, duration, method) {
+      return moment(Math[method]((+date) / (+duration)) * (+duration)); 
+  } 
+
+    
+  // Handle password show/hide
+  const handleClickShowPassword = () => {
+    setValues({ ...values, showPassword: !values.showPassword });
+  };
+  const handleMouseDownPassword = (event) => {
+    event.preventDefault();
+  };
+
+
+  // Handle copying and snackbar messages
+  const [openSnackbar, setOpenSnackbar] = React.useState(false);
+  const [snackbarMessage, setSnackbarMessage] = React.useState(false);
+  const [snackbarKey, setSnackbarKey] = React.useState(false);
+  const handleSnackbarClick = (text, message, key) => {
+    copy(text);
+    setSnackbarMessage(message);
+    setSnackbarKey(key);
+    setOpenSnackbar(true);
+  };
+  const handleSnackbarClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setOpenSnackbar(false);
+  };
+
+
+  // Handle copy invitation
+  const [openCopyDialog, toggleOpenCopyDialog] = React.useState(false);
+  const [invitation, setInvitation] = useState("")
+  const handleOpenCopyDialog = () => {
+    setInvitation(getInvitationMarkup())
+    toggleOpenCopyDialog(true);
+  };
+  const handleCloseCopyDialog = () => {
+    toggleOpenCopyDialog(false);
+  };  
   function getInvitationMarkup () {  
     const formattedstart = moment
       .unix(jobRecord.t.seconds)
@@ -119,59 +204,17 @@ Password: ${jobRecord.password}
     ` //TODO: remove hardcoding of Ayuda in template
   }
 
-  // Handle password show/hide
-  const handleClickShowPassword = () => {
-    setValues({ ...values, showPassword: !values.showPassword });
-  };
 
-  const handleMouseDownPassword = (event) => {
-    event.preventDefault();
-  };
-
-  // Handle copying and snackbar messages
-  const [openSnackbar, setOpenSnackbar] = React.useState(false);
-  const [snackbarMessage, setSnackbarMessage] = React.useState(false);
-  const [snackbarKey, setSnackbarKey] = React.useState(false);
-  const handleSnackbarClick = (text, message, key) => {
-    copy(text);
-    setSnackbarMessage(message);
-    setSnackbarKey(key);
-    setOpenSnackbar(true);
-  };
-
-  const handleSnackbarClose = (event, reason) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-    setOpenSnackbar(false);
-  };
-
-
-  // Handle copy invitation
-  const [openCopyDialog, toggleOpenCopyDialog] = React.useState(false);
-
-  const handleOpenCopyDialog = () => {
-    setInvitation(getInvitationMarkup())
-    toggleOpenCopyDialog(true);
-  };
-
-  const handleCloseCopyDialog = () => {
-    toggleOpenCopyDialog(false);
-  };
-
-
-  // Handle Remove jobs dialog
+  // Handle remove job
   const [open, setOpen] = React.useState(false);
   const handleClickOpen = () => {
     setOpen(true);
   };
-
   const handleClose = () => {
     setOpen(false);
   };
 
   async function removeJob() {
-
     var removeJob = firebase.functions().httpsCallable('removeJob');
     await removeJob({id: props.jobId, zoom_id: jobRecord.id})
     .then(function(result) {
@@ -182,12 +225,11 @@ Password: ${jobRecord.password}
         console.log(error.message);
         //TODO: Handle user navigation for error state
     });
-
   }
 
 
+  // Handle update job
   async function updateJob() {
-
     var updateJob = firebase.functions().httpsCallable('updateJob');
     await updateJob({
       job_id: props.jobId, 
@@ -196,6 +238,10 @@ Password: ${jobRecord.password}
       payer_id: payer.id,
       rate_id: rate.id,
       notes: notes,
+      zoom_id: jobRecord.id,
+      start: start.toISOString(),
+      duration: moment(end).diff(moment(start), 'minutes'),
+      tz: jobRecord.tz
     })
     .then(function(result) {
         navigate('/');
@@ -204,16 +250,13 @@ Password: ${jobRecord.password}
         console.log(error.message);
         //TODO: Handle user navigation for error state
     });
-
   }
-
 
 
   // Receive customer data from customer child component
   const customerCallbackFunction = (childData) => {
     setPayer(childData)
   }
-
   // Receive customer data from rates child component
   const rateCallbackFunction = (childData) => {
     setRate(childData)
@@ -254,27 +297,33 @@ Password: ${jobRecord.password}
                 />
                 </Grid>
                 <Grid item xs={6}>
-                <CustomerChooser parentCallback={customerCallbackFunction} initialCustomerId={jobRecord.payer_id}/>
+                <CustomerChooser 
+                  parentCallback={customerCallbackFunction} 
+                  initialCustomerId={jobRecord.payer_id}
+                />
                 </Grid>
                 <Grid item xs={6}>
-                <RateChooser parentCallback={rateCallbackFunction} initialRateId={jobRecord.rate_id}/>
+                <RateChooser 
+                  parentCallback={rateCallbackFunction} 
+                  initialRateId={jobRecord.rate_id}
+                />
                 </Grid>
                 <Grid item xs={6}>
                   <MuiPickersUtilsProvider variant="outlined" utils={MomentUtils}>
                     <DateTimePicker 
                       required
                       disablePast
-                      //maxDate={maxDate}
+                      maxDate={maxDate}
                       maxDateMessage="Schedule only availble for one year."
                       inputVariant="outlined"
                       label="When does it start?"
                       id="start"
                       name="start"
                       value={start}
-                      //onChange={val => {
-                      //  handleStartDateChange(val);
-                      //  handleEndDateChange(val);
-                      //}}
+                      onChange={val => {
+                        handleStartDateChange(val);
+                        handleEndDateChange(val);
+                      }}
                       />
                   </MuiPickersUtilsProvider>
                 </Grid>
@@ -284,14 +333,14 @@ Password: ${jobRecord.password}
                       required
                       disablePast
                       openTo="hours"
-                      //maxDate={maxDate}
+                      maxDate={maxDate}
                       maxDateMessage="Schedule only availble for one year."
                       inputVariant="outlined"
                       label="When does it end?"
                       id="end"
                       name="end"
                       value={end}
-                      //onChange={handleEndDateChange}
+                      onChange={handleEndDateChange}
                     />
                   </MuiPickersUtilsProvider>
                 </Grid>
@@ -419,6 +468,7 @@ Password: ${jobRecord.password}
                 className={classes.submit}
                 startIcon={<SaveIcon />}
                 onClick={updateJob}
+                disabled={disable}
             >
                 Save Job
             </Button>
@@ -504,9 +554,3 @@ Password: ${jobRecord.password}
   ) 
 };
 export default JobPage;
-
-const rates = [
-  { rate_name: 'Free', rate_id: 0 },
-  { rate_name: '$15', rate_id: 1 },
-  { rate_name: '$20', rate_id: 2 },
-]

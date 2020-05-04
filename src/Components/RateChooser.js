@@ -33,9 +33,6 @@ export default function RateChooser(props) {
 
   // Share payer selected data with parent object
   const sendData = (data) => {
-    if (data == null) {
-        return
-    }
     props.parentCallback(data);
   }
   
@@ -114,7 +111,7 @@ export default function RateChooser(props) {
             t: firebase.firestore.Timestamp.fromDate(new Date()),
     })
     .then(ref => {        
-        console.log('Added document with ID: ', ref.id);
+        //console.log('Added document with ID: ', ref.id);
         let newRate = {
             name: rateDialogValue.name,
             rate: parseFloat(rateDialogValue.name),

@@ -73,6 +73,9 @@ const JobPage = (props) => {
   const {displayName, email} = user;
 
   const jobRecord = props.location.state.jobRecord;
+  const [topic, setTopic] = useState(jobRecord.topic);
+  const [notes, setNotes] = useState(jobRecord.agenda);
+
   //TODO: If jobRecord not set then try to retrieve from Firestore using url params
 
   // Handle updateable form elements
@@ -168,7 +171,6 @@ Password: ${jobRecord.password}
   };
 
   async function removeJob() {
-    setOpen(false);
 
     var removeJob = firebase.functions().httpsCallable('removeJob');
     await removeJob({id: props.jobId, zoom_id: jobRecord.id})
@@ -182,6 +184,30 @@ Password: ${jobRecord.password}
     });
 
   }
+
+
+  async function updateJob() {
+
+    var updateJob = firebase.functions().httpsCallable('updateJob');
+    await updateJob({
+      job_id: props.jobId, 
+      topic: topic,
+      payer: payer.name,
+      payer_id: payer.id,
+      rate_id: rate.id,
+      notes: notes,
+    })
+    .then(function(result) {
+        navigate('/');
+    })
+    .catch(function(error) {
+        console.log(error.message);
+        //TODO: Handle user navigation for error state
+    });
+
+  }
+
+
 
   // Receive customer data from customer child component
   const customerCallbackFunction = (childData) => {
@@ -221,8 +247,10 @@ Password: ${jobRecord.password}
                     fullWidth
                     id="topic"
                     label="What's the call about?"
-                    value={jobRecord.topic}
-                    //onChange={e => setTopic(e.target.value)}
+                    value={topic}
+                    onChange={(event) => {
+                      setTopic(event.target.value);
+                    }}
                 />
                 </Grid>
                 <Grid item xs={6}>
@@ -280,8 +308,8 @@ Password: ${jobRecord.password}
                     }}                           
                     id="notes"
                     label="Notes"
-                    value={jobRecord.agenda}
-                    //onChange={e => setNotes(e.target.value)}
+                    value={notes}
+                    onChange={e => setNotes(e.target.value)}
                 />
                 </Grid>
                 <Grid item xs={12}>
@@ -390,6 +418,7 @@ Password: ${jobRecord.password}
                 color="default"
                 className={classes.submit}
                 startIcon={<SaveIcon />}
+                onClick={updateJob}
             >
                 Save Job
             </Button>

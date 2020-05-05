@@ -15,7 +15,7 @@
 import firebase from "firebase/app";
 import "firebase/auth";
 import "firebase/firestore";
-import { navigate } from "@reach/router"
+
 
 const firebaseConfig = {
     apiKey: "AIzaSyDRSI8T66SXMenjL9u0BJgHbKcfVUqjhzE",
@@ -36,7 +36,7 @@ export const firestore = firebase.firestore();
 
 export const signOut = () => {
     auth.signOut();
-    navigate("/", { replace: true });
+    window.location.assign('/');
 };
 
 // Google OAuth Client ID, needed to support One-tap sign-up.

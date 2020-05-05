@@ -11,8 +11,6 @@ export default class Jobs extends Component {
       this.state = {
         jobs: [],
         content: '',
-        readError: null,
-        writeError: null
       };
     }
 
@@ -21,7 +19,7 @@ export default class Jobs extends Component {
     async componentDidMount() {
         const user = this.context
         const {uid} = user;
-        this.setState({ readError: null });
+        //this.setState({ readError: null });
         let jobs = [];
 
         //TODO: switch to using observer and providers + local cache to reduce server hits
@@ -50,7 +48,7 @@ export default class Jobs extends Component {
             })
             .catch(err => {
                 console.log('Error getting documents', err);
-                this.setState({ readError: err.message });
+                //this.setState({ readError: err.message });
             });            
     }
 

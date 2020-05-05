@@ -9,6 +9,7 @@ import AccountPage from "./AccountPage";
 import JobPage from "./JobPage";
 import GetJobPage from "./GetJobPage";
 import AddJobPage from "./AddJobPage";
+import LoadingPage from "./LoadingPage";
 import { UserContext } from "../providers/UserProvider";
 
 
@@ -19,6 +20,7 @@ function Application() {
   return (
     user ?
     <Router>
+      <LoadingPage path="/loading" />
       <HomePage path="/" />
       <Register path="/register" />
       <ConnectStripe path="/connect-stripe" />

@@ -3,13 +3,17 @@ import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 import {auth} from '../firebase';
 import {provider} from '../firebase';
 import {CLIENT_ID} from '../firebase';
+var firebaseui = require('firebaseui');
+
 
 // Configure FirebaseUI.
 const uiConfig = {
+    callbacks: {
+    },
     // Popup signin flow rather than redirect flow.
     signInFlow: 'redirect',
     // Redirect to /signedIn after sign in is successful. Alternatively you can provide a callbacks.signInSuccess function.
-    signInSuccessUrl: '/',
+    signInSuccessUrl: '/loading',
     // We will display Google as auth providers.
     signInOptions: [
         {
@@ -19,6 +23,8 @@ const uiConfig = {
             clientId: CLIENT_ID
         }
     ],
+    //credentialHelper: firebaseui.auth.CredentialHelper.GOOGLE_YOLO,
+    credentialHelper: firebaseui.auth.CredentialHelper.ACCOUNT_CHOOSER_COM,
     // Terms of service url.
     'tosUrl': 'https://www.google.com',
     // Privacy policy url.

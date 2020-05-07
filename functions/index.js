@@ -19,6 +19,13 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'isRegistered') 
     });
 }
 
+if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'sendMail') {
+    const sendMail = require('./sendMail');
+    exports.sendMail = functions.https.onCall((data, context) => {
+        return sendMail.handler(data, context, firestoreDb);
+    });
+}
+
 if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'connectStripe') {
     const connectStripe = require('./connectStripe');
     exports.connectStripe = functions.https.onCall((data, context) => {

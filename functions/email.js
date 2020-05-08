@@ -1,4 +1,3 @@
-const { google, outlook, yahoo, ics } = require('calendar-link');
 var nodemailer = require("nodemailer");
 const path = require('path');
 const Email = require('email-templates');
@@ -15,6 +14,7 @@ var transporter = nodemailer.createTransport({
 });
 const moment = require('moment');
 const ical = require('ical-generator');
+const { google, outlook, yahoo, ics } = require('calendar-link');
 
 
 
@@ -41,6 +41,23 @@ const email = new Email({
 
 const productName = 'Ayuda Live'
 const supportEmail = 'support@ayuda.live'
+const getInvitationMarkup = (user, jobRecord, productName) => {
+    const formattedstart = moment
+    .unix(jobRecord.t.seconds)
+    .tz(jobRecord.tz)  
+    .format(('MMMM Do, h:mm a'));
+    return `${user.name} (${user.email}) is inviting you to a scheduled ${productName} meeting.
+
+Topic: ${jobRecord.topic}
+Time: ${formattedstart}
+        
+Join the Zoom Meeting
+${jobRecord.join_url}
+    
+Meeting ID: ${jobRecord.id}
+Password: ${jobRecord.password}
+`
+}
 
 const formatToName = (user) => {
     return `${user.name} <${user.email}>`
@@ -89,7 +106,7 @@ const sendAddJobProviderEmail = (user, jobRecord, customerDoc, rateDoc) => {
                 end: end,
                 timestamp: moment(),
                 summary: jobRecord.topic,
-                description: 'Sample description',  //change to Zoom meeting invite details + notes
+                description: getInvitationMarkup(user, jobRecord),
                 organizer: `${user.name} <ayuda@ayuda.live>`, //must use this email since we send from it
                 url: `https://ayuda.live/job/${jobRecord.ref_id}`,
                 uid: jobRecord.ref_id,
@@ -99,7 +116,7 @@ const sendAddJobProviderEmail = (user, jobRecord, customerDoc, rateDoc) => {
     
     const calendarEvent = {
         title: jobRecord.topic,
-        description: 'Sample description', //change to Zoom meeting invite details + notes
+        description: getInvitationMarkup(user, jobRecord),
         start: start.format(),
         duration: [jobRecord.d, "minutes"]
     };
@@ -110,7 +127,7 @@ const sendAddJobProviderEmail = (user, jobRecord, customerDoc, rateDoc) => {
             to: formatToName(user),
             icalEvent: {
                 filename: 'invite.ics',
-                //method: 'request',
+                //method: 'request', //setting this as request method gives recipient yes, maybe, no options
                 content: myCal
             },
             /*      
@@ -139,7 +156,6 @@ const sendAddJobProviderEmail = (user, jobRecord, customerDoc, rateDoc) => {
             meeting_id: jobRecord.id,
             meeting_password: jobRecord.password,
             job_url: `https://ayuda.live/job/${jobRecord.ref_id}`,
-            join_url: jobRecord.join_url,
             action_url: jobRecord.start_url,
             notes: jobRecord.agenda ,
             google_url: google(calendarEvent),

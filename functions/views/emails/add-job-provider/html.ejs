@@ -46,13 +46,6 @@
                                   <tr>
                                     <td class="attributes_item">
                                       <span class="f-fallback">
-                                        <strong>Customer:</strong> <%= customer_name %> 
-                                      </span>
-                                    </td>
-                                  </tr>
-                                  <tr>
-                                    <td class="attributes_item">
-                                      <span class="f-fallback">
                                         <strong>Hourly Rate:</strong> <%= rate %> 
                                       </span>
                                     </td>
@@ -78,40 +71,17 @@
                                       </span>
                                     </td>
                                   </tr>
-                                  <tr>
-                                    <td class="attributes_item">
-                                      <span class="f-fallback">
-                                          <strong>Join URL:</strong> <%= join_url %> 
-                                        </span>
-                                    </td>
-                                  </tr>
                                 </table>
                               </td>
                             </tr>
-                          </table>
-                        
-                          <table class="" role="presentation">
                             <tr>
                               <td>
-                                  <p class="f-fallback sub align-center"><a href="<%= google_url %>">Google Calendar</a></p>
+                                  <p class="f-fallback sub align-right"><a href="<%= job_url %>">View, change or cancel this meeting</a></p>                                
                               </td>
-                              <td>
-                                  <p class="f-fallback sub align-center"><a href="<%= ics_url %>">Apple Calendar</a></p>
-                              </td>
-                              <td>
-                                  <p class="f-fallback sub align-center"><a href="<%= outlook_url %>">Microsoft Outlook</a></p>
-                              </td>
-                              <td>
-                                  <p class="f-fallback sub align-center"><a href="<%= yahoo_url %>">Yahoo! Calendar</a></p>
-                              </td>
-                              <td>
-                                  <p class="f-fallback sub align-center"><a href="<%= ics_url %>">Download Invite (.ics)</a></p>
-                              </td>
-                            </tr>
+                            </tr>  
                           </table>
-    
-                        <p>Your customer has been notified and must authorize the charge before this meeting will be confirmed and can start.</p>
-                        <p><a href="<%= job_url %>">Need to change or cancel this meeting?</a></p>
+
+                        <p><%= customer_name %> (<%= email %>) has been notified and must authorize the charge before this meeting will be confirmed and can start.</p>
                         <p>If you have any questions, please <a href="mailto:<%= support_email %>">email our customer success team</a>.</p>
                         <p>Thanks,
                           <br>The <%= product_name %> Team</p>
@@ -120,11 +90,23 @@
                         <table class="body-sub" role="presentation">
                           <tr>
                             <td>
-                              <p class="f-fallback sub">If you’re having trouble with the button above, copy and paste the URL below into your web browser.</p>
-                              <p class="f-fallback sub"><%= action_url %></p>
+                                <p class="f-fallback sub align-center"><a href="<%= google_url %>">Google Calendar</a></p>
+                            </td>
+                            <td>
+                                <p class="f-fallback sub align-center"><a href="<%= ics_url %>">Apple Calendar</a></p>
+                            </td>
+                            <td>
+                                <p class="f-fallback sub align-center"><a href="<%= outlook_url %>">Microsoft Outlook</a></p>
+                            </td>
+                            <td>
+                                <p class="f-fallback sub align-center"><a href="<%= yahoo_url %>">Yahoo! Calendar</a></p>
+                            </td>
+                            <td>
+                                <p class="f-fallback sub align-center"><a href="<%= ics_url %>">Download Invite (.ics)</a></p>
                             </td>
                           </tr>
                         </table>
+  
                       </div>
 
 <%- include('../html-footer.ejs') %>

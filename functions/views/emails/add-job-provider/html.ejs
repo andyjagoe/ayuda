@@ -2,7 +2,7 @@
 
                       <div class="f-fallback">
                         <h1>Hi, <%= name %>!</h1>
-                        <p>Your job has been scheduled. The Zoom meeting details are:</p>
+                        <p>Your job for <%= customer_name %> has been scheduled as a Zoom meeting:</p>
                         <!-- Action -->
                         <table class="body-action" align="center" width="100%" cellpadding="0" cellspacing="0" role="presentation">
                           <tr>
@@ -112,7 +112,7 @@
     
                         <p>Your customer has been notified and must authorize the charge before this meeting will be confirmed and can start.</p>
                         <p><a href="<%= job_url %>">Need to change or cancel this meeting?</a></p>
-                        <p>If you have any questions, please <a href="mailto:{{support_email}}">email our customer success team</a>.</p>
+                        <p>If you have any questions, please <a href="mailto:<%= support_email %>">email our customer success team</a>.</p>
                         <p>Thanks,
                           <br>The <%= product_name %> Team</p>
                         

@@ -1,7 +1,7 @@
 var moment = require('moment-timezone');
 const functions = require('firebase-functions');
 const axios = require('axios');
-const zoomToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOm51bGwsImlzcyI6IkFUZ2l2aEhuUUh5SDlYOXE0Z0E3aHciLCJleHAiOjE1ODg2NDk0MjQsImlhdCI6MTU4ODA0NDYyNH0.6riecbQKpVXkHPO_N2F0EiQFV3EwZBzi04qVLnPjL3k';
+const zoomToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOm51bGwsImlzcyI6IkFUZ2l2aEhuUUh5SDlYOXE0Z0E3aHciLCJleHAiOjE1ODk1MDk0ODAsImlhdCI6MTU4ODkwNDY4MH0.pols3IekbCUqEBgqK4Hf_CNPt0QrY2feZKmsiY7Yir8';
 
 
 function generatePassword() {
@@ -14,7 +14,7 @@ function generatePassword() {
     return retVal;
 }
 
-exports.handler = function(data, context, firestoreDb, admin) {
+exports.handler = function(data, context, firestoreDb, admin, emailHandler) {
     //console.log(JSON.stringify(context.rawRequest.headers, null, 2));
 
     const payer = data.payer;
@@ -28,9 +28,12 @@ exports.handler = function(data, context, firestoreDb, admin) {
     // Authentication / user information is automatically added to the request.
     const uid = context.auth.uid;
     const name = context.auth.token.name || null;
-    const picture = context.auth.token.picture || null;
     const email = context.auth.token.email || null;
-    //console.log(uid, name, picture, email);
+    const user = {
+        name: name,
+        email: email,
+        uid: uid
+    }
 
 
     // Checking that the user is authenticated.
@@ -67,12 +70,15 @@ exports.handler = function(data, context, firestoreDb, admin) {
     //console.log(notes);
 
     var userDoc = null;
+    var jobDoc = null;
+    var customerDoc = null;
+    var rateDoc = null;
 
     //check if state value is valid
     return firestoreDb.collection('/users').doc(uid).get()
     .then(doc => {
         if (!doc.exists) {
-        console.log('No such document!');
+        console.log('No such user!');
         throw new functions.https.HttpsError('failed-precondition', 'Unable to verify state.');
         }
         const zoomId = doc.data().zoomId;
@@ -81,6 +87,32 @@ exports.handler = function(data, context, firestoreDb, admin) {
             throw new functions.https.HttpsError('failed-precondition', 'No Zoom ID available.');
         }
         userDoc = doc.data();
+        return firestoreDb.collection('/users')
+            .doc(uid)
+            .collection('customers')
+            .doc(payer_id)
+            .get();
+    })
+    .then(doc => {
+        if (!doc.exists) {
+            console.log('No such customer!');
+            throw new functions.https.HttpsError('failed-precondition', 'Unable to verify state.');
+        }
+        console.log(doc.data());
+        customerDoc = doc.data();
+        return firestoreDb.collection('/users')
+            .doc(uid)
+            .collection('rates')
+            .doc(rate_id)
+            .get();
+    })
+    .then(doc => {
+        if (!doc.exists) {
+            console.log('No such rate!');
+            throw new functions.https.HttpsError('failed-precondition', 'Unable to verify state.');
+        }
+        console.log(doc.data());
+        rateDoc = doc.data();
         return true;
     })
     .then(result => {
@@ -113,27 +145,34 @@ exports.handler = function(data, context, firestoreDb, admin) {
     })    
     .then(response => {
         //console.log('response data: ', response.data);
+        jobDoc  = {
+            uuid: response.data.uuid,
+            id: response.data.id,
+            payer: payer,
+            payer_id: payer_id,
+            rate_id: rate_id,
+            topic: topic,
+            agenda: notes,
+            t: admin.firestore.Timestamp.fromDate(new Date(response.data.start_time)),
+            d: response.data.duration,
+            tz: response.data.timezone,
+            start_url: response.data.start_url,
+            join_url: response.data.join_url,
+            password: response.data.password                
+        }
         return firestoreDb.collection('/users')
             .doc(uid)
             .collection('meetings')
-            .add({
-                uuid: response.data.uuid,
-                id: response.data.id,
-                payer: payer,
-                payer_id: payer_id,
-                rate_id: rate_id,
-                topic: topic,
-                agenda: notes,
-                t: admin.firestore.Timestamp.fromDate(new Date(response.data.start_time)),
-                d: response.data.duration,
-                tz: response.data.timezone,
-                start_url: response.data.start_url,
-                join_url: response.data.join_url,
-                password: response.data.password                
-        });
+            .add(jobDoc);
     })  
     .then(ref => {
         console.log('Added job with ID: ', ref.id);
+        jobDoc.ref_id = ref.id
+        console.log(jobDoc);
+        return emailHandler.sendAddJobProviderEmail(user, jobDoc, customerDoc, rateDoc);
+    })
+    .then(result => {
+        console.log('Add job email sent to provider');
         return true;
     })
     .catch(error => {

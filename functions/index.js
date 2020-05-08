@@ -2,6 +2,7 @@ const admin = require('firebase-admin');
 const functions = require('firebase-functions');
 admin.initializeApp(functions.config().firebase);
 const database = admin.database();
+const emailHandler = require('./email');
 var firestoreDb = admin.firestore();
 
 
@@ -22,7 +23,7 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'isRegistered') 
 if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'sendMail') {
     const sendMail = require('./sendMail');
     exports.sendMail = functions.https.onCall((data, context) => {
-        return sendMail.handler(data, context, firestoreDb);
+        return sendMail.handler(data, context, firestoreDb, emailHandler);
     });
 }
 
@@ -36,7 +37,7 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'connectStripe')
 if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'addJob') {
     const addJob = require('./addJob');
     exports.addJob = functions.https.onCall((data, context) => {
-        return addJob.handler(data, context, firestoreDb, admin);
+        return addJob.handler(data, context, firestoreDb, admin, emailHandler);
     });
 }
 

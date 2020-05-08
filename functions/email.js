@@ -168,9 +168,44 @@ const sendAddJobProviderEmail = (user, jobRecord, customerDoc, rateDoc) => {
     return email.send(add_job_provider)
 }
 
+const sendAddJobClientEmail = (user, jobRecord, customerDoc, rateDoc) => {
+    const start = moment.unix(jobRecord.t.seconds)
+    const end = moment.unix(jobRecord.t.seconds).add(jobRecord.d, 'minutes')
+
+
+    const add_job_client = {
+        template: "add-job-client",
+        message: {
+            to: formatToName({
+                name: customerDoc.name,
+                email: customerDoc.email
+            }),
+        },
+        locals: {                 
+            name: user.name,
+            product_name: productName,
+            support_email: supportEmail,
+            preheader: `${user.name} has invited you to an ${productName} meeting`,
+            email: customerDoc.email, 
+            customer_name: customerDoc.name,
+            action_url: 'https://ayuda.live/',
+            job_date_time: moment
+                .unix(jobRecord.t.seconds)
+                .tz(jobRecord.tz)  
+                .format('MMMM Do, h:mm a'),
+            topic: jobRecord.topic,
+            duration: formatDuration(jobRecord.d),
+            rate: formatRateName(rateDoc.name),
+            notes: jobRecord.agenda,
+        },        
+    }
+
+    return email.send(add_job_client)
+}
 
 
 module.exports = {
     sendWelcomeEmail,
     sendAddJobProviderEmail,
+    sendAddJobClientEmail
 }

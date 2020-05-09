@@ -60,18 +60,20 @@ Password: ${jobRecord.password}
 `
 }
 
+
 const formatToName = (user) => {
     return `${user.name} <${user.email}>`
 }
+
 
 const formatDuration = (d) => {
     return `${d} minutes`
 }
 
+
 const formatRateName = (name) => {
     return `$${name}`
 }
-
 
 
 const formatJobDoc = (jobDoc, customerDoc, rateDoc) => {
@@ -83,9 +85,11 @@ const formatJobDoc = (jobDoc, customerDoc, rateDoc) => {
     newDoc.password = jobDoc.password
     newDoc.job_date_time = moment
         .unix(jobDoc.t.seconds)
-        .tz(jobDoc.tz)  
+        .tz(jobDoc.tz)
         .format('MMMM Do, h:mm a')
     newDoc.duration = formatDuration(jobDoc.d)
+    newDoc.start_url = jobDoc.start_url
+    newDoc.join_url = jobDoc.join_url
     newDoc.customer_name = customerDoc.name
     newDoc.customer_email = customerDoc.email
     newDoc.rate_name = formatRateName(rateDoc.name)
@@ -168,7 +172,7 @@ const sendAddJobProviderEmail = (user, jobRecord, customerDoc, rateDoc) => {
             product_name: productName,
             support_email: supportEmail,
             preheader: 'Your job has been scheduled and the Zoom meeting details are below.',
-            current_job_doc: formatJobDoc(currentJobDoc, customerDoc, rateDoc),
+            current_job_doc: formatJobDoc(jobRecord, customerDoc, rateDoc),
             job_url: `https://ayuda.live/job/${jobRecord.ref_id}`,
             calendar_links: getCalendarLinks(user, jobRecord),
         },        

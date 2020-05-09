@@ -54,3 +54,11 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'updateJob') {
         return updateJob.handler(data, context, firestoreDb, admin, emailHandler);
     });
 }
+
+if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'jobCreatedTasks') {
+    const jobCreatedTasks = require('./jobCreatedTasks');
+    exports.jobCreatedTasks = functions.firestore.document('/users/{uid}/meetings/{meeting_id}')
+    .onCreate((snapshot, context) => {    
+        return jobCreatedTasks.handler(snapshot, context, firestoreDb, emailHandler);
+    });
+}

@@ -74,7 +74,7 @@ exports.handler = function(data, context, firestoreDb, admin, emailHandler) {
     var customerDoc = null;
     var rateDoc = null;
 
-    //check if state value is valid
+    /*
     return firestoreDb.collection('/users').doc(uid).get()
     .then(doc => {
         if (!doc.exists) {
@@ -115,6 +115,48 @@ exports.handler = function(data, context, firestoreDb, admin, emailHandler) {
         rateDoc = doc.data();
         return true;
     })
+    */
+
+    //check if state value is valid
+    return firestoreDb.collection('/users').doc(uid).get()
+    .then(doc => {
+        if (!doc.exists) {
+        console.log('No such user!');
+        throw new functions.https.HttpsError('failed-precondition', 'Unable to verify state.');
+        }
+        const zoomId = doc.data().zoomId;
+        if (!(typeof zoomId === 'string') || zoomId.length === 0) {
+            // Throwing an HttpsError so that the client gets the error details.
+            throw new functions.https.HttpsError('failed-precondition', 'No Zoom ID available.');
+        }
+        userDoc = doc.data();
+        return axios({
+            method: 'post',
+            url: `https://api.zoom.us/v2/users/${userDoc.zoomId}/meetings`,
+            data: {
+                "topic": topic,
+                "type": "2",
+                "start_time": moment(start).tz(userDoc.tz).format(), //TODO catch cases when tz missing
+                "duration": duration,
+                "timezone": userDoc.tz,
+                "password": generatePassword(),
+                "agenda": notes,
+                "settings": {
+                  "host_video": true,
+                  "participant_video": true,
+                  "join_before_host": false,
+                  "use_pmi": false,
+                  "audio": "voip"
+                }
+            },
+            headers: {
+              'Authorization': `Bearer ${zoomToken}`,
+              'User-Agent': 'Zoom-api-Jwt-Request',
+              'content-type': 'application/json'
+            }
+        });
+    })
+    /*
     .then(result => {
         const userTz = moment(start).tz(userDoc.tz).format();  //TODO catch cases when tz missing
         return axios({
@@ -142,7 +184,7 @@ exports.handler = function(data, context, firestoreDb, admin, emailHandler) {
               'content-type': 'application/json'
             }
         });        
-    })    
+    })  */  
     .then(response => {
         //console.log('response data: ', response.data);
         jobDoc  = {
@@ -167,15 +209,7 @@ exports.handler = function(data, context, firestoreDb, admin, emailHandler) {
     })  
     .then(ref => {
         console.log('Added job with ID: ', ref.id);
-        jobDoc.ref_id = ref.id
-        return emailHandler.sendAddJobProviderEmail(user, jobDoc, customerDoc, rateDoc);
-    })
-    .then(result => {
-        console.log('Add job email sent to provider');
-        return emailHandler.sendAddJobClientEmail(user, jobDoc, customerDoc, rateDoc);
-    })
-    .then(result => {
-        console.log('Add job email has been sent to client');        
+        //jobDoc.ref_id = ref.id
         return true;
     })
     .catch(error => {

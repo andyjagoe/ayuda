@@ -14,7 +14,7 @@ function generatePassword() {
     return retVal;
 }
 
-exports.handler = function(data, context, firestoreDb, admin, emailHandler) {
+exports.handler = function(data, context, firestoreDb, admin) {
     //console.log(JSON.stringify(context.rawRequest.headers, null, 2));
 
     const payer = data.payer;
@@ -27,13 +27,6 @@ exports.handler = function(data, context, firestoreDb, admin, emailHandler) {
 
     // Authentication / user information is automatically added to the request.
     const uid = context.auth.uid;
-    const name = context.auth.token.name || null;
-    const email = context.auth.token.email || null;
-    const user = {
-        name: name,
-        email: email,
-        uid: uid
-    }
 
 
     // Checking that the user is authenticated.
@@ -63,59 +56,8 @@ exports.handler = function(data, context, firestoreDb, admin, emailHandler) {
 
     //TODO:  Add error checking for valid start and duration values 
 
-    //console.log(payer);
-    //console.log(topic);
-    //console.log(start);
-    //console.log(duration);
-    //console.log(notes);
-
     var userDoc = null;
     var jobDoc = null;
-    var customerDoc = null;
-    var rateDoc = null;
-
-    /*
-    return firestoreDb.collection('/users').doc(uid).get()
-    .then(doc => {
-        if (!doc.exists) {
-        console.log('No such user!');
-        throw new functions.https.HttpsError('failed-precondition', 'Unable to verify state.');
-        }
-        const zoomId = doc.data().zoomId;
-        if (!(typeof zoomId === 'string') || zoomId.length === 0) {
-            // Throwing an HttpsError so that the client gets the error details.
-            throw new functions.https.HttpsError('failed-precondition', 'No Zoom ID available.');
-        }
-        userDoc = doc.data();
-        return firestoreDb.collection('/users')
-            .doc(uid)
-            .collection('customers')
-            .doc(payer_id)
-            .get();
-    })
-    .then(doc => {
-        if (!doc.exists) {
-            console.log('No such customer!');
-            throw new functions.https.HttpsError('failed-precondition', 'Unable to verify state.');
-        }
-        console.log(doc.data());
-        customerDoc = doc.data();
-        return firestoreDb.collection('/users')
-            .doc(uid)
-            .collection('rates')
-            .doc(rate_id)
-            .get();
-    })
-    .then(doc => {
-        if (!doc.exists) {
-            console.log('No such rate!');
-            throw new functions.https.HttpsError('failed-precondition', 'Unable to verify state.');
-        }
-        console.log(doc.data());
-        rateDoc = doc.data();
-        return true;
-    })
-    */
 
     //check if state value is valid
     return firestoreDb.collection('/users').doc(uid).get()
@@ -156,35 +98,6 @@ exports.handler = function(data, context, firestoreDb, admin, emailHandler) {
             }
         });
     })
-    /*
-    .then(result => {
-        const userTz = moment(start).tz(userDoc.tz).format();  //TODO catch cases when tz missing
-        return axios({
-            method: 'post',
-            url: `https://api.zoom.us/v2/users/${userDoc.zoomId}/meetings`,
-            data: {
-                "topic": topic,
-                "type": "2",
-                "start_time": userTz,
-                "duration": duration,
-                "timezone": userDoc.tz,
-                "password": generatePassword(),
-                "agenda": notes,
-                "settings": {
-                  "host_video": true,
-                  "participant_video": true,
-                  "join_before_host": false,
-                  "use_pmi": false,
-                  "audio": "voip"
-                }
-            },
-            headers: {
-              'Authorization': `Bearer ${zoomToken}`,
-              'User-Agent': 'Zoom-api-Jwt-Request',
-              'content-type': 'application/json'
-            }
-        });        
-    })  */  
     .then(response => {
         //console.log('response data: ', response.data);
         jobDoc  = {
@@ -208,8 +121,7 @@ exports.handler = function(data, context, firestoreDb, admin, emailHandler) {
             .add(jobDoc);
     })  
     .then(ref => {
-        console.log('Added job with ID: ', ref.id);
-        //jobDoc.ref_id = ref.id
+        //console.log('Added job with ID: ', ref.id);
         return true;
     })
     .catch(error => {

@@ -2,7 +2,7 @@
 
                       <div class="f-fallback">
                         <h1>Hi, <%= name %>!</h1>
-                        <p>Your job for <%= current_job_doc.customer_name %> has been scheduled as a Zoom meeting:</p>
+                        <p>This job has changed. The new Zoom meeting details are below:</p>
 
                         <!-- Action -->
                         <table class="body-action" align="center" width="100%" cellpadding="0" cellspacing="0" role="presentation">
@@ -26,28 +26,53 @@
                                   <tr>
                                     <td class="attributes_item">
                                       <span class="f-fallback">
-                                        <strong>Topic:</strong> <%= current_job_doc.topic %> 
+                                        <strong>Customer:</strong> <%= new_job_doc.customer_name %> 
                                       </span>
                                     </td>
                                   </tr>
                                   <tr>
                                     <td class="attributes_item">
                                       <span class="f-fallback">
-                                        <strong>Time:</strong> <%= current_job_doc.job_date_time %> 
+                                        <strong>Topic:</strong>
+                                        <% if(current_job_doc.topic == new_job_doc.topic) { %>
+                                          <%= new_job_doc.topic %>
+                                        <% } else { %>
+                                            <del><%= current_job_doc.topic %></del>
+                                            <ins><%= new_job_doc.topic %></ins>
+                                        <% } %>
+                                      </span>
+                                    </td>
+                                  </tr>
+                                    <tr>
+                                    <td class="attributes_item">
+                                      <span class="f-fallback">
+                                        <strong>Time:</strong>
+                                        <% if(current_job_doc.job_date_time == new_job_doc.job_date_time) { %>
+                                          <%= new_job_doc.job_date_time %>
+                                        <% } else { %>
+                                            <del><%= current_job_doc.job_date_time %></del>
+                                            <ins><%= new_job_doc.job_date_time %></ins>
+                                        <% } %>
                                       </span>
                                     </td>
                                   </tr>
                                   <tr>
                                     <td class="attributes_item">
                                       <span class="f-fallback">
-                                        <strong>Duration:</strong> <%= current_job_doc.duration %> 
+                                        <strong>Duration:</strong>
+                                        <% if(current_job_doc.duration == new_job_doc.duration) { %>
+                                          <%= new_job_doc.duration %>
+                                        <% } else { %>
+                                            <del><%= current_job_doc.duration %></del>
+                                            <ins><%= new_job_doc.duration %></ins>
+                                        <% } %>
                                       </span>
                                     </td>
                                   </tr>
                                   <tr>
                                     <td class="attributes_item">
                                       <span class="f-fallback">
-                                        <strong>Hourly Rate:</strong> <%= current_job_doc.rate_name %> 
+                                        <strong>Hourly Rate:</strong> <%= new_job_doc.rate_name %> 
                                       </span>
                                     </td>
                                   </tr>
@@ -68,7 +93,14 @@
                                   <tr>
                                     <td class="attributes_item">
                                       <span class="f-fallback">
-                                        <strong>Notes:</strong> <%= current_job_doc.agenda %> 
+                                        <strong>Notes:</strong>
+                                        <% if(current_job_doc.agenda == new_job_doc.agenda) { %>
+                                          <%= new_job_doc.agenda %>
+                                        <% } else { %>
+                                            <del><%= current_job_doc.agenda %></del>
+                                            <ins><%= new_job_doc.agenda %></ins>
+                                        <% } %>
+
                                       </span>
                                     </td>
                                   </tr>
@@ -82,10 +114,10 @@
                             </tr>  
                           </table>
 
-                        <p><%= current_job_doc.customer_name %> (<%= current_job_doc.customer_email %>) has been notified and must authorize the charge before this meeting will be confirmed and can start.</p>
+                        <p><%= new_job_doc.customer_name %> (<%= new_job_doc.customer_email %>) has been notified.</p>
                         <p>If you have any questions, please <a href="mailto:<%= support_email %>">email our customer success team</a>.</p>
-                        <p>Thanks,
-                          <br>The <%= product_name %> Team Yes?</p>
+                        <p>Thanks,  
+                          <br>The <%= product_name %> Team</p>
                         
                         <!-- Sub copy -->
                         <table class="body-sub" role="presentation">

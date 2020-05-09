@@ -175,7 +175,7 @@ exports.handler = function(data, context, firestoreDb, admin, emailHandler) {
         return emailHandler.sendAddJobClientEmail(user, jobDoc, customerDoc, rateDoc);
     })
     .then(result => {
-        console.log('Add job email sent to client');
+        console.log('Add job email has been sent to client');        
         return true;
     })
     .catch(error => {

@@ -41,6 +41,7 @@ const email = new Email({
 
 const productName = 'Ayuda Live'
 const supportEmail = 'support@ayuda.live'
+
 const getInvitationMarkup = (user, jobRecord, productName) => {
     const formattedstart = moment
     .unix(jobRecord.t.seconds)
@@ -73,6 +74,65 @@ const formatRateName = (name) => {
 
 
 
+const formatJobDoc = (jobDoc, customerDoc, rateDoc) => {
+    var newDoc = {}
+
+    newDoc.topic = jobDoc.topic
+    newDoc.agenda = jobDoc.agenda
+    newDoc.id = jobDoc.id
+    newDoc.password = jobDoc.password
+    newDoc.job_date_time = moment
+        .unix(jobDoc.t.seconds)
+        .tz(jobDoc.tz)  
+        .format('MMMM Do, h:mm a')
+    newDoc.duration = formatDuration(jobDoc.d)
+    newDoc.customer_name = customerDoc.name
+    newDoc.customer_email = customerDoc.email
+    newDoc.rate_name = formatRateName(rateDoc.name)
+
+    return newDoc
+}
+
+
+const generateICal = (user, jobRecord, method) => {
+    const myCal = {
+        domain: 'ayuda.live',
+        prodId: '//ayuda.live//ical-generator//EN',
+        //method: 'request',  //setting this as request method gives recipient yes, maybe, no options
+        events: [
+            {
+                start: moment.unix(jobRecord.t.seconds),
+                end: moment.unix(jobRecord.t.seconds).add(jobRecord.d, 'minutes'),
+                timestamp: moment(),
+                summary: jobRecord.topic,
+                description: getInvitationMarkup(user, jobRecord),
+                organizer: `${user.name} <ayuda@ayuda.live>`, //must use this email since we send from it
+                url: `https://ayuda.live/job/${jobRecord.ref_id}`,
+                uid: jobRecord.ref_id,
+            }
+        ]   
+    }
+    if (method !== null) {myCal.method = method}
+    return ical(myCal).toString();
+}   
+
+
+const getCalendarLinks = (user, jobRecord) => {
+    const calendarEvent = {
+        title: jobRecord.topic,
+        description: getInvitationMarkup(user, jobRecord),
+        start: moment.unix(jobRecord.t.seconds).format(),
+        duration: [jobRecord.d, "minutes"]
+    }
+    return {
+        google_url: google(calendarEvent),
+        outlook_url: outlook(calendarEvent),
+        yahoo_url: yahoo(calendarEvent),
+        ics_url: ics(calendarEvent),
+    };
+}
+
+
 const sendWelcomeEmail = (user) => {
     const welcome_email = {
         template: 'welcome',
@@ -93,34 +153,6 @@ const sendWelcomeEmail = (user) => {
 
 
 const sendAddJobProviderEmail = (user, jobRecord, customerDoc, rateDoc) => {
-    const start = moment.unix(jobRecord.t.seconds)
-    const end = moment.unix(jobRecord.t.seconds).add(jobRecord.d, 'minutes')
-
-    const myCal = ical({
-        domain: 'ayuda.live',
-        prodId: '//ayuda.live//ical-generator//EN',
-        //method: 'request',  //setting this as request method gives recipient yes, maybe, no options
-        events: [
-            {
-                start: start,
-                end: end,
-                timestamp: moment(),
-                summary: jobRecord.topic,
-                description: getInvitationMarkup(user, jobRecord),
-                organizer: `${user.name} <ayuda@ayuda.live>`, //must use this email since we send from it
-                url: `https://ayuda.live/job/${jobRecord.ref_id}`,
-                uid: jobRecord.ref_id,
-            }
-        ]   
-    }).toString();
-    
-    const calendarEvent = {
-        title: jobRecord.topic,
-        description: getInvitationMarkup(user, jobRecord),
-        start: start.format(),
-        duration: [jobRecord.d, "minutes"]
-    };
-
     const add_job_provider = {
         template: "add-job-provider",
         message: {
@@ -128,45 +160,23 @@ const sendAddJobProviderEmail = (user, jobRecord, customerDoc, rateDoc) => {
             icalEvent: {
                 filename: 'invite.ics',
                 //method: 'request', //setting this as request method gives recipient yes, maybe, no options
-                content: myCal
+                content: generateICal(user, jobRecord, null)
             },
-            /*      
-            attachments: [
-                {
-                    filename: 'invite.ics',
-                    path: ics(calendarEvent)
-                },
-            ]
-            */
         },
         locals: {                 
             name: user.name,
             product_name: productName,
             support_email: supportEmail,
             preheader: 'Your job has been scheduled and the Zoom meeting details are below.',
-            email: customerDoc.email, 
-            customer_name: customerDoc.name,
-            job_date_time: moment
-                .unix(jobRecord.t.seconds)
-                .tz(jobRecord.tz)  
-                .format('MMMM Do, h:mm a'),
-            topic: jobRecord.topic,
-            duration: formatDuration(jobRecord.d),
-            rate: formatRateName(rateDoc.name),
-            meeting_id: jobRecord.id,
-            meeting_password: jobRecord.password,
+            current_job_doc: formatJobDoc(currentJobDoc, customerDoc, rateDoc),
             job_url: `https://ayuda.live/job/${jobRecord.ref_id}`,
-            action_url: jobRecord.start_url,
-            notes: jobRecord.agenda ,
-            google_url: google(calendarEvent),
-            outlook_url: outlook(calendarEvent),
-            yahoo_url: yahoo(calendarEvent),
-            ics_url: ics(calendarEvent),
+            calendar_links: getCalendarLinks(user, jobRecord),
         },        
     }
 
     return email.send(add_job_provider)
 }
+
 
 const sendAddJobClientEmail = (user, jobRecord, customerDoc, rateDoc) => {
     const start = moment.unix(jobRecord.t.seconds)
@@ -188,7 +198,7 @@ const sendAddJobClientEmail = (user, jobRecord, customerDoc, rateDoc) => {
             preheader: `${user.name} has invited you to an ${productName} meeting`,
             email: customerDoc.email, 
             customer_name: customerDoc.name,
-            action_url: 'https://ayuda.live/',
+            action_url: 'https://ayuda.live',
             job_date_time: moment
                 .unix(jobRecord.t.seconds)
                 .tz(jobRecord.tz)  
@@ -204,8 +214,60 @@ const sendAddJobClientEmail = (user, jobRecord, customerDoc, rateDoc) => {
 }
 
 
+const sendChangeJobProviderEmail = (user, currentJobDoc, newJobDoc, customerDoc, rateDoc) => {    
+    const change_job_provider = {
+        template: "change-job-provider",
+        message: {
+            to: formatToName(user),
+            icalEvent: {
+                filename: 'invite.ics',
+                content: generateICal(user, newJobDoc, null)
+            },
+        },
+        locals: {                 
+            name: user.name,
+            product_name: productName,
+            support_email: supportEmail,
+            preheader: 'Your job has been scheduled and the Zoom meeting details are below.',
+            current_job_doc: formatJobDoc(currentJobDoc, customerDoc, rateDoc),
+            new_job_doc: formatJobDoc(newJobDoc, customerDoc,  rateDoc),
+            job_url: `https://ayuda.live/job/${currentJobDoc.ref_id}`,
+            calendar_links: getCalendarLinks(user, newJobDoc),
+        },  
+    }
+
+    return email.send(change_job_provider)
+}
+
+
+const sendCancelJobProviderEmail = (user, jobRecord, customerDoc, rateDoc) => {
+    const cancel_job_provider = {
+        template: "cancel-job-provider",
+        message: {
+            to: formatToName(user),
+            icalEvent: {
+                filename: 'invite.ics',
+                method: 'cancel',
+                content: generateICal(user, jobRecord, 'cancel')
+            },
+        },
+        locals: {                 
+            name: user.name,
+            product_name: productName,
+            support_email: supportEmail,
+            preheader: `Your job for ${customerDoc.name} has been cancelled.`,
+            current_job_doc: formatJobDoc(jobRecord, customerDoc, rateDoc),
+        },        
+    }
+
+    return email.send(cancel_job_provider)
+}
+
+
 module.exports = {
     sendWelcomeEmail,
     sendAddJobProviderEmail,
-    sendAddJobClientEmail
+    sendAddJobClientEmail,
+    sendChangeJobProviderEmail,
+    sendCancelJobProviderEmail,
 }

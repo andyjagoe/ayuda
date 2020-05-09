@@ -44,13 +44,13 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'addJob') {
 if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'removeJob') {
     const removeJob = require('./removeJob');
     exports.removeJob = functions.https.onCall((data, context) => {
-        return removeJob.handler(data, context, firestoreDb, admin);
+        return removeJob.handler(data, context, firestoreDb, admin, emailHandler);
     });
 }
 
 if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'updateJob') {
     const updateJob = require('./updateJob');
     exports.updateJob = functions.https.onCall((data, context) => {
-        return updateJob.handler(data, context, firestoreDb, admin);
+        return updateJob.handler(data, context, firestoreDb, admin, emailHandler);
     });
 }

@@ -1,1 +1,7 @@
-Your job for <%= current_job_doc.customer_name %> on <%= current_job_doc.job_date_time %> has been updated
+<% if(current_job_doc.customer_name != new_job_doc.customer_name) { %>
+    <%= new_job_doc.customer_name %> scheduled for <%= new_job_doc.job_date_time %>
+<% } else if(current_job_doc.job_date_time != new_job_doc.job_date_time) { %>
+    <%= new_job_doc.customer_name %> re-scheduled for <%= new_job_doc.job_date_time %> 
+<% } else { %>
+    Your job for <%= current_job_doc.customer_name %> on <%= current_job_doc.job_date_time %> has been updated
+<% } %>

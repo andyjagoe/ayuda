@@ -2,7 +2,8 @@ const admin = require('firebase-admin');
 const functions = require('firebase-functions');
 admin.initializeApp(functions.config().firebase);
 const database = admin.database();
-const emailHandler = require('./email');
+const emailHandler = require('./emailHandler');
+const calendarHandler = require('./calendarHandler');
 var firestoreDb = admin.firestore();
 
 
@@ -76,5 +77,12 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'jobDeletedTasks
     exports.jobDeletedTasks = functions.firestore.document('/users/{uid}/meetings/{meeting_id}')
     .onDelete((snapshot, context) => {    
         return jobDeletedTasks.handler(snapshot, context, firestoreDb, emailHandler);
+    });
+}
+
+if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'calendar') {
+    const calendar = require('./calendar');
+    exports.calendar = functions.https.onRequest((req, res) => {
+        return calendar.handler(req, res, firestoreDb, calendarHandler);
     });
 }

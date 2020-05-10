@@ -12,9 +12,8 @@ var transporter = nodemailer.createTransport({
         apiVersion: '2010-12-01'
     })
 });
+const calendarHandler = require('./calendarHandler');
 const moment = require('moment');
-const ical = require('ical-generator');
-const { google, outlook, yahoo, ics } = require('calendar-link');
 
 
 
@@ -41,24 +40,6 @@ const email = new Email({
 
 const productName = 'Ayuda Live'
 const supportEmail = 'support@ayuda.live'
-
-const getInvitationMarkup = (user, jobRecord, productName) => {
-    const formattedstart = moment
-    .unix(jobRecord.t.seconds)
-    .tz(jobRecord.tz)  
-    .format(('MMMM Do, h:mm a'));
-    return `${user.name} (${user.email}) is inviting you to a scheduled ${productName} meeting.
-
-Topic: ${jobRecord.topic}
-Time: ${formattedstart}
-        
-Join the Zoom Meeting
-${jobRecord.join_url}
-    
-Meeting ID: ${jobRecord.id}
-Password: ${jobRecord.password}
-`
-}
 
 
 const formatToName = (user) => {
@@ -98,41 +79,13 @@ const formatJobDoc = (jobDoc, customerDoc, rateDoc) => {
 }
 
 
-const generateICal = (user, jobRecord, method) => {
-    const myCal = {
-        domain: 'ayuda.live',
-        prodId: '//ayuda.live//ical-generator//EN',
-        //method: 'request',  //setting this as request method gives recipient yes, maybe, no options
-        events: [
-            {
-                start: moment.unix(jobRecord.t.seconds),
-                end: moment.unix(jobRecord.t.seconds).add(jobRecord.d, 'minutes'),
-                timestamp: moment(),
-                summary: jobRecord.topic,
-                description: getInvitationMarkup(user, jobRecord),
-                organizer: `${user.name} <ayuda@ayuda.live>`, //must use this email since we send from it
-                url: `https://ayuda.live/job/${jobRecord.ref_id}`,
-                uid: jobRecord.ref_id,
-            }
-        ]   
-    }
-    if (method !== null) {myCal.method = method}
-    return ical(myCal).toString();
-}   
-
-
 const getCalendarLinks = (user, jobRecord) => {
-    const calendarEvent = {
-        title: jobRecord.topic,
-        description: getInvitationMarkup(user, jobRecord),
-        start: moment.unix(jobRecord.t.seconds).format(),
-        duration: [jobRecord.d, "minutes"]
-    }
     return {
-        google_url: google(calendarEvent),
-        outlook_url: outlook(calendarEvent),
-        yahoo_url: yahoo(calendarEvent),
-        ics_url: ics(calendarEvent),
+        google_url: `https://ayuda.live/calendar?calendar=google&id=${jobRecord.ref_id}&uid=${user.uid}`,
+        outlook_url: `https://ayuda.live/calendar?calendar=outlook&id=${jobRecord.ref_id}&uid=${user.uid}`,
+        yahoo_url: `https://ayuda.live/calendar?calendar=yahoo&id=${jobRecord.ref_id}&uid=${user.uid}`,
+        ics_url: `https://ayuda.live/calendar?calendar=ics&id=${jobRecord.ref_id}&uid=${user.uid}`,
+        download_url: `https://ayuda.live/calendar?calendar=download&id=${jobRecord.ref_id}&uid=${user.uid}`,
     };
 }
 
@@ -164,7 +117,7 @@ const sendAddJobProviderEmail = (user, jobRecord, customerDoc, rateDoc) => {
             icalEvent: {
                 filename: 'invite.ics',
                 //method: 'request', //setting this as request method gives recipient yes, maybe, no options
-                content: generateICal(user, jobRecord, null)
+                content: calendarHandler.generateICal(user, jobRecord, null)
             },
         },
         locals: {                 
@@ -233,7 +186,7 @@ const sendChangeJobProviderEmail = (
             to: formatToName(user),
             icalEvent: {
                 filename: 'invite.ics',
-                content: generateICal(user, newJobDoc, null)
+                content: calendarHandler.generateICal(user, newJobDoc, null)
             },
         },
         locals: {                 
@@ -260,7 +213,7 @@ const sendCancelJobProviderEmail = (user, jobRecord, customerDoc, rateDoc) => {
             icalEvent: {
                 filename: 'invite.ics',
                 method: 'cancel',
-                content: generateICal(user, jobRecord, 'cancel')
+                content: calendarHandler.generateICal(user, jobRecord, 'cancel')
             },
         },
         locals: {                 

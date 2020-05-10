@@ -26,14 +26,20 @@
                                   <tr>
                                     <td class="attributes_item">
                                       <span class="f-fallback">
-                                        <strong>Customer:</strong> <%= new_job_doc.customer_name %> 
+                                        <strong>Customer:</strong> 
+                                        <% if(current_job_doc.customer_name == new_job_doc.customer_name) { %>
+                                          <%= new_job_doc.customer_name %>
+                                        <% } else { %>
+                                            <del><%= current_job_doc.customer_name %></del>
+                                            <ins><%= new_job_doc.customer_name %></ins>
+                                        <% } %>
                                       </span>
                                     </td>
                                   </tr>
                                   <tr>
                                     <td class="attributes_item">
                                       <span class="f-fallback">
-                                        <strong>Topic:</strong>
+                                        <strong>Topic:</strong> 
                                         <% if(current_job_doc.topic == new_job_doc.topic) { %>
                                           <%= new_job_doc.topic %>
                                         <% } else { %>
@@ -46,7 +52,7 @@
                                     <tr>
                                     <td class="attributes_item">
                                       <span class="f-fallback">
-                                        <strong>Time:</strong>
+                                        <strong>Time:</strong> 
                                         <% if(current_job_doc.job_date_time == new_job_doc.job_date_time) { %>
                                           <%= new_job_doc.job_date_time %>
                                         <% } else { %>
@@ -59,7 +65,7 @@
                                   <tr>
                                     <td class="attributes_item">
                                       <span class="f-fallback">
-                                        <strong>Duration:</strong>
+                                        <strong>Duration:</strong> 
                                         <% if(current_job_doc.duration == new_job_doc.duration) { %>
                                           <%= new_job_doc.duration %>
                                         <% } else { %>
@@ -72,7 +78,14 @@
                                   <tr>
                                     <td class="attributes_item">
                                       <span class="f-fallback">
-                                        <strong>Hourly Rate:</strong> <%= new_job_doc.rate_name %> 
+                                        <strong>Hourly Rate:</strong> 
+                                        <% if(current_job_doc.rate_name == new_job_doc.rate_name) { %>
+                                          <%= new_job_doc.rate_name %>
+                                        <% } else { %>
+                                            <del><%= current_job_doc.rate_name %></del>
+                                            <ins><%= new_job_doc.rate_name %></ins>
+                                        <% } %>
+
                                       </span>
                                     </td>
                                   </tr>

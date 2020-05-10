@@ -51,7 +51,7 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'removeJob') {
 if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'updateJob') {
     const updateJob = require('./updateJob');
     exports.updateJob = functions.https.onCall((data, context) => {
-        return updateJob.handler(data, context, firestoreDb, admin, emailHandler);
+        return updateJob.handler(data, context, firestoreDb, admin);
     });
 }
 
@@ -60,6 +60,14 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'jobCreatedTasks
     exports.jobCreatedTasks = functions.firestore.document('/users/{uid}/meetings/{meeting_id}')
     .onCreate((snapshot, context) => {    
         return jobCreatedTasks.handler(snapshot, context, firestoreDb, emailHandler);
+    });
+}
+
+if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'jobUpdatedTasks') {
+    const jobUpdatedTasks = require('./jobUpdatedTasks');
+    exports.jobUpdatedTasks = functions.firestore.document('/users/{uid}/meetings/{meeting_id}')
+    .onUpdate((change, context) => {    
+        return jobUpdatedTasks.handler(change, context, firestoreDb, emailHandler);
     });
 }
 

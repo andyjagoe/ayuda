@@ -218,7 +218,15 @@ const sendAddJobClientEmail = (user, jobRecord, customerDoc, rateDoc) => {
 }
 
 
-const sendChangeJobProviderEmail = (user, currentJobDoc, newJobDoc, customerDoc, rateDoc) => {    
+const sendChangeJobProviderEmail = (
+        user, 
+        currentJobDoc, 
+        newJobDoc, 
+        currentCustomerDoc, 
+        newCustomerDoc,
+        currentRateDoc,
+        newRateDoc
+    ) => {    
     const change_job_provider = {
         template: "change-job-provider",
         message: {
@@ -233,8 +241,8 @@ const sendChangeJobProviderEmail = (user, currentJobDoc, newJobDoc, customerDoc,
             product_name: productName,
             support_email: supportEmail,
             preheader: 'Your job has been scheduled and the Zoom meeting details are below.',
-            current_job_doc: formatJobDoc(currentJobDoc, customerDoc, rateDoc),
-            new_job_doc: formatJobDoc(newJobDoc, customerDoc,  rateDoc),
+            current_job_doc: formatJobDoc(currentJobDoc, currentCustomerDoc, currentRateDoc),
+            new_job_doc: formatJobDoc(newJobDoc, newCustomerDoc, newRateDoc),
             job_url: `https://ayuda.live/job/${currentJobDoc.ref_id}`,
             calendar_links: getCalendarLinks(user, newJobDoc),
         },  

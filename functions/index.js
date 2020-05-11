@@ -86,3 +86,17 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'calendar') {
         return calendar.handler(req, res, firestoreDb, calendarHandler);
     });
 }
+
+if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'addCustomer') {
+    const addCustomer = require('./addCustomer');
+    exports.addCustomer = functions.https.onCall((data, context) => {
+        return addCustomer.handler(data, context, firestoreDb, admin);
+    });
+}
+
+if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'fetchCheckoutSession') {
+    const fetchCheckoutSession = require('./fetchCheckoutSession');
+    exports.fetchCheckoutSession = functions.https.onCall((data, context) => {
+        return fetchCheckoutSession.handler(data, context, firestoreDb);
+    });
+}

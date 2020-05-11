@@ -116,15 +116,12 @@ export default function CustomerChooser(props) {
     event.preventDefault();
     event.stopPropagation()
 
-    // Add new customer to Firestore
-    await firestore.collection('/users')
-        .doc(uid)
-        .collection('customers')
-        .add({
-            name: customerDialogValue.name,
-            email: customerDialogValue.email,
-            phone: customerDialogValue.phone,
-            t: firebase.firestore.Timestamp.fromDate(new Date()),
+    // Add new customer    
+    var addCustomer = firebase.functions().httpsCallable('addCustomer');
+    await addCustomer({
+      name: customerDialogValue.name,
+      email: customerDialogValue.email,
+      phone: customerDialogValue.phone,
     })
     .then(ref => {        
         //console.log('Added document with ID: ', ref.id);

@@ -10,6 +10,7 @@ import JobPage from "./JobPage";
 import GetJobPage from "./GetJobPage";
 import AddJobPage from "./AddJobPage";
 import LoadingPage from "./LoadingPage";
+import Authorize from "./Authorize";
 import { UserContext } from "../providers/UserProvider";
 
 
@@ -29,10 +30,12 @@ function Application() {
       <JobPage path="/job/:jobId" />
       <GetJobPage path="/getjob" />
       <AddJobPage path="/addjob" />
+      <Authorize path="/authorize" />
     </Router>
   :      
     <Router>
       <SignIn path="/" />
+      <Authorize path="/authorize" />
     </Router>
   );
 }

@@ -10,6 +10,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { UserContext } from "../providers/UserProvider";
 import firebase from 'firebase/app';
 import 'firebase/functions';
+const queryString = require('query-string');
  
 
 const useStyles = makeStyles((theme) => ({
@@ -42,7 +43,6 @@ export default function ConnectStripe(props) {
     const [resultMessage, setResultMessage] = React.useState('Verifying Stripe account');
     const [resultSeverity, setResultSeverity] = React.useState('info');
 
-    const queryString = require('query-string');
     const parsed = queryString.parse(props.location.search);
 
     async function handleSubmit() {

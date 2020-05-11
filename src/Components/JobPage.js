@@ -216,7 +216,9 @@ Password: ${jobRecord.password}
 
   async function removeJob() {
     var removeJob = firebase.functions().httpsCallable('removeJob');
-    await removeJob({id: props.jobId, zoom_id: jobRecord.id})
+    await removeJob({
+      id: props.jobId, 
+    })
     .then(function(result) {
         console.log(result.data);
         navigate('/');

@@ -98,17 +98,7 @@ export default function AddJobPage(props) {
     } else {
       setTopicError (null)
     }
-    if (payer.name === "") {
-      setPayerError('Payer name is required')
-    } else {
-      setPayerError (null)
-    }
-    if (rate.name === "") {
-      setRateError('Rate is required')
-    } else {
-      setRateError (null)
-    }
-
+    
     var startBeforeEnd = moment(end).isBefore(start);
     var startToFinish = moment(end).diff(moment(start), 'hours');
 

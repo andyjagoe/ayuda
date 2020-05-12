@@ -40,7 +40,7 @@ exports.handler = function(data, context, firestoreDb, admin) {
         phone: phone
     })
     .then (result => {
-        console.log(result)
+        //console.log(result)
         return firestoreDb.collection('/users')
         .doc(uid)
         .collection('customers')

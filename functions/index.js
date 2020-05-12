@@ -96,7 +96,7 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'addCustomer') {
 
 if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'fetchCheckoutSession') {
     const fetchCheckoutSession = require('./fetchCheckoutSession');
-    exports.fetchCheckoutSession = functions.https.onCall(async (data, context) => {
+    exports.fetchCheckoutSession = functions.https.onCall((data, context) => {
         return fetchCheckoutSession.handler(data, context, firestoreDb);
     });
 }

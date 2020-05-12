@@ -1,5 +1,5 @@
 
-exports.handler = function(req, res, firestoreDb, calendarHandler) {
+exports.handler = async function(req, res, firestoreDb, calendarHandler) {
 
     if (!req.query.calendar) {   
         console.log('The function must be called with one argument "calendar".') 
@@ -16,35 +16,34 @@ exports.handler = function(req, res, firestoreDb, calendarHandler) {
 
     const id = req.query.id
     const uid = req.query.uid
-    const user = {
-        uid: uid
-    }
 
-    return firestoreDb.collection('/users')
-    .doc(uid)
-    .get()
-    .then(doc => {
-        if (!doc.exists) {
+    try {
+        const [
+            userSnap,
+            jobSnap,
+        ] = await Promise.all([
+            firestoreDb.collection('/users').doc(uid).get(),
+            firestoreDb.collection('/users').doc(uid).collection('meetings').doc(id).get(),
+        ])
+
+        // check for empty documents
+        if (!userSnap.exists) {
             console.log('No such user!') 
             return res.status(400).send('Invalid request')      
         }
-        const userDoc = doc.data();
-        user.name = doc.data().displayName;
-        user.email = doc.data().email
-
-        return firestoreDb.collection('/users')
-            .doc(uid)
-            .collection('meetings')
-            .doc(id)
-            .get();
-    })   
-    .then(doc => {
-        if (!doc.exists) {
-            console.log('No such meeting!') 
+        if (!jobSnap.exists) {
+            console.log('No such job!') 
             return res.status(400).send('Invalid request')      
         }
-        const jobRecord = doc.data()
-        
+
+        const userDoc = userSnap.data();
+        const user = {
+            uid: uid,
+            name: userDoc.displayName,
+            email: userDoc.email,
+        }
+        const jobRecord = jobSnap.data();
+
         switch(req.query.calendar) {
             case "google":
                 res.redirect(calendarHandler.getCalendarLink(user, jobRecord, 'google'))
@@ -67,10 +66,10 @@ exports.handler = function(req, res, firestoreDb, calendarHandler) {
         }
 
         return res.status(400).send('Invalid request')      
-    })
-    .catch(error => {
+        
+    } catch (error) {
         console.error("Error: ", error);
         return res.status(400).send('Invalid request')      
-    });
+    }
 
 }

@@ -24,7 +24,7 @@ exports.handler = function(data, context, firestoreDb) {
             console.log('No such document!');
             return false;
         } else {
-            console.log('Document data:', doc.data());
+            //console.log('Document data:', doc.data());
             return true;
         }
     })

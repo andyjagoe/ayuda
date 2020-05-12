@@ -155,7 +155,7 @@ const sendAddJobClientEmail = (user, jobRecord, customerDoc, rateDoc) => {
             preheader: `${user.name} has invited you to an ${productName} meeting`,
             email: customerDoc.email, 
             customer_name: customerDoc.name,
-            action_url: 'https://ayuda.live',
+            action_url: `https://ayuda.live/authorize?id=${jobRecord.ref_id}&uid=${user.uid}`,
             job_date_time: moment
                 .unix(jobRecord.t.seconds)
                 .tz(jobRecord.tz)  

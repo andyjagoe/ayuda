@@ -184,7 +184,7 @@ export default function RateChooser(props) {
                           name: newValue,
                           rate: parseFloat(newValue),
                           id: '',
-                          currency: 'USD',
+                          currency: 'usd',
                         });
                       });
                       return;
@@ -197,7 +197,7 @@ export default function RateChooser(props) {
                         name: newValue.inputValue,
                         rate: parseFloat(newValue.inputValue),
                         id: '',
-                        currency: 'USD',
+                        currency: 'usd',
                       });
           
                       return;

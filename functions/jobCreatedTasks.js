@@ -33,6 +33,7 @@ exports.handler = function(snapshot, context, firestoreDb, emailHandler) {
             return false;
         }
         customerDoc = doc.data();
+        customerDoc.id = doc.id;
         return firestoreDb.collection('/users')
             .doc(uid)
             .collection('rates')
@@ -45,6 +46,7 @@ exports.handler = function(snapshot, context, firestoreDb, emailHandler) {
             return false;
         }
         rateDoc = doc.data();
+        rateDoc.id = doc.id;
         return emailHandler.sendAddJobProviderEmail(user, jobDoc, customerDoc, rateDoc);
     })
     .then(result => {

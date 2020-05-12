@@ -26,11 +26,13 @@ const formatRateDescription = (rateRecord) => {
 
 
 
-exports.handler = function(data, context, firestoreDb) {
+exports.handler = async function(data, context, firestoreDb) {
     console.log(data)
 
     const id = data.id;
     const uid = data.uid;
+    const cid = data.cid;
+    const rid = data.rid;
 
     if (!(typeof id === 'string') || id.length === 0) {
         console.log('The function must be called with one argument "id".') 
@@ -40,80 +42,82 @@ exports.handler = function(data, context, firestoreDb) {
         console.log('The function must be called with one argument "uid".') 
         throw new functions.https.HttpsError('failed-precondition', 'Unable to verify state.');      
     }
-
-    const user = {
-        uid: uid
+    if (!(typeof cid === 'string') || cid.length === 0) {
+        console.log('The function must be called with one argument "cid".') 
+        throw new functions.https.HttpsError('failed-precondition', 'Unable to verify state.');      
+    }
+    if (!(typeof rid === 'string') || rid.length === 0) {
+        console.log('The function must be called with one argument "rid".') 
+        throw new functions.https.HttpsError('failed-precondition', 'Unable to verify state.');      
     }
 
-    var userDoc = null;
-    var jobRecord = null;
-    var customerRecord = null;
-    var rateRecord = null;
-    var stripeRecord = null;
 
-    return firestoreDb.collection('/users')
-    .doc(uid)
-    .get()
-    .then(doc => {
-        if (!doc.exists) {
+    try {
+        const [
+            userSnap,
+            jobSnap,
+            customerSnap,
+            rateSnap,
+            stripeSnap        
+        ] = await Promise.all([
+            firestoreDb.collection('/users').doc(uid).get(),
+            firestoreDb.collection('/users').doc(uid).collection('meetings').doc(id).get(),
+            firestoreDb.collection('/users').doc(uid).collection('customers').doc(cid).get(),
+            firestoreDb.collection('/users').doc(uid).collection('rates').doc(rid).get(),
+            firestoreDb.collection('/stripe').doc(uid).get()
+        ])
+
+        // check for empty documents
+        if (!userSnap.exists) {
             console.log('No such user!') 
             throw new functions.https.HttpsError('failed-precondition', 'Unable to verify state.');
         }
-        userDoc = doc.data();
-        user.name = doc.data().displayName;
-        user.email = doc.data().email
-
-        return firestoreDb.collection('/users')
-            .doc(uid)
-            .collection('meetings')
-            .doc(id)
-            .get();
-    })
-    .then(doc => {
-        if (!doc.exists) {
-            console.log('No such meeting!') 
+        if (!jobSnap.exists) {
+            console.log('No such job!') 
             throw new functions.https.HttpsError('failed-precondition', 'Unable to verify state.');
         }
-        jobRecord = doc.data()
-        return firestoreDb.collection('/users')
-            .doc(uid)
-            .collection('customers')
-            .doc(jobRecord.payer_id)
-            .get();
-    })
-    .then(doc => {
-        if (!doc.exists) {
+        if (!customerSnap.exists) {
             console.log('No such customer!') 
             throw new functions.https.HttpsError('failed-precondition', 'Unable to verify state.');
         }
-        customerRecord = doc.data()
-        return firestoreDb.collection('/users')
-            .doc(uid)
-            .collection('rates')
-            .doc(jobRecord.rate_id)
-            .get();
-    })
-    .then(doc => {
-        if (!doc.exists) {
+        if (!rateSnap.exists) {
             console.log('No such rate!') 
             throw new functions.https.HttpsError('failed-precondition', 'Unable to verify state.');
         }
-        rateRecord = doc.data()
-        return firestoreDb.collection('/stripe')
-            .doc(uid)
-            .get();
-    })
-    .then(doc => {
-        if (!doc.exists) {
-            console.log('User not set up for payments') 
+        if (!stripeSnap.exists) {
+            console.log('No stripe credentials!') 
             throw new functions.https.HttpsError('failed-precondition', 'Unable to verify state.');
         }
-        stripeRecord = doc.data()
+
+        //Verify that customer and rate id's match those of the job/meeting doc
+        if (jobSnap.data().payer_id !== customerSnap.id) {
+            console.log("cid given doesn't match payer_id for this job") 
+            throw new functions.https.HttpsError('failed-precondition', 'Unable to verify state.');
+        }
+        if (jobSnap.data().rate_id !== rateSnap.id) {
+            console.log("rid given doesn't match rate_id for this job") 
+            throw new functions.https.HttpsError('failed-precondition', 'Unable to verify state.');
+        }
+
+
+        const userDoc = userSnap.data();
+        const user = {
+            uid: uid,
+            name: userDoc.displayName,
+            email: userDoc.email,
+        }
+        const jobRecord = jobSnap.data();
+        const customerRecord = customerSnap.data();
+        const rateRecord = rateSnap.data();
+        const stripeRecord = stripeSnap.data();
+
+        // Create Stripe session
         const dateDescription = formatDateDescription(jobRecord)
         const rateDescription = formatRateDescription(rateRecord)
         const charge = rateRecord.rate * (jobRecord.d / 60) * 100
+        const transfer = Math.round(charge - (60 + (charge * 4.9)/100))  //TODO: make sure we have a min charge so this is > 0
 
-        return stripe.checkout.sessions.create({
+        const stripeSession = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
             line_items: [{
                 name: `${jobRecord.topic} @ ${rateDescription} per hour.`,
@@ -125,23 +129,24 @@ exports.handler = function(data, context, firestoreDb) {
             }],
             payment_intent_data: {
                 capture_method: 'manual',
-                on_behalf_of: stripeRecord.stripe_user_id,
                 setup_future_usage: 'on_session', 
-                description: `${dateDescription} @ ${rateDescription} per hour`
+                description: `${dateDescription} @ ${rateDescription} per hour`,
+                transfer_data: {
+                    destination: stripeRecord.stripe_user_id,
+                    amount: transfer 
+                }
             },
             customer: customerRecord.stripe_id,
             submit_type:  'book',
             success_url: 'https://example.com/success?session_id={CHECKOUT_SESSION_ID}',
             cancel_url: 'https://example.com/cancel',
-        });
-    })
-    .then(result => {
-        console.log(result);
-        return result;
-    })
-    .catch(error => {
+        })
+
+        return stripeSession
+
+    } catch (error) {
         console.error("Error: ", error);
         throw new functions.https.HttpsError('failed-precondition', 'Unable to verify state.');
-    });
+    }
 
 }

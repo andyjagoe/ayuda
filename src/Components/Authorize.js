@@ -53,14 +53,28 @@ export default function ConnectStripe(props) {
             console.log('The function must be called with one argument "uid".')
             return
         }
+        if (!parsed.cid) {   
+            console.log('The function must be called with one argument "cid".')
+            return
+        }
+        if (!parsed.rid) {   
+            console.log('The function must be called with one argument "rid".')
+            return
+        }
 
         console.log(parsed.uid)
         console.log(parsed.id)
+        console.log(parsed.cid)
+        console.log(parsed.rid)
         var sessionId = null
 
 
         var fetchCheckoutSession = firebase.functions().httpsCallable('fetchCheckoutSession');
-        await fetchCheckoutSession({uid: parsed.uid, id: parsed.id}).then(function(result) {
+        await fetchCheckoutSession({uid: parsed.uid, 
+                                    id: parsed.id,
+                                    cid: parsed.cid,
+                                    rid: parsed.rid
+                                    }).then(function(result) {
             console.log(result.data);
             sessionId = result.data.id
             return sessionId    

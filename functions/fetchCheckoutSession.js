@@ -89,7 +89,7 @@ exports.handler = async function(data, context, firestoreDb) {
             throw new functions.https.HttpsError('failed-precondition', 'Unable to verify state.');
         }
 
-        //Verify that customer and rate id's match those of the job/meeting doc
+        //Verify that customer id and rate id match those of the job/meeting doc
         if (jobSnap.data().payer_id !== customerSnap.id) {
             console.log("cid given doesn't match payer_id for this job") 
             throw new functions.https.HttpsError('failed-precondition', 'Unable to verify state.');
@@ -100,12 +100,6 @@ exports.handler = async function(data, context, firestoreDb) {
         }
 
 
-        const userDoc = userSnap.data();
-        const user = {
-            uid: uid,
-            name: userDoc.displayName,
-            email: userDoc.email,
-        }
         const jobRecord = jobSnap.data();
         const customerRecord = customerSnap.data();
         const rateRecord = rateSnap.data();

@@ -137,7 +137,7 @@ exports.handler = async function(data, context, firestoreDb) {
             cancel_url: 'https://ayuda.live/',
         })
 
-        return stripeSession
+        return {sessionId: stripeSession.id}
 
     } catch (error) {
         console.error("Error: ", error);

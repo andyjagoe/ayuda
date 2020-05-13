@@ -1,4 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import CssBaseline from '@material-ui/core/CssBaseline';
+import Container from '@material-ui/core/Container';
+import OnboardingAppBar from './OnboardingAppBar';
+import Grid from '@material-ui/core/Grid';
+import { makeStyles } from '@material-ui/core/styles';
 import firebase from 'firebase/app';
 import 'firebase/functions';
 import { loadStripe } from '@stripe/stripe-js';
@@ -6,12 +11,33 @@ const stripePromise = loadStripe('pk_test_SRhAdAz2m4pWUCjiCetL30r0');
 const queryString = require('query-string');
  
 
+const useStyles = makeStyles((theme) => ({
+    paper: {
+      marginTop: theme.spacing(8),
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+    },
+    avatar: {
+      margin: theme.spacing(1),
+      backgroundColor: theme.palette.secondary.main,
+    },
+    form: {
+      width: '100%', // Fix IE 11 issue.
+      marginTop: theme.spacing(3),
+    },
+    submit: {
+      margin: theme.spacing(3, 0, 2),
+    },
+  }));
 
 
-export default function Authorize(props) {
+export default function Checkout(props) {
+    const classes = useStyles();
     const parsed = queryString.parse(props.location.search);
 
-    redirectToStripe()
+    useEffect(() => { 
+    });
 
     async function redirectToStripe() {
         if (!parsed.id) {   
@@ -49,6 +75,16 @@ export default function Authorize(props) {
     }      
   
   return (
-    <React.Fragment />
+    <React.Fragment>
+        <Container component="main" maxWidth="xs">
+        <CssBaseline />
+        <div className={classes.paper}>
+            <Grid container spacing={2} style={{ padding: 40}}>
+                <Grid item xs={12}>
+                </Grid>
+            </Grid>            
+        </div>
+        </Container>
+    </React.Fragment>
   );
 }

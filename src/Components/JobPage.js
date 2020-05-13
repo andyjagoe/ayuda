@@ -148,7 +148,6 @@ const JobPage = (props) => {
       return moment(Math[method]((+date) / (+duration)) * (+duration)); 
   } 
 
-    
   // Handle password show/hide
   const handleClickShowPassword = () => {
     setValues({ ...values, showPassword: !values.showPassword });
@@ -361,6 +360,17 @@ Password: ${jobRecord.password}
                     label="Notes"
                     value={notes}
                     onChange={e => setNotes(e.target.value)}
+                />
+                </Grid>
+                <Grid item xs={12}>
+                <TextField
+                    name="status"
+                    variant="outlined"
+                    disabled
+                    fullWidth
+                    id="status"
+                    label="Status"
+                    value={jobRecord.status}
                 />
                 </Grid>
                 <Grid item xs={12}>

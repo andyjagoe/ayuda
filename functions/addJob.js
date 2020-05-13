@@ -113,7 +113,8 @@ exports.handler = function(data, context, firestoreDb, admin) {
             tz: response.data.timezone,
             start_url: response.data.start_url,
             join_url: response.data.join_url,
-            password: response.data.password                
+            password: response.data.password,
+            status: 'pending',                
         }
         return firestoreDb.collection('/users')
             .doc(uid)

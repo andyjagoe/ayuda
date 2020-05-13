@@ -137,9 +137,10 @@ exports.handler = async function(data, context, firestoreDb) {
                 }
             },
             customer: customerRecord.stripe_id,
+            client_reference_id: `${uid}|${id}`,
             submit_type:  'book',
-            success_url: 'https://example.com/success?session_id={CHECKOUT_SESSION_ID}',
-            cancel_url: 'https://example.com/cancel',
+            success_url: 'https://ayuda.live/authorize_success?session_id={CHECKOUT_SESSION_ID}',
+            cancel_url: 'https://ayuda.live/',
         })
 
         return stripeSession

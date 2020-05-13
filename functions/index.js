@@ -93,3 +93,10 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'fetchCheckoutSe
         return fetchCheckoutSession.handler(data, context, firestoreDb);
     });
 }
+
+if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'stripeCallback') {
+    const stripeCallback = require('./stripeCallback');
+    exports.stripeCallback = functions.https.onRequest((req, res) => {
+        return stripeCallback.handler(req, res, firestoreDb);
+    });
+}

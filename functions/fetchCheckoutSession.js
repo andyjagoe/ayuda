@@ -27,7 +27,6 @@ const formatRateDescription = (rateRecord) => {
 
 
 exports.handler = async function(data, context, firestoreDb) {
-    console.log(data)
 
     const id = data.id;
     const uid = data.uid;

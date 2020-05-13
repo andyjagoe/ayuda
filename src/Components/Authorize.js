@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import firebase from 'firebase/app';
 import 'firebase/functions';
 import { navigate } from "@reach/router"
@@ -11,8 +11,15 @@ const queryString = require('query-string');
 
 export default function Authorize(props) {
     const parsed = queryString.parse(props.location.search);
+    const firstRender = useRef(true)
 
-    redirectToStripe()
+    useEffect(() => {
+        if (firstRender.current) {
+          firstRender.current = false
+          redirectToStripe()
+        }        
+    })
+    
 
     async function redirectToStripe() {
         if (!parsed.id) {   

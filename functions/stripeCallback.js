@@ -3,7 +3,7 @@ const stripe = require('stripe')('sk_test_K0y591XvPNiX9UJaxdaZcSK6');
 const endpointSecret = 'whsec_wKTP8VhOGpyFV37lvjNZ5ExHoImAkq54';
 
 
-exports.handler = async function(req, res, firestoreDb) {
+exports.handler = async function(req, res, firestoreDb, admin) {
     const sig = req.headers['stripe-signature'];
 
     let event;
@@ -22,7 +22,8 @@ exports.handler = async function(req, res, firestoreDb) {
             await handleCheckoutSucceeded(
                 event.data.object.payment_intent, 
                 event.data.object.client_reference_id, 
-                firestoreDb
+                firestoreDb,
+                admin
             )
             break;
         default:
@@ -35,7 +36,7 @@ exports.handler = async function(req, res, firestoreDb) {
     
 }
 
-function handleCheckoutSucceeded(paymentIntent, client_reference_id, firestoreDb) {
+function handleCheckoutSucceeded(paymentIntent, client_reference_id, firestoreDb, admin) {
     const [uid, job_id] = client_reference_id.split('|')
     return firestoreDb.collection('/users')
     .doc(uid)
@@ -43,6 +44,7 @@ function handleCheckoutSucceeded(paymentIntent, client_reference_id, firestoreDb
     .doc(job_id)
     .set({
         payment_intent: paymentIntent,
+        payment_intent_t: admin.firestore.Timestamp.fromDate(new Date()),
         status: 'authorized'
     }, { merge: true })
     .then(ref => {

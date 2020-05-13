@@ -1,6 +1,7 @@
 import React from 'react';
 import firebase from 'firebase/app';
 import 'firebase/functions';
+import { navigate } from "@reach/router"
 import { loadStripe } from '@stripe/stripe-js';
 const stripePromise = loadStripe('pk_test_SRhAdAz2m4pWUCjiCetL30r0');
 const queryString = require('query-string');
@@ -38,11 +39,15 @@ export default function Authorize(props) {
                                         cid: parsed.cid,
                                         rid: parsed.rid
                                         });
-            const sessionId = snap.data.sessionId
-            const stripe = await stripePromise;
-            const { error } = await stripe.redirectToCheckout({
-                sessionId,
-            });
+            if (snap.data.hasValidAuth === true) {
+              navigate('/authorize_success')
+            } else {
+              const sessionId = snap.data.sessionId
+              const stripe = await stripePromise;
+              const { error } = await stripe.redirectToCheckout({
+                  sessionId,
+              });  
+            }
         } catch (error) {
             console.error("Error: ", error);
         }

@@ -105,6 +105,19 @@ exports.handler = async function(data, context, firestoreDb) {
         const rateRecord = rateSnap.data();
         const stripeRecord = stripeSnap.data();
 
+
+        //Check to see if there is already a valid paymentIntent for this job
+        if ('payment_intent' in jobRecord && 'payment_intent_t' in jobRecord) {
+            const lastValidPaymentIntent = moment().subtract(6, 'days')
+            const paymentIntentDate = moment(jobRecord.payment_intent_t.toDate())
+            if (paymentIntentDate.isAfter(lastValidPaymentIntent)) {
+                console.log('PaymentIntent still valid')
+                return {sessionId: null, hasValidAuth: true}
+            }
+        }
+    
+
+
         // Create Stripe session
         const dateDescription = formatDateDescription(jobRecord)
         const rateDescription = formatRateDescription(rateRecord)
@@ -134,10 +147,10 @@ exports.handler = async function(data, context, firestoreDb) {
             client_reference_id: `${uid}|${id}`,
             submit_type:  'book',
             success_url: 'https://ayuda.live/authorize_success?session_id={CHECKOUT_SESSION_ID}',
-            cancel_url: 'https://ayuda.live/',
+            cancel_url: 'https://ayuda.live',
         })
 
-        return {sessionId: stripeSession.id}
+        return {sessionId: stripeSession.id, hasValidAuth: false}
 
     } catch (error) {
         console.error("Error: ", error);

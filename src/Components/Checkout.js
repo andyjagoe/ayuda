@@ -2,6 +2,9 @@ import React, { useEffect } from 'react';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Container from '@material-ui/core/Container';
 import OnboardingAppBar from './OnboardingAppBar';
+import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
+import Avatar from '@material-ui/core/Avatar';
+import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import { makeStyles } from '@material-ui/core/styles';
 import firebase from 'firebase/app';
@@ -76,9 +79,16 @@ export default function Checkout(props) {
   
   return (
     <React.Fragment>
+        <OnboardingAppBar />
         <Container component="main" maxWidth="xs">
         <CssBaseline />
         <div className={classes.paper}>
+            <Avatar className={classes.avatar}>
+                <ShoppingCartIcon />
+            </Avatar>
+            <Typography component="h1" variant="h5">
+                Book a session
+            </Typography>
             <Grid container spacing={2} style={{ padding: 40}}>
                 <Grid item xs={12}>
                 </Grid>

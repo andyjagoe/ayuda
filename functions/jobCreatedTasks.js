@@ -57,7 +57,8 @@ exports.handler = function(snapshot, context, firestoreDb, emailHandler) {
     .then(result => {
         //console.log('Add job email sent to client');
         const validToAuthDate = moment(jobDoc.t.toDate()).subtract(6, 'days') // Auth valid  up to 7 days
-        if (moment().isAfter(validToAuthDate)) {
+        // Only send auth email if job  is with in 6 days and is not zero rate
+        if (moment().isAfter(validToAuthDate) && rateDoc.rate !== 0) {
             return emailHandler.sendAuthorizeJobClientEmail(user, jobDoc, customerDoc, rateDoc);    
         }
         return true;

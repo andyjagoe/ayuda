@@ -164,9 +164,6 @@ const sendAddJobClientEmail = (user, jobRecord, customerDoc, rateDoc) => {
 
 
 const sendAuthorizeJobClientEmail = (user, jobRecord, customerDoc, rateDoc) => {
-    //const start = moment.unix(jobRecord.t.seconds)
-    //const end = moment.unix(jobRecord.t.seconds).add(jobRecord.d, 'minutes')
-
 
     const authorize_job_client = {
         template: "authorize-job-client",

@@ -12,6 +12,7 @@ import AddJobPage from "./AddJobPage";
 import LoadingPage from "./LoadingPage";
 import Authorize from "./Authorize";
 import Checkout from "./Checkout";
+import Error from "./Error";
 import AuthorizeSuccess from "./AuthorizeSuccess";
 import { UserContext } from "../providers/UserProvider";
 
@@ -35,6 +36,7 @@ function Application() {
       <Authorize path="/authorize" />
       <AuthorizeSuccess path="/authorize_success" />
       <Checkout path="/checkout" />
+      <Error path="/error" />
     </Router>
   :      
     <Router>
@@ -42,6 +44,7 @@ function Application() {
       <Authorize path="/authorize" />
       <AuthorizeSuccess path="/authorize_success" />
       <Checkout path="/checkout" />
+      <Error path="/error" />
     </Router>
   );
 }

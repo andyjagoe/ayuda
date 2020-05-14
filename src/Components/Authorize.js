@@ -57,6 +57,7 @@ export default function Authorize(props) {
             }
         } catch (error) {
             console.error("Error: ", error);
+            navigate('/error', { state: { error: error } })
         }
     }      
   

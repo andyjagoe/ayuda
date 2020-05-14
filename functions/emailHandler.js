@@ -136,12 +136,40 @@ const sendAddJobProviderEmail = (user, jobRecord, customerDoc, rateDoc) => {
 
 
 const sendAddJobClientEmail = (user, jobRecord, customerDoc, rateDoc) => {
+
+    const add_job_client = {
+        template: "add-job-client",
+        message: {
+            to: formatToName({
+                name: customerDoc.name,
+                email: customerDoc.email
+            }),
+            icalEvent: {
+                filename: 'invite.ics',
+                content: calendarHandler.generateICal(user, jobRecord, null)
+            },
+        },
+        locals: {                 
+            name: user.name,
+            product_name: productName,
+            support_email: supportEmail,
+            preheader: `${user.name} has invited you to an ${productName} meeting`,
+            current_job_doc: formatJobDoc(jobRecord, customerDoc, rateDoc),
+            calendar_links: getCalendarLinks(user, jobRecord),
+        },        
+    }
+
+    return email.send(add_job_client)
+}
+
+
+const sendAuthorizeJobClientEmail = (user, jobRecord, customerDoc, rateDoc) => {
     const start = moment.unix(jobRecord.t.seconds)
     const end = moment.unix(jobRecord.t.seconds).add(jobRecord.d, 'minutes')
 
 
-    const add_job_client = {
-        template: "add-job-client",
+    const authorize_job_client = {
+        template: "authorize-job-client",
         message: {
             to: formatToName({
                 name: customerDoc.name,
@@ -168,9 +196,8 @@ const sendAddJobClientEmail = (user, jobRecord, customerDoc, rateDoc) => {
         },        
     }
 
-    return email.send(add_job_client)
+    return email.send(authorize_job_client)
 }
-
 
 const sendChangeJobProviderEmail = (
         user, 
@@ -236,4 +263,5 @@ module.exports = {
     sendAddJobClientEmail,
     sendChangeJobProviderEmail,
     sendCancelJobProviderEmail,
+    sendAuthorizeJobClientEmail,
 }

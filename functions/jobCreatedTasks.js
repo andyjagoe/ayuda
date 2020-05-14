@@ -1,3 +1,4 @@
+const moment = require('moment');
 
 exports.handler = function(snapshot, context, firestoreDb, emailHandler) {
     const uid = context.params.uid;    
@@ -54,7 +55,11 @@ exports.handler = function(snapshot, context, firestoreDb, emailHandler) {
         return emailHandler.sendAddJobClientEmail(user, jobDoc, customerDoc, rateDoc);
     })
     .then(result => {
-        //console.log('Add job email has been sent to client');        
+        //console.log('Add job email sent to client');
+        const validToAuthDate = moment(jobDoc.t.toDate()).subtract(6, 'days') // Auth valid  up to 7 days
+        if (moment().isAfter(validToAuthDate)) {
+            return emailHandler.sendAuthorizeJobClientEmail(user, jobDoc, customerDoc, rateDoc);    
+        }
         return true;
     })
     .catch(error => {

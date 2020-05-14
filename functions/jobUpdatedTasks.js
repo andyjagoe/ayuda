@@ -14,7 +14,7 @@ exports.handler = function(change, context, firestoreDb, emailHandler) {
         return false
     }
     
-    // Check is user facing values changed. If yes, trigger update emails
+    // Check if user facing values changed. If yes, trigger update emails
     const oldValues = {
         agenda: currentJobDoc.agenda,
         d: currentJobDoc.d,
@@ -42,7 +42,7 @@ exports.handler = function(change, context, firestoreDb, emailHandler) {
         tz: newJobDoc.tz,
     }
     if (_.isEqual(oldValues, newValues)) {
-        // No values that should trigger an email update changed
+        // No values that should trigger an email update have changed
         return false
     }
 

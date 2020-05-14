@@ -1,8 +1,9 @@
 <%- include('../html-header.ejs') %>
 
                       <div class="f-fallback">
-                        <h1>Hi, <%= customer_name %>!</h1>
-                        <p><%= name %> has invited you to an <%= product_name %> meeting. You must authorize the charge for this meeting or it will be cancelled.</p>
+                        <h1>Hi, <%= current_job_doc.customer_name %>!</h1>
+                        <p><%= name %> scheduled a session for you as a Zoom meeting:</p>
+
                         <!-- Action -->
                         <table class="body-action" align="center" width="100%" cellpadding="0" cellspacing="0" role="presentation">
                           <tr>
@@ -10,7 +11,7 @@
                               <table width="100%" border="0" cellspacing="0" cellpadding="0" role="presentation">
                                 <tr>
                                   <td align="center">
-                                    <a href="<%= action_url %>" class="f-fallback button" target="_blank">Book Now</a>
+                                    <a href="<%= current_job_doc.join_url %>" class="f-fallback button" target="_blank">Join Meeting</a>
                                   </td>
                                 </tr>
                               </table>
@@ -25,35 +26,49 @@
                                   <tr>
                                     <td class="attributes_item">
                                       <span class="f-fallback">
-                                        <strong>Topic:</strong> <%= topic %> 
+                                        <strong>Topic:</strong> <%= current_job_doc.topic %>
                                       </span>
                                     </td>
                                   </tr>
                                   <tr>
                                     <td class="attributes_item">
                                       <span class="f-fallback">
-                                        <strong>Time:</strong> <%= job_date_time %> 
+                                        <strong>Time:</strong> <%= current_job_doc.job_date_time %> 
                                       </span>
                                     </td>
                                   </tr>
                                   <tr>
                                     <td class="attributes_item">
                                       <span class="f-fallback">
-                                        <strong>Duration:</strong> <%= duration %> 
+                                        <strong>Duration:</strong> <%= current_job_doc.duration %> 
                                       </span>
                                     </td>
                                   </tr>
                                   <tr>
                                     <td class="attributes_item">
                                       <span class="f-fallback">
-                                        <strong>Hourly Rate:</strong> <%= rate %> 
+                                        <strong>Hourly Rate:</strong> <%= current_job_doc.rate_name %> 
                                       </span>
                                     </td>
                                   </tr>
                                   <tr>
                                     <td class="attributes_item">
                                       <span class="f-fallback">
-                                        <strong>Notes:</strong> <%= notes %> 
+                                        <strong>Meeting ID:</strong> <%= current_job_doc.id %> 
+                                      </span>
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <td class="attributes_item">
+                                      <span class="f-fallback">
+                                        <strong>Password:</strong> <%= current_job_doc.password %> 
+                                      </span>
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <td class="attributes_item">
+                                      <span class="f-fallback">
+                                        <strong>Notes:</strong> <%= current_job_doc.agenda %> 
                                       </span>
                                     </td>
                                   </tr>
@@ -62,11 +77,32 @@
                             </tr>
                           </table>
 
-                          <p>Cancel any time. You won't be billed until the meeting is complete.</p>
-                          <p>If you have any questions, please <a href="mailto:<%= support_email %>">email our customer success team</a>.</p>
+                        <p>If you have any questions, please <a href="mailto:<%= support_email %>">email our customer success team</a>.</p>
                         <p>Thanks,
                           <br>The <%= product_name %> Team</p>
-                          
+                        
+                        <!-- Sub copy -->
+                        <table class="body-sub" role="presentation">
+                          <tr>
+                            <td>
+                                <p class="f-fallback sub align-center"><a href="<%= calendar_links.google_url %>">Google Calendar</a></p>
+                            </td>
+                            <td>
+                                <p class="f-fallback sub align-center"><a href="<%= calendar_links.ics_url %>">Apple Calendar</a></p>
+                            </td>
+                            <td>
+                                <p class="f-fallback sub align-center"><a href="<%= calendar_links.outlook_url %>">Microsoft Outlook</a></p>
+                            </td>
+                            <td>
+                                <p class="f-fallback sub align-center"><a href="<%= calendar_links.yahoo_url %>">Yahoo! Calendar</a></p>
+                            </td>
+                            <td>
+                                <p class="f-fallback sub align-center"><a href="<%= calendar_links.download_url %>">Download Invite (.ics)</a></p>
+                            </td>
+                          </tr>
+                        </table>
+  
                       </div>
+
 
 <%- include('../html-footer.ejs') %>

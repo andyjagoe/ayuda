@@ -46,6 +46,7 @@ export default function Error(props) {
             return
         }
         setErrorMessage(err.message)
+        console.log(err)
     }
   
   return (

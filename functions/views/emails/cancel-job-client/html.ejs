@@ -1,0 +1,43 @@
+<%- include('../html-header.ejs') %>
+
+                      <div class="f-fallback">
+                        <h1>Hi, <%= current_job_doc.customer_name %>!</h1>
+                        <p>Your session with <%= name %> has been cancelled.</p>
+                        
+                        <table class="attributes" width="100%" cellpadding="0" cellspacing="0" role="presentation">
+                            <tr>
+                              <td class="attributes_content">
+                                <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+                                  <tr>
+                                    <td class="attributes_item">
+                                      <span class="f-fallback">
+                                        <strong>Topic:</strong> <del><%= current_job_doc.topic %></del>
+                                      </span>
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <td class="attributes_item">
+                                      <span class="f-fallback">
+                                        <strong>Time:</strong> <del><%= current_job_doc.job_date_time %></del> 
+                                      </span>
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <td class="attributes_item">
+                                      <span class="f-fallback">
+                                        <strong>Duration:</strong> <del><%= current_job_doc.duration %></del> 
+                                      </span>
+                                    </td>
+                                  </tr>        
+                                </table>
+                              </td>
+                            </tr>
+                      </table>
+
+                        <p>If you have any questions, please <a href="mailto:<%= support_email %>">email our customer success team</a>.</p>
+                        <p>Thanks,
+                          <br>The <%= product_name %> Team</p>
+                          
+                      </div>
+
+<%- include('../html-footer.ejs') %>

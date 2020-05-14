@@ -48,8 +48,8 @@ exports.handler = function(snapshot, context, firestoreDb, emailHandler) {
         return emailHandler.sendCancelJobProviderEmail(user, jobDoc, customerDoc, rateDoc);
     })
     .then(result => {
-        //console.log('Add job email has been sent to client');        
-        return true;
+        //console.log('Cancel job email has been sent to provider');        
+        return emailHandler.sendCancelJobClientEmail(user, jobDoc, customerDoc, rateDoc);
     })
     .catch(error => {
         console.error("Error: ", error);

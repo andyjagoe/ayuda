@@ -180,7 +180,7 @@ const sendAuthorizeJobClientEmail = (user, jobRecord, customerDoc, rateDoc) => {
             name: user.name,
             product_name: productName,
             support_email: supportEmail,
-            preheader: `${user.name} has invited you to an ${productName} meeting`,
+            preheader: `Billing details are required to hold your appointment with ${user.name}.`,
             email: customerDoc.email, 
             customer_name: customerDoc.name,
             action_url: `https://ayuda.live/authorize?id=${jobRecord.ref_id}` 
@@ -221,7 +221,7 @@ const sendChangeJobProviderEmail = (
             name: user.name,
             product_name: productName,
             support_email: supportEmail,
-            preheader: 'Your job has been scheduled and the Zoom meeting details are below.',
+            preheader: `Your job for has been updated.`,
             current_job_doc: formatJobDoc(currentJobDoc, currentCustomerDoc, currentRateDoc),
             new_job_doc: formatJobDoc(newJobDoc, newCustomerDoc, newRateDoc),
             job_url: `https://ayuda.live/job/${currentJobDoc.ref_id}`,
@@ -230,6 +230,42 @@ const sendChangeJobProviderEmail = (
     }
 
     return email.send(change_job_provider)
+}
+
+
+const sendChangeJobClientEmail = (
+    user, 
+    currentJobDoc, 
+    newJobDoc, 
+    currentCustomerDoc, 
+    newCustomerDoc,
+    currentRateDoc,
+    newRateDoc
+) => {
+const change_job_client = {
+    template: "change-job-client",
+    message: {
+        to: formatToName({
+            name: currentCustomerDoc.name,
+            email: currentCustomerDoc.email
+        }),
+        icalEvent: {
+            filename: 'invite.ics',
+            content: calendarHandler.generateICal(user, newJobDoc, null)
+        },
+    },
+    locals: {                 
+        name: user.name,
+        product_name: productName,
+        support_email: supportEmail,
+        preheader: `Your session with ${user.name} has been updated.`,
+        current_job_doc: formatJobDoc(currentJobDoc, currentCustomerDoc, currentRateDoc),
+        new_job_doc: formatJobDoc(newJobDoc, newCustomerDoc, newRateDoc),
+        calendar_links: getCalendarLinks(user, newJobDoc),
+    },  
+}
+
+return email.send(change_job_client)
 }
 
 
@@ -257,11 +293,40 @@ const sendCancelJobProviderEmail = (user, jobRecord, customerDoc, rateDoc) => {
 }
 
 
+const sendCancelJobClientEmail = (user, jobRecord, customerDoc, rateDoc) => {
+    const cancel_job_client = {
+        template: "cancel-job-client",
+        message: {
+            to: formatToName({
+                name: customerDoc.name,
+                email: customerDoc.email
+            }),
+            icalEvent: {
+                filename: 'invite.ics',
+                method: 'cancel',
+                content: calendarHandler.generateICal(user, jobRecord, 'cancel')
+            },
+        },
+        locals: {                 
+            name: user.name,
+            product_name: productName,
+            support_email: supportEmail,
+            preheader: `Your job with ${user.name} has been cancelled.`,
+            current_job_doc: formatJobDoc(jobRecord, customerDoc, rateDoc),
+        },        
+    }
+
+    return email.send(cancel_job_client)
+}
+
+
 module.exports = {
     sendWelcomeEmail,
     sendAddJobProviderEmail,
     sendAddJobClientEmail,
-    sendChangeJobProviderEmail,
-    sendCancelJobProviderEmail,
     sendAuthorizeJobClientEmail,
+    sendChangeJobProviderEmail,
+    sendChangeJobClientEmail,
+    sendCancelJobProviderEmail,
+    sendCancelJobClientEmail,
 }

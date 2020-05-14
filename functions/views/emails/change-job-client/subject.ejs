@@ -1,0 +1,5 @@
+<% if(current_job_doc.customer_name != new_job_doc.customer_name) { %>
+    <%= name %> re-scheduled for <%= new_job_doc.job_date_time %> 
+<% } else { %>
+    Your session with <%= name %> on <%= current_job_doc.job_date_time %> has been updated
+<% } %>

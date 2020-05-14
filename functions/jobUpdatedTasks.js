@@ -2,7 +2,7 @@
 const _ = require('lodash/core');
 
 
-exports.handler = function(change, context, firestoreDb, emailHandler) {
+exports.handler = async function(change, context, firestoreDb, emailHandler) {
     var currentJobDoc = change.before.data();
     var newJobDoc = change.after.data();
 
@@ -128,8 +128,29 @@ exports.handler = function(change, context, firestoreDb, emailHandler) {
         );
     })
     .then(result => {
-        console.log('Update job email has been sent to provider');        
-        return true;
+        //console.log('Update job email has been sent to provider');
+        if  (currentJobDoc.payer_id !== newJobDoc.payer_id) {
+            // If customer was switched, send new job notice to new customer
+            return emailHandler.sendAddJobClientEmail(user, newJobDoc, newCustomerDoc, newRateDoc);
+        } else {
+            return emailHandler.sendChangeJobClientEmail(
+                user, 
+                currentJobDoc,
+                newJobDoc,
+                currentCustomerDoc, 
+                newCustomerDoc,
+                currentRateDoc,
+                newRateDoc
+            );
+        }     
+    })
+    .then(result  => {
+        if  (currentJobDoc.payer_id !== newJobDoc.payer_id) {
+            // If customer was switched, send cancel notice to old customer
+            return emailHandler.sendCancelJobClientEmail(user, currentJobDoc, currentCustomerDoc, currentRateDoc);    
+        } else {
+            return true
+        }
     })
     .catch(error => {
         console.error("Error: ", error);

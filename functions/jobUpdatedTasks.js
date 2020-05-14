@@ -1,19 +1,93 @@
-
 const _ = require('lodash/core');
+
+
+async function getSnaps(uid, currentJobDoc, newJobDoc, firestoreDb) {
+    try {
+        const [
+            userSnap,
+            currentCustomerSnap,
+            newCustomerSnap,
+            currentRateSnap,
+            newRateSnap        
+        ] = await Promise.all([
+            firestoreDb.collection('/users').doc(uid).get(),
+            firestoreDb.collection('/users').doc(uid).collection('customers').doc(currentJobDoc.payer_id).get(),
+            firestoreDb.collection('/users').doc(uid).collection('customers').doc(newJobDoc.payer_id).get(),
+            firestoreDb.collection('/users').doc(uid).collection('rates').doc(currentJobDoc.rate_id).get(),
+            firestoreDb.collection('/users').doc(uid).collection('rates').doc(newJobDoc.rate_id).get(),
+        ])
+
+        // check for empty documents
+        if (!userSnap.exists) {
+            console.log('No such user!')
+            return false
+        }
+        if (!currentCustomerSnap.exists) {
+            console.log('No such customer (current)!') 
+            return false
+        }
+        if (!newCustomerSnap.exists) {
+            console.log('No such customer (new)!') 
+            return false
+        }
+        if (!currentRateSnap.exists) {
+            console.log('No such rate (current)!') 
+            return false
+        }
+        if (!newRateSnap.exists) {
+            console.log('No such rate (new)!') 
+            return false
+        }
+
+        const user = {
+            uid: uid,
+            name: userSnap.data().displayName,
+            email: userSnap.data().email,
+        }    
+
+        return {
+            user: user,
+            userDoc: userSnap.data(),
+            currentCustomerDoc: currentCustomerSnap.data(),
+            newCustomerDoc: newCustomerSnap.data(),
+            currentRateDoc: currentRateSnap.data(),
+            newRateDoc: newRateSnap.data(),
+        }
+    } catch (error) {
+        console.error("Error: ", error);
+        return false
+    }
+}
+
 
 
 exports.handler = async function(change, context, firestoreDb, emailHandler) {
     var currentJobDoc = change.before.data();
     var newJobDoc = change.after.data();
+    currentJobDoc.ref_id = context.params.meeting_id
+    newJobDoc.ref_id = context.params.meeting_id
+    const uid = context.params.uid;    
+
 
     // Check to see if this is a pending job that has been authorized
     if (currentJobDoc.status === 'pending' && newJobDoc.status === 'authorized') {
         console.log(`Authorization of pending job. PaymentIntent: ${newJobDoc.payment_intent}`)
 
-        //TODO: check validity of payment intent and send emails to provider and client
-        return false
+        //TODO: do we need to check validity of payment intent?
+        try {
+            const { user, newCustomerDoc, newRateDoc 
+            } = await getSnaps( uid, currentJobDoc, newJobDoc, firestoreDb)
+
+            await emailHandler.sendConfirmedJobClientEmail(user, newJobDoc, newCustomerDoc, newRateDoc)
+            await emailHandler.sendConfirmedJobProviderEmail(user, newJobDoc, newCustomerDoc, newRateDoc);
+            return true           
+        } catch (error) {
+            console.error("Error: ", error);
+            return false
+        }   
     }
     
+
     // Check if user facing values changed. If yes, trigger update emails
     const oldValues = {
         agenda: currentJobDoc.agenda,
@@ -46,78 +120,16 @@ exports.handler = async function(change, context, firestoreDb, emailHandler) {
         return false
     }
 
-    const uid = context.params.uid;    
-    const user = {
-        uid: uid
-    }
 
-    currentJobDoc.ref_id = context.params.meeting_id
-    newJobDoc.ref_id = context.params.meeting_id
-    var currentCustomerDoc = null;
-    var newCustomerDoc = null;
-    var currentRateDoc = null;
-    var newRateDoc = null;
+    try {
+        const { user,
+                currentCustomerDoc, 
+                newCustomerDoc, 
+                currentRateDoc, 
+                newRateDoc
+        } = await getSnaps( uid, currentJobDoc, newJobDoc, firestoreDb)
 
-    return firestoreDb.collection('/users')
-    .doc(uid)
-    .get()
-    .then(doc => {
-        if (!doc.exists) {
-            console.log('No such user!');
-            return false;
-        }
-        const userDoc = doc.data();
-        user.name = userDoc.displayName;
-        user.email = userDoc.email
-        return firestoreDb.collection('/users')
-            .doc(uid)
-            .collection('customers')
-            .doc(currentJobDoc.payer_id)
-            .get();
-    })
-    .then(doc => {
-        if (!doc.exists) {
-            console.log('No such customer!');
-            return false;
-        }
-        currentCustomerDoc = doc.data();
-        return firestoreDb.collection('/users')
-            .doc(uid)
-            .collection('customers')
-            .doc(newJobDoc.payer_id)
-            .get();
-    })
-    .then(doc => {
-        if (!doc.exists) {
-            console.log('No such customer!');
-            return false;
-        }
-        newCustomerDoc = doc.data();
-        return firestoreDb.collection('/users')
-            .doc(uid)
-            .collection('rates')
-            .doc(currentJobDoc.rate_id)
-            .get();
-    })
-    .then(doc => {
-        if (!doc.exists) {
-            console.log('No such customer!');
-            return false;
-        }
-        currentRateDoc = doc.data();
-        return firestoreDb.collection('/users')
-            .doc(uid)
-            .collection('rates')
-            .doc(newJobDoc.rate_id)
-            .get();
-    })
-    .then(doc => {
-        if (!doc.exists) {
-            console.log('No such rate!');
-            return false;
-        }
-        newRateDoc = doc.data();
-        return emailHandler.sendChangeJobProviderEmail(
+        await emailHandler.sendChangeJobProviderEmail(
             user, 
             currentJobDoc,
             newJobDoc,
@@ -126,14 +138,13 @@ exports.handler = async function(change, context, firestoreDb, emailHandler) {
             currentRateDoc,
             newRateDoc
         );
-    })
-    .then(result => {
-        //console.log('Update job email has been sent to provider');
+
         if  (currentJobDoc.payer_id !== newJobDoc.payer_id) {
             // If customer was switched, send new job notice to new customer
-            return emailHandler.sendAddJobClientEmail(user, newJobDoc, newCustomerDoc, newRateDoc);
+            await emailHandler.sendAddJobClientEmail(user, newJobDoc, newCustomerDoc, newRateDoc);
+            await emailHandler.sendCancelJobClientEmail(user, currentJobDoc, currentCustomerDoc, currentRateDoc);
         } else {
-            return emailHandler.sendChangeJobClientEmail(
+            await emailHandler.sendChangeJobClientEmail(
                 user, 
                 currentJobDoc,
                 newJobDoc,
@@ -142,19 +153,12 @@ exports.handler = async function(change, context, firestoreDb, emailHandler) {
                 currentRateDoc,
                 newRateDoc
             );
-        }     
-    })
-    .then(result  => {
-        if  (currentJobDoc.payer_id !== newJobDoc.payer_id) {
-            // If customer was switched, send cancel notice to old customer
-            return emailHandler.sendCancelJobClientEmail(user, currentJobDoc, currentCustomerDoc, currentRateDoc);    
-        } else {
-            return true
-        }
-    })
-    .catch(error => {
+        } 
+    } catch (error) {
         console.error("Error: ", error);
-        return false;
-    });
+        return false
+    }
 
+
+    return true
 }

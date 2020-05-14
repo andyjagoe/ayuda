@@ -164,8 +164,8 @@ const sendAddJobClientEmail = (user, jobRecord, customerDoc, rateDoc) => {
 
 
 const sendAuthorizeJobClientEmail = (user, jobRecord, customerDoc, rateDoc) => {
-    const start = moment.unix(jobRecord.t.seconds)
-    const end = moment.unix(jobRecord.t.seconds).add(jobRecord.d, 'minutes')
+    //const start = moment.unix(jobRecord.t.seconds)
+    //const end = moment.unix(jobRecord.t.seconds).add(jobRecord.d, 'minutes')
 
 
     const authorize_job_client = {
@@ -320,6 +320,58 @@ const sendCancelJobClientEmail = (user, jobRecord, customerDoc, rateDoc) => {
 }
 
 
+const sendConfirmedJobProviderEmail = (user, jobRecord, customerDoc, rateDoc) => {
+    const confirmed_job_provider = {
+        template: "confirmed-job-provider",
+        message: {
+            to: formatToName(user),
+            icalEvent: {
+                filename: 'invite.ics',
+                content: calendarHandler.generateICal(user, jobRecord, null)
+            },
+        },
+        locals: {                 
+            name: user.name,
+            product_name: productName,
+            support_email: supportEmail,
+            preheader: `Your job for ${customerDoc.name} has been confirmed.`,
+            current_job_doc: formatJobDoc(jobRecord, customerDoc, rateDoc),
+            job_url: `https://ayuda.live/job/${jobRecord.ref_id}`,
+            calendar_links: getCalendarLinks(user, jobRecord),
+        },        
+    }
+
+    return email.send(confirmed_job_provider)
+}
+
+
+const sendConfirmedJobClientEmail = (user, jobRecord, customerDoc, rateDoc) => {
+    const confirmed_job_client = {
+        template: "confirmed-job-client",
+        message: {
+            to: formatToName({
+                name: customerDoc.name,
+                email: customerDoc.email
+            }),
+            icalEvent: {
+                filename: 'invite.ics',
+                content: calendarHandler.generateICal(user, jobRecord, null)
+            },
+        },
+        locals: {                 
+            name: user.name,
+            product_name: productName,
+            support_email: supportEmail,
+            preheader: `Your job with ${user.name} has been confirmed.`,
+            current_job_doc: formatJobDoc(jobRecord, customerDoc, rateDoc),
+            calendar_links: getCalendarLinks(user, jobRecord),
+        },        
+    }
+
+    return email.send(confirmed_job_client)
+}
+
+
 module.exports = {
     sendWelcomeEmail,
     sendAddJobProviderEmail,
@@ -329,4 +381,6 @@ module.exports = {
     sendChangeJobClientEmail,
     sendCancelJobProviderEmail,
     sendCancelJobClientEmail,
+    sendConfirmedJobProviderEmail,
+    sendConfirmedJobClientEmail,
 }

@@ -1,4 +1,8 @@
 const moment = require('moment');
+// Values needed for Google Cloud Tasks
+const project = 'ayuda-9ea45';
+const queue = 'reminders';
+const location = 'us-central1';
 
 
 async function getSnaps(uid, jobDoc, firestoreDb) {
@@ -52,7 +56,39 @@ async function getSnaps(uid, jobDoc, firestoreDb) {
 }
 
 
-exports.handler = async function(snapshot, context, firestoreDb, emailHandler, admin) {
+async function createTask(client) {
+    const payload = {data: 'hello world!!!'};
+    const inSeconds = 60;
+
+    // Construct the fully qualified queue name.
+    const parent = client.queuePath(project, location, queue);
+    const url = `https://${location}-${project}.cloudfunctions.net/sendReminderCallback`
+
+    const task = {
+        httpRequest: {
+          httpMethod: 'POST',
+          url,
+          body: Buffer.from(JSON.stringify(payload)).toString('base64'),
+          
+          headers: {
+            'Content-Type': 'application/json',
+          },          
+        },
+        scheduleTime: {
+          seconds: inSeconds + Date.now() / 1000,
+        }
+    }
+
+    const request = {parent, task};
+    const [response] = await client.createTask(request);
+    const name = response.name;
+    //console.log(`Created task ${name}`);
+
+    return name
+}
+
+
+exports.handler = async function(snapshot, context, firestoreDb, emailHandler, admin, cloudTasksClient) {
     const uid = context.params.uid;    
 
     jobDoc = snapshot.data();
@@ -77,6 +113,8 @@ exports.handler = async function(snapshot, context, firestoreDb, emailHandler, a
                     last_auth_email: admin.firestore.Timestamp.fromDate(new Date())
                 }, { merge: true })
         }
+
+        await createTask(cloudTasksClient)
 
         return true           
 

@@ -10,9 +10,10 @@
     "logs": "firebase functions:log"
   },
   "engines": {
-    "node": "8"
+    "node": "10"
   },
   "dependencies": {
+    "@google-cloud/tasks": "^2.0.0",
     "aws-sdk": "^2.670.0",
     "axios": "^0.19.2",
     "calendar-link": "^1.2.5",

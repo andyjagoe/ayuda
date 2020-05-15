@@ -1,7 +1,7 @@
 var moment = require('moment-timezone');
 const functions = require('firebase-functions');
 const axios = require('axios');
-const zoomToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOm51bGwsImlzcyI6IkFUZ2l2aEhuUUh5SDlYOXE0Z0E3aHciLCJleHAiOjE1ODk1MDk0ODAsImlhdCI6MTU4ODkwNDY4MH0.pols3IekbCUqEBgqK4Hf_CNPt0QrY2feZKmsiY7Yir8';
+const zoomToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOm51bGwsImlzcyI6IkFUZ2l2aEhuUUh5SDlYOXE0Z0E3aHciLCJleHAiOjE1OTAxMTgzNjUsImlhdCI6MTU4OTUxMzU2NX0.c217fUqdDN4ZVMqM2otRKMxiv3aB_gYOYnV7pzL3Xhk';
 
 
 function generatePassword() {

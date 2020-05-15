@@ -1,16 +1,17 @@
 const admin = require('firebase-admin');
 const functions = require('firebase-functions');
+const {CloudTasksClient} = require('@google-cloud/tasks');
 admin.initializeApp(functions.config().firebase);
-const database = admin.database();
 const emailHandler = require('./emailHandler');
 const calendarHandler = require('./calendarHandler');
+const cloudTasksClient = new CloudTasksClient();
 var firestoreDb = admin.firestore();
 
 
 if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'newUserSignup') {
     const newUserSignup = require('./newUserSignup');
     exports.newUserSignup = functions.auth.user().onCreate((event) => {
-        return newUserSignup.handler(event, database, firestoreDb, admin);
+        return newUserSignup.handler(event, firestoreDb, admin);
     });
 }
 
@@ -53,7 +54,7 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'jobCreatedTasks
     const jobCreatedTasks = require('./jobCreatedTasks');
     exports.jobCreatedTasks = functions.firestore.document('/users/{uid}/meetings/{meeting_id}')
     .onCreate((snapshot, context) => {    
-        return jobCreatedTasks.handler(snapshot, context, firestoreDb, emailHandler, admin);
+        return jobCreatedTasks.handler(snapshot, context, firestoreDb, emailHandler, admin, cloudTasksClient);
     });
 }
 
@@ -91,6 +92,13 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'fetchCheckoutSe
     const fetchCheckoutSession = require('./fetchCheckoutSession');
     exports.fetchCheckoutSession = functions.https.onCall((data, context) => {
         return fetchCheckoutSession.handler(data, context, firestoreDb);
+    });
+}
+
+if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'sendReminderCallback') {
+    const sendReminderCallback = require('./sendReminderCallback');
+    exports.sendReminderCallback = functions.https.onRequest((req, res) => {
+        return sendReminderCallback.handler(req, res, firestoreDb, admin);
     });
 }
 

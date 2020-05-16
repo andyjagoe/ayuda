@@ -25,11 +25,11 @@ const trackReminder = async (uid, id, taskName, type, firestoreDb) => {
 
 
 const setMeetingReminders = async (user, jobId, jobTimeInSeconds, firestoreDb) => {
-    const thirtyMinPayload = {  type: 'reminder.30min',
+    const thirtyMinPayload = {  type: 'reminder.meeting.30min',
                                 data: {uid: user.uid, id: jobId}
                             }
     const thirtyMinInSeconds = moment(jobTimeInSeconds.toDate()).subtract(30, 'minutes')
-    const oneDayPayload = {  type: 'reminder.24hour',
+    const oneDayPayload = {  type: 'reminder.meeting.24hour',
                                 data: {uid: user.uid, id: jobId}
                             }
     const oneDayInSeconds = moment(jobTimeInSeconds.toDate()).subtract(24, 'hours')
@@ -52,12 +52,33 @@ const setMeetingReminders = async (user, jobId, jobTimeInSeconds, firestoreDb) =
 }
 
 
-const setAuthorizationReminders = async (payload, inSeconds) => {
-    // 6 day reminder
+const setAuthorizationReminders = async (user, jobId, jobTimeInSeconds, firestoreDb) => {
+    const sixDayPayload = { type: 'reminder.auth.6day', data: {uid: user.uid, id: jobId}}
+    const sixDayInSeconds = moment(jobTimeInSeconds.toDate()).subtract(6, 'days')
+    const fourDayPayload = {  type: 'reminder.auth.4day', data: {uid: user.uid, id: jobId}}
+    const fourDayInSeconds = moment(jobTimeInSeconds.toDate()).subtract(4, 'days')
+    const twoDayPayload = {  type: 'reminder.auth.2day', data: {uid: user.uid, id: jobId}}
+    const twoDayInSeconds = moment(jobTimeInSeconds.toDate()).subtract(2, 'days')
 
-    // 4 day reminder
+    try {
+        if (moment().isBefore(sixDayInSeconds)) {
+            const sixDayTaskName = await addTask(sixDayPayload, sixDayInSeconds.unix())
+            await trackReminder (user.uid, jobId, sixDayTaskName, sixDayPayload.type, firestoreDb)
+        }
+        if (moment().isBefore(fourDayInSeconds)) {
+            const fourDayTaskName = await addTask(fourDayPayload, fourDayInSeconds.unix())
+            await trackReminder (user.uid, jobId, fourDayTaskName, fourDayPayload.type, firestoreDb)
+        }
+        if (moment().isBefore(twoDayInSeconds)) {
+            const twoDayTaskName = await addTask(twoDayPayload, twoDayInSeconds.unix())
+            await trackReminder (user.uid, jobId, twoDayTaskName, twoDayPayload.type, firestoreDb)
+        }
 
-    // 2 day reminder
+        return true
+    } catch (error) {
+        console.error(error.message);
+        return false
+    }
 
 }
 

@@ -69,7 +69,8 @@ exports.handler = async function(snapshot, context, firestoreDb, emailHandler, a
             await emailHandler.sendAuthorizeJobClientEmail(user, jobDoc, customerDoc, rateDoc);
         }
         await taskHandler.setMeetingReminders(user, jobDoc.ref_id, jobDoc.t, firestoreDb)
-
+        await taskHandler.setAuthorizationReminders(user, jobDoc.ref_id, jobDoc.t, firestoreDb)
+        
         return true           
 
     } catch (error) {

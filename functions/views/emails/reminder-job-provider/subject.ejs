@@ -1,0 +1,7 @@
+<% if(type === '30min') { %>
+    Your meeting with <%= current_job_doc.customer_name %> is starting in 30 minutes
+<% } else if(type === '24hour') { %>
+    Your meeting with <%= current_job_doc.customer_name %> is starting in 24 hours
+<% } else { %>
+    Reminder: <%= current_job_doc.customer_name %> scheduled for <%= current_job_doc.job_date_time %>
+<% } %>

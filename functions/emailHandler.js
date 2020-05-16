@@ -369,6 +369,61 @@ const sendConfirmedJobClientEmail = (user, jobRecord, customerDoc, rateDoc) => {
 }
 
 
+const sendReminderJobProviderEmail = (user, jobRecord, customerDoc, rateDoc, type) => {
+    const reminder_job_provider = {
+        template: "reminder-job-provider",
+        message: {
+            to: formatToName(user),
+            icalEvent: {
+                filename: 'invite.ics',
+                content: calendarHandler.generateICal(user, jobRecord, null)
+            },
+        },
+        locals: {                 
+            name: user.name,
+            product_name: productName,
+            support_email: supportEmail,
+            preheader: `Your job for ${customerDoc.name} has been confirmed.`,
+            current_job_doc: formatJobDoc(jobRecord, customerDoc, rateDoc),
+            type: type,
+            job_url: `https://ayuda.live/job/${jobRecord.ref_id}`,
+            calendar_links: getCalendarLinks(user, jobRecord),
+        },        
+    }
+
+    return email.send(reminder_job_provider)
+}
+
+
+const sendReminderJobClientEmail = (user, jobRecord, customerDoc, rateDoc, type) => {
+    const reminder_job_client = {
+        template: "reminder-job-client",
+        message: {
+            to: formatToName({
+                name: customerDoc.name,
+                email: customerDoc.email
+            }),
+            icalEvent: {
+                filename: 'invite.ics',
+                content: calendarHandler.generateICal(user, jobRecord, null)
+            },
+        },
+        locals: {                 
+            name: user.name,
+            product_name: productName,
+            support_email: supportEmail,
+            preheader: `Your job with ${user.name} has been confirmed.`,
+            current_job_doc: formatJobDoc(jobRecord, customerDoc, rateDoc),
+            type: type,
+            calendar_links: getCalendarLinks(user, jobRecord),
+        },        
+    }
+
+    return email.send(reminder_job_client)
+}
+
+
+
 module.exports = {
     sendWelcomeEmail,
     sendAddJobProviderEmail,
@@ -380,4 +435,6 @@ module.exports = {
     sendCancelJobClientEmail,
     sendConfirmedJobProviderEmail,
     sendConfirmedJobClientEmail,
+    sendReminderJobProviderEmail,
+    sendReminderJobClientEmail,
 }

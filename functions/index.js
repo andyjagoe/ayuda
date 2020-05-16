@@ -97,7 +97,7 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'fetchCheckoutSe
 if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'sendReminderCallback') {
     const sendReminderCallback = require('./sendReminderCallback');
     exports.sendReminderCallback = functions.https.onRequest((req, res) => {
-        return sendReminderCallback.handler(req, res, firestoreDb, admin);
+        return sendReminderCallback.handler(req, res, firestoreDb, emailHandler);
     });
 }
 

@@ -1,0 +1,121 @@
+<%- include('../html-header.ejs') %>
+
+                      <div class="f-fallback">
+                        <h1>Hi, <%= name %>!</h1>
+                        <p>
+                          <% if(type === '30min') { %>
+                            Your meeting with <%= current_job_doc.customer_name %> is starting in 30 minutes.
+                        <% } else if(type === '24hour') { %>
+                            Your meeting with <%= current_job_doc.customer_name %> is starting in 24 hours.
+                        <% } else { %>
+                            Reminder: <%= current_job_doc.customer_name %> scheduled for <%= current_job_doc.job_date_time %>
+                        <% } %>
+                        </p>
+
+                        <!-- Action -->
+                        <table class="body-action" align="center" width="100%" cellpadding="0" cellspacing="0" role="presentation">
+                          <tr>
+                            <td align="center">                              
+                              <table width="100%" border="0" cellspacing="0" cellpadding="0" role="presentation">
+                                <tr>
+                                  <td align="center">
+                                    <a href="<%= current_job_doc.start_url %>" class="f-fallback button" target="_blank">Start Meeting</a>
+                                  </td>
+                                </tr>
+                              </table>
+                            </td> 
+                          </tr>
+                        </table>
+                        
+                        <table class="attributes" width="100%" cellpadding="0" cellspacing="0" role="presentation">
+                            <tr>
+                              <td class="attributes_content">
+                                <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+                                  <tr>
+                                    <td class="attributes_item">
+                                      <span class="f-fallback">
+                                        <strong>Topic:</strong> <%= current_job_doc.topic %>
+                                      </span>
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <td class="attributes_item">
+                                      <span class="f-fallback">
+                                        <strong>Time:</strong> <%= current_job_doc.job_date_time %> 
+                                      </span>
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <td class="attributes_item">
+                                      <span class="f-fallback">
+                                        <strong>Duration:</strong> <%= current_job_doc.duration %> 
+                                      </span>
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <td class="attributes_item">
+                                      <span class="f-fallback">
+                                        <strong>Hourly Rate:</strong> <%= current_job_doc.rate_name %> 
+                                      </span>
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <td class="attributes_item">
+                                      <span class="f-fallback">
+                                        <strong>Meeting ID:</strong> <%= current_job_doc.id %> 
+                                      </span>
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <td class="attributes_item">
+                                      <span class="f-fallback">
+                                        <strong>Password:</strong> <%= current_job_doc.password %> 
+                                      </span>
+                                    </td>
+                                  </tr>
+                                  <tr>
+                                    <td class="attributes_item">
+                                      <span class="f-fallback">
+                                        <strong>Notes:</strong> <%= current_job_doc.agenda %> 
+                                      </span>
+                                    </td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                  <p class="f-fallback sub align-right"><a href="<%= job_url %>">View, change or cancel this meeting</a></p>                                
+                              </td>
+                            </tr>  
+                          </table>
+
+                        <p>If you have any questions, please <a href="mailto:<%= support_email %>">email our customer success team</a>.</p>
+                        <p>Thanks,
+                          <br>The <%= product_name %> Team</p>
+                        
+                        <!-- Sub copy -->
+                        <table class="body-sub" role="presentation">
+                          <tr>
+                            <td>
+                                <p class="f-fallback sub align-center"><a href="<%= calendar_links.google_url %>">Google Calendar</a></p>
+                            </td>
+                            <td>
+                                <p class="f-fallback sub align-center"><a href="<%= calendar_links.ics_url %>">Apple Calendar</a></p>
+                            </td>
+                            <td>
+                                <p class="f-fallback sub align-center"><a href="<%= calendar_links.outlook_url %>">Microsoft Outlook</a></p>
+                            </td>
+                            <td>
+                                <p class="f-fallback sub align-center"><a href="<%= calendar_links.yahoo_url %>">Yahoo! Calendar</a></p>
+                            </td>
+                            <td>
+                                <p class="f-fallback sub align-center"><a href="<%= calendar_links.download_url %>">Download Invite (.ics)</a></p>
+                            </td>
+                          </tr>
+                        </table>
+  
+                      </div>
+
+
+<%- include('../html-footer.ejs') %>

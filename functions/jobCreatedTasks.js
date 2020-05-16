@@ -63,13 +63,16 @@ exports.handler = async function(snapshot, context, firestoreDb, emailHandler, a
         await emailHandler.sendAddJobProviderEmail(user, jobDoc, customerDoc, rateDoc)
         await emailHandler.sendAddJobClientEmail(user, jobDoc, customerDoc, rateDoc);
 
-        const validToAuthDate = moment(jobDoc.t.toDate()).subtract(6, 'days') // Auth valid  up to 7 days
-        // Only send auth email if job  is with in 6 days and is not zero rate
+        const validToAuthDate = moment(jobDoc.t.toDate()).subtract(2, 'days')
+        //  Send auth email immediately if job is < 2 days away and is not zero rate
         if (moment().isAfter(validToAuthDate) && rateDoc.rate !== 0) {
             await emailHandler.sendAuthorizeJobClientEmail(user, jobDoc, customerDoc, rateDoc);
         }
+        if(rateDoc.rate !== 0) {
+            // Don't send authorization reminders for $0 meetings
+            await taskHandler.setAuthorizationReminders(user, jobDoc.ref_id, jobDoc.t, firestoreDb)
+        }
         await taskHandler.setMeetingReminders(user, jobDoc.ref_id, jobDoc.t, firestoreDb)
-        await taskHandler.setAuthorizationReminders(user, jobDoc.ref_id, jobDoc.t, firestoreDb)
         
         return true           
 

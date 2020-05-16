@@ -1,4 +1,6 @@
 const _ = require('lodash/core');
+const moment = require('moment');
+const stripe = require('stripe')('sk_test_K0y591XvPNiX9UJaxdaZcSK6');
 
 
 async function getSnaps(uid, currentJobDoc, newJobDoc, firestoreDb) {
@@ -44,14 +46,22 @@ async function getSnaps(uid, currentJobDoc, newJobDoc, firestoreDb) {
             name: userSnap.data().displayName,
             email: userSnap.data().email,
         }    
+        var currentCustomerDoc = currentCustomerSnap.data()
+        currentCustomerDoc.id = currentCustomerSnap.id;
+        var newCustomerDoc = newCustomerSnap.data()
+        newCustomerDoc.id = newCustomerSnap.id;
+        var currentRateDoc = currentRateSnap.data()
+        currentRateDoc.id = currentRateSnap.id;
+        var newRateDoc = newRateSnap.data()
+        newRateDoc.id = newRateSnap.id;
 
         return {
             user: user,
             userDoc: userSnap.data(),
-            currentCustomerDoc: currentCustomerSnap.data(),
-            newCustomerDoc: newCustomerSnap.data(),
-            currentRateDoc: currentRateSnap.data(),
-            newRateDoc: newRateSnap.data(),
+            currentCustomerDoc: currentCustomerDoc,
+            newCustomerDoc: newCustomerDoc,
+            currentRateDoc: currentRateDoc,
+            newRateDoc: newRateDoc,
         }
     } catch (error) {
         console.error("Error: ", error);
@@ -60,8 +70,19 @@ async function getSnaps(uid, currentJobDoc, newJobDoc, firestoreDb) {
 }
 
 
+async function needsAuthorization (jobDoc, rateDoc) {
+    if (!('payment_intent' in jobDoc)) {
+        return true
+    }
+    const intent = await stripe.paymentIntents.retrieve(jobDoc.payment_intent)            
+    if (intent.amount_capturable < rateDoc.rate * (jobDoc.d / 60) * 100) {
+        return true
+    }
+    return false
+}
 
-exports.handler = async function(change, context, firestoreDb, emailHandler) {
+
+exports.handler = async function(change, context, firestoreDb, emailHandler, taskHandler) {
     var currentJobDoc = change.before.data();
     var newJobDoc = change.after.data();
     currentJobDoc.ref_id = context.params.meeting_id
@@ -71,9 +92,8 @@ exports.handler = async function(change, context, firestoreDb, emailHandler) {
 
     // Check to see if this is a pending job that has been authorized
     if (currentJobDoc.status === 'pending' && newJobDoc.status === 'authorized') {
-        console.log(`Authorization of pending job. PaymentIntent: ${newJobDoc.payment_intent}`)
-
         //TODO: do we need to check validity of payment intent?
+
         try {
             const { user, newCustomerDoc, newRateDoc 
             } = await getSnaps( uid, currentJobDoc, newJobDoc, firestoreDb)
@@ -153,7 +173,31 @@ exports.handler = async function(change, context, firestoreDb, emailHandler) {
                 currentRateDoc,
                 newRateDoc
             );
-        } 
+        }
+        
+
+        // Determine whether we need to send auth request emails
+        const validToAuthDate = moment(newJobDoc.t.toDate()).subtract(2, 'days')
+        if (moment().isAfter(validToAuthDate) && newRateDoc.rate !== 0) {
+            // Check paymentIntent and whether sufficient $ is authorized. If not, send auth request. 
+            const needsAuth  = await needsAuthorization(newJobDoc, newRateDoc)
+            if (needsAuth) {
+                await emailHandler.sendAuthorizeJobClientEmail(user, newJobDoc, newCustomerDoc, newRateDoc);
+            }
+        }
+
+
+        // Determine whether we need to update reminders for the job
+        if (!moment(currentJobDoc.t.toDate()).isSame(moment(newJobDoc.t.toDate()))) {
+            console.log(`Start time has changed. Need to update reminder tasks`)
+            await taskHandler.cancelAllReminders(user.uid, currentJobDoc.ref_id, firestoreDb) 
+            if(newRateDoc.rate !== 0) {
+                await taskHandler.setAuthorizationReminders(user.uid, newJobDoc.ref_id, newJobDoc.t, firestoreDb)
+            }
+            await taskHandler.setMeetingReminders(user.uid, newJobDoc.ref_id, newJobDoc.t, firestoreDb)
+        }
+
+
     } catch (error) {
         console.error("Error: ", error);
         return false

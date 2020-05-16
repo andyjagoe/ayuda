@@ -25,6 +25,18 @@ const formatRateDescription = (rateRecord) => {
 }
 
 
+async function needsAuthorization (jobDoc, rateDoc) {
+    if (!('payment_intent' in jobDoc)) {
+        return true
+    }
+    const intent = await stripe.paymentIntents.retrieve(jobDoc.payment_intent)            
+    if (intent.amount_capturable < rateDoc.rate * (jobDoc.d / 60) * 100) {
+        return true
+    }
+    return false
+}
+
+
 
 exports.handler = async function(data, context, firestoreDb) {
 
@@ -91,11 +103,11 @@ exports.handler = async function(data, context, firestoreDb) {
         //Verify that customer id and rate id match those of the job/meeting doc
         if (jobSnap.data().payer_id !== customerSnap.id) {
             console.log("cid given doesn't match payer_id for this job") 
-            throw new functions.https.HttpsError('failed-precondition', 'Unable to verify state.');
+            throw new functions.https.HttpsError('failed-precondition', 'Link no longer valid.');
         }
         if (jobSnap.data().rate_id !== rateSnap.id) {
             console.log("rid given doesn't match rate_id for this job") 
-            throw new functions.https.HttpsError('failed-precondition', 'Unable to verify state.');
+            throw new functions.https.HttpsError('failed-precondition', 'Link no longer valid.');
         }
 
 
@@ -106,16 +118,12 @@ exports.handler = async function(data, context, firestoreDb) {
 
 
         //Check to see if there is already a valid paymentIntent for this job
-        if ('payment_intent' in jobRecord && 'payment_intent_t' in jobRecord) {
-            const lastValidPaymentIntent = moment().subtract(6, 'days')
-            const paymentIntentDate = moment(jobRecord.payment_intent_t.toDate())
-            if (paymentIntentDate.isAfter(lastValidPaymentIntent)) {
-                console.log('PaymentIntent still valid')
-                return {sessionId: null, hasValidAuth: true}
-            }
+        const needsAuth  = await needsAuthorization(jobRecord, rateRecord)
+        if (!needsAuth) {
+            //TODO: better error message for users who click on old/expired links
+            return {sessionId: null, hasValidAuth: true}
         }
     
-
 
         // Create Stripe session
         const dateDescription = formatDateDescription(jobRecord)

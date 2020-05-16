@@ -9,7 +9,7 @@ exports.handler = async function(snapshot, context, firestoreDb, emailHandler, t
         const {user, customerDoc, rateDoc} = await getSnaps(uid, jobDoc, firestoreDb)
         await emailHandler.sendCancelJobProviderEmail(user, jobDoc, customerDoc, rateDoc);
         await emailHandler.sendCancelJobClientEmail(user, jobDoc, customerDoc, rateDoc);
-        await taskHandler.cancelAllReminders(user, jobDoc.ref_id, firestoreDb) 
+        await taskHandler.cancelAllReminders(user.uid, jobDoc.ref_id, firestoreDb) 
 
         return true           
 

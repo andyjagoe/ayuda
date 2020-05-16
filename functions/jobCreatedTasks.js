@@ -52,7 +52,7 @@ async function getSnaps(uid, jobDoc, firestoreDb) {
 }
 
 
-exports.handler = async function(snapshot, context, firestoreDb, emailHandler, admin, taskHandler) {
+exports.handler = async function(snapshot, context, firestoreDb, emailHandler, taskHandler) {
     const uid = context.params.uid;    
 
     var jobDoc = snapshot.data();
@@ -70,9 +70,9 @@ exports.handler = async function(snapshot, context, firestoreDb, emailHandler, a
         }
         if(rateDoc.rate !== 0) {
             // Don't send authorization reminders for $0 meetings
-            await taskHandler.setAuthorizationReminders(user, jobDoc.ref_id, jobDoc.t, firestoreDb)
+            await taskHandler.setAuthorizationReminders(user.uid, jobDoc.ref_id, jobDoc.t, firestoreDb)
         }
-        await taskHandler.setMeetingReminders(user, jobDoc.ref_id, jobDoc.t, firestoreDb)
+        await taskHandler.setMeetingReminders(user.uid, jobDoc.ref_id, jobDoc.t, firestoreDb)
         
         return true           
 

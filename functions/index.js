@@ -1,10 +1,9 @@
 const admin = require('firebase-admin');
 const functions = require('firebase-functions');
-const {CloudTasksClient} = require('@google-cloud/tasks');
 admin.initializeApp(functions.config().firebase);
 const emailHandler = require('./emailHandler');
 const calendarHandler = require('./calendarHandler');
-const cloudTasksClient = new CloudTasksClient();
+const taskHandler = require('./taskHandler');
 var firestoreDb = admin.firestore();
 
 
@@ -54,7 +53,7 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'jobCreatedTasks
     const jobCreatedTasks = require('./jobCreatedTasks');
     exports.jobCreatedTasks = functions.firestore.document('/users/{uid}/meetings/{meeting_id}')
     .onCreate((snapshot, context) => {    
-        return jobCreatedTasks.handler(snapshot, context, firestoreDb, emailHandler, admin, cloudTasksClient);
+        return jobCreatedTasks.handler(snapshot, context, firestoreDb, emailHandler, admin, taskHandler);
     });
 }
 
@@ -70,7 +69,7 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'jobDeletedTasks
     const jobDeletedTasks = require('./jobDeletedTasks');
     exports.jobDeletedTasks = functions.firestore.document('/users/{uid}/meetings/{meeting_id}')
     .onDelete((snapshot, context) => {    
-        return jobDeletedTasks.handler(snapshot, context, firestoreDb, emailHandler);
+        return jobDeletedTasks.handler(snapshot, context, firestoreDb, emailHandler, taskHandler);
     });
 }
 

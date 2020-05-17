@@ -3,6 +3,10 @@ const zoomVerificationToken = 'ZLXFn9VjQS2cHoG_y0_GUg';
 
 
 exports.handler = async function(req, res, firestoreDb) {
+    //console.log(`${req.headers}: ${JSON.stringify(req.headers)}`);
+    if (req.headers.authorization !== zoomVerificationToken) {
+        return res.status(400).end();
+    }
 
     switch (req.body.event) {
         case 'meeting.started':

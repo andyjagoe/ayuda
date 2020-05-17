@@ -6,10 +6,11 @@ exports.handler = async function(snapshot, context, firestoreDb, emailHandler, t
     jobDoc.ref_id = context.params.meeting_id
 
     try {
-        const {user, customerDoc, rateDoc} = await getSnaps(uid, jobDoc, firestoreDb)
+        const {user, userDoc, customerDoc, rateDoc} = await getSnaps(uid, jobDoc, firestoreDb)
         await emailHandler.sendCancelJobProviderEmail(user, jobDoc, customerDoc, rateDoc);
         await emailHandler.sendCancelJobClientEmail(user, jobDoc, customerDoc, rateDoc);
-        await taskHandler.cancelAllReminders(user.uid, jobDoc.ref_id, firestoreDb) 
+        await taskHandler.cancelAllReminders(user.uid, jobDoc.ref_id, firestoreDb)
+        await removeZoomMap(userDoc, jobDoc, firestoreDb)
 
         return true           
 
@@ -22,7 +23,7 @@ exports.handler = async function(snapshot, context, firestoreDb, emailHandler, t
 
 
 
-async function getSnaps(uid, jobDoc, firestoreDb) {
+const getSnaps = async (uid, jobDoc, firestoreDb) => {
     try {
         const [
             userSnap,
@@ -70,4 +71,13 @@ async function getSnaps(uid, jobDoc, firestoreDb) {
         console.error("Error: ", error);
         return false
     }
+}
+
+
+const removeZoomMap = async (userDoc, jobDoc, firestoreDb) => {
+    return firestoreDb.collection('/zoom_map')
+        .doc(userDoc.zoomId)
+        .collection('meetings')
+        .doc(Buffer.from(jobDoc.uuid).toString('base64'))
+        .delete();
 }

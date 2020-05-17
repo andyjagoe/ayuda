@@ -58,6 +58,7 @@ exports.handler = function(data, context, firestoreDb, admin) {
 
     var userDoc = null;
     var jobDoc = null;
+    var zoomResponse  = null;
 
     //check if state value is valid
     return firestoreDb.collection('/users').doc(uid).get()
@@ -100,6 +101,8 @@ exports.handler = function(data, context, firestoreDb, admin) {
     })
     .then(response => {
         //console.log('response data: ', response.data);
+        zoomResponse = response.data
+        
         jobDoc  = {
             uuid: response.data.uuid,
             id: response.data.id,
@@ -122,11 +125,18 @@ exports.handler = function(data, context, firestoreDb, admin) {
             .add(jobDoc);
     })  
     .then(ref => {
-        //console.log('Added job with ID: ', ref.id);
-        return true;
+        //console.log('Added job with ID: ', ref.id);        
+        return firestoreDb.collection('/zoom_map')
+            .doc(userDoc.zoomId)
+            .collection('meetings')
+            .doc(Buffer.from(zoomResponse.uuid).toString('base64')) // since this will be a key we must base64 encode
+            .set({id: ref.id});
+    })
+    .then(ref => {
+        return true
     })
     .catch(error => {
-        console.error("addJob Error: ", error);
+        console.error(`Addjob error: ${error.message}`);
         return false;
     });
 

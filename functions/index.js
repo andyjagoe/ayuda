@@ -111,6 +111,6 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'stripeCallback'
 if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'zoomCallback') {
     const zoomCallback = require('./zoomCallback');
     exports.zoomCallback = functions.https.onRequest((req, res) => {
-        return zoomCallback.handler(req, res, firestoreDb);
+        return zoomCallback.handler(req, res, firestoreDb, admin);
     });
 }

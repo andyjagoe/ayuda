@@ -105,7 +105,7 @@ exports.handler = function(data, context, firestoreDb, admin) {
         
         jobDoc  = {
             uuid: response.data.uuid,
-            id: response.data.id,
+            id: response.data.id.toString(),
             payer: payer,
             payer_id: payer_id,
             rate_id: rate_id,
@@ -129,7 +129,7 @@ exports.handler = function(data, context, firestoreDb, admin) {
         return firestoreDb.collection('/zoom_map')
             .doc(userDoc.zoomId)
             .collection('meetings')
-            .doc(Buffer.from(zoomResponse.uuid).toString('base64')) // since this will be a key we must base64 encode
+            .doc(zoomResponse.id.toString())
             .set({id: ref.id});
     })
     .then(ref => {

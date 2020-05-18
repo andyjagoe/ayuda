@@ -2,7 +2,7 @@ const functions = require('firebase-functions');
 const zoomVerificationToken = 'ZLXFn9VjQS2cHoG_y0_GUg';
 
 
-exports.handler = async function(req, res, firestoreDb) {
+exports.handler = async function(req, res, firestoreDb, admin) {
     //console.log(`${req.headers}: ${JSON.stringify(req.headers)}`);
     if (req.headers.authorization !== zoomVerificationToken) {
         return res.status(400).end();
@@ -15,6 +15,7 @@ exports.handler = async function(req, res, firestoreDb) {
                 const {userDoc, jobDoc} = await getMeetingRef(req.body.payload, firestoreDb)
                 console.log(`uid: ${userDoc.uid}`)
                 console.log(`id: ${jobDoc.id}`)
+                await addMeetingEvent(userDoc.uid, jobDoc.id, req.body.event, req.body.payload, firestoreDb, admin)
             }
             break;
         case 'meeting.ended':
@@ -23,7 +24,7 @@ exports.handler = async function(req, res, firestoreDb) {
                 const {userDoc, jobDoc} = await getMeetingRef(req.body.payload, firestoreDb)
                 console.log(`uid: ${userDoc.uid}`)
                 console.log(`id: ${jobDoc.id}`)
-
+                await addMeetingEvent(userDoc.uid, jobDoc.id, req.body.event, req.body.payload, firestoreDb, admin)
                 // enqueue billing revenue capture
             }
             break;
@@ -33,6 +34,7 @@ exports.handler = async function(req, res, firestoreDb) {
                 const {userDoc, jobDoc} = await getMeetingRef(req.body.payload, firestoreDb)
                 console.log(`uid: ${userDoc.uid}`)
                 console.log(`id: ${jobDoc.id}`)
+                await addMeetingEvent(userDoc.uid, jobDoc.id, req.body.event, req.body.payload, firestoreDb, admin)
             }
             break;
         case 'meeting.participant_left':
@@ -41,6 +43,7 @@ exports.handler = async function(req, res, firestoreDb) {
                 const {userDoc, jobDoc} = await getMeetingRef(req.body.payload, firestoreDb)
                 console.log(`uid: ${userDoc.uid}`)
                 console.log(`id: ${jobDoc.id}`)
+                await addMeetingEvent(userDoc.uid, jobDoc.id, req.body.event, req.body.payload, firestoreDb, admin)
             }
             break;
         default:
@@ -55,7 +58,6 @@ exports.handler = async function(req, res, firestoreDb) {
 
 
 const getMeetingRef = async (payload, firestoreDb) => {
-    console.log(`payload.object.uuid ${Buffer.from(payload.object.uuid).toString('base64')}`)
     
     try {
 
@@ -69,7 +71,7 @@ const getMeetingRef = async (payload, firestoreDb) => {
             firestoreDb.collection('/zoom_map')
                 .doc(payload.object.host_id)
                 .collection('meetings')
-                .doc(Buffer.from(payload.object.uuid).toString('base64'))
+                .doc(payload.object.id)
                 .get(),
         ])
 
@@ -87,6 +89,33 @@ const getMeetingRef = async (payload, firestoreDb) => {
             userDoc: userSnap.data(),
             jobDoc: jobSnap.data(),
         }
+
+    } catch (error) {
+        console.error(error);
+        return false
+    }
+
+}
+
+
+const addMeetingEvent = async (uid, id, type, payload, firestoreDb, admin) => {
+    try {
+        var eventDoc = {
+            type: type,
+            t: admin.firestore.Timestamp.fromDate(new Date())
+        }
+        if ('participant' in payload.object) {
+            eventDoc.participant = payload.object.participant
+        }
+
+        await firestoreDb.collection('/billing')
+        .doc(uid)
+        .collection('meetings')
+        .doc(id)
+        .collection("events")
+        .add(eventDoc);
+
+        return true
 
     } catch (error) {
         console.error(error);

@@ -4,6 +4,7 @@ admin.initializeApp(functions.config().firebase);
 const emailHandler = require('./emailHandler');
 const calendarHandler = require('./calendarHandler');
 const taskHandler = require('./taskHandler');
+const zoomHelper = require('./zoomHelper');
 var firestoreDb = admin.firestore();
 
 
@@ -69,7 +70,7 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'jobDeletedTasks
     const jobDeletedTasks = require('./jobDeletedTasks');
     exports.jobDeletedTasks = functions.firestore.document('/users/{uid}/meetings/{meeting_id}')
     .onDelete((snapshot, context) => {    
-        return jobDeletedTasks.handler(snapshot, context, firestoreDb, emailHandler, taskHandler);
+        return jobDeletedTasks.handler(snapshot, context, firestoreDb, emailHandler, taskHandler, zoomHelper);
     });
 }
 
@@ -111,6 +112,6 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'stripeCallback'
 if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'zoomCallback') {
     const zoomCallback = require('./zoomCallback');
     exports.zoomCallback = functions.https.onRequest((req, res) => {
-        return zoomCallback.handler(req, res, firestoreDb, admin);
+        return zoomCallback.handler(req, res, firestoreDb, admin, zoomHelper);
     });
 }

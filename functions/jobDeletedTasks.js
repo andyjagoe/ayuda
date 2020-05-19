@@ -1,5 +1,5 @@
 
-exports.handler = async function(snapshot, context, firestoreDb, emailHandler, taskHandler) {
+exports.handler = async function(snapshot, context, firestoreDb, emailHandler, taskHandler, zoomHelper) {
     const uid = context.params.uid;    
 
     var jobDoc = snapshot.data();
@@ -10,7 +10,7 @@ exports.handler = async function(snapshot, context, firestoreDb, emailHandler, t
         await emailHandler.sendCancelJobProviderEmail(user, jobDoc, customerDoc, rateDoc);
         await emailHandler.sendCancelJobClientEmail(user, jobDoc, customerDoc, rateDoc);
         await taskHandler.cancelAllReminders(user.uid, jobDoc.ref_id, firestoreDb)
-        await removeZoomMap(userDoc, jobDoc, firestoreDb)
+        await zoomHelper.removeZoomMap(userDoc, jobDoc, firestoreDb)
 
         return true           
 
@@ -73,11 +73,3 @@ const getSnaps = async (uid, jobDoc, firestoreDb) => {
     }
 }
 
-
-const removeZoomMap = async (userDoc, jobDoc, firestoreDb) => {
-    return firestoreDb.collection('/zoom_map')
-        .doc(userDoc.zoomId)
-        .collection('meetings')
-        .doc(jobDoc.id)
-        .delete();
-}

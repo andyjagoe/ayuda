@@ -59,8 +59,8 @@ exports.handler = function(data, context, firestoreDb) {
         return true;
     })
     .catch(error => {
-        console.error("removeJob Error: ", error);
-        return false;
+        console.error(error);
+        throw new functions.https.HttpsError('failed-precondition', error.message);
     });
 
 }

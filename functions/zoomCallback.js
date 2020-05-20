@@ -2,7 +2,7 @@ const functions = require('firebase-functions');
 const zoomVerificationToken = 'ZLXFn9VjQS2cHoG_y0_GUg';
 
 
-exports.handler = async function(req, res, firestoreDb, admin, zoomHelper) {
+exports.handler = async function(req, res, firestoreDb, admin, zoomHelper, taskHandler) {
     //console.log(`${req.headers}: ${JSON.stringify(req.headers)}`);s
     if (req.headers.authorization !== zoomVerificationToken) {
         return res.status(400).end();
@@ -35,6 +35,7 @@ exports.handler = async function(req, res, firestoreDb, admin, zoomHelper) {
                     const {userDoc, jobDoc} = await zoomHelper.dataFromZoomMap(host_id, id, firestoreDb)
                     const when = admin.firestore.Timestamp.fromDate(new Date(payload.object.end_time))
                     await addMeetingEvent(userDoc.uid, jobDoc.id, event, when, payload, firestoreDb)
+                    await taskHandler.scheduleBillingForJob(userDoc.uid, jobDoc.id, when, firestoreDb)
                 } catch (error) {
                     console.error(error)
                 }

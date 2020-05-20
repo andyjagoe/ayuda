@@ -54,6 +54,14 @@ exports.handler = async function(req, res, firestoreDb, emailHandler) {
                 }                    
             }
             break;
+        case 'task.billing.standard':
+            {
+                console.log('task.billing.standard')
+                //const {user, jobDoc, customerDoc, rateDoc} = await getSnaps(uid, id, firestoreDb)
+                // 1. Run billing
+                // 2. Remove zoom_map entries for this meeting (instead of in jobDeleteTasks)
+            }
+            break;
         default:
             // Unexpected type
             return res.status(400).end();

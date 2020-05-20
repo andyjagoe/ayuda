@@ -7,6 +7,65 @@ const queue = 'reminders';
 const location = 'us-central1';
 
 
+
+
+const scheduleBillingForJob = async (uid, jobId, jobFinishedInSeconds, firestoreDb) => {
+    const billingPayload = {  type: 'task.billing.standard',
+                                data: {uid: uid, id: jobId}
+                            }
+    const whenInSeconds = moment(jobFinishedInSeconds.toDate()).add(6, 'hours')
+    try {
+        const billingTaskName = await addTask(billingPayload, whenInSeconds.unix())
+        await trackBillingTask (uid, jobId, billingTaskName, billingPayload.type, firestoreDb)
+
+        return true
+    } catch (error) {
+        console.error(error);
+        return false
+    }
+
+}
+
+
+const trackBillingTask = async (uid, id, taskName, type, firestoreDb) => {
+    try {
+        await firestoreDb.collection('/billing')
+        .doc(uid)
+        .collection('meetings')
+        .doc(id)
+        .collection('tasks')
+        .add({id: taskName,type: type,
+        })
+        return true
+    } catch (error) {
+        console.error(error);
+        return false
+    }
+}
+
+
+const cancelAllBillingTasks = async (uid, jobId, firestoreDb) => {
+    try {
+        const tasks = await firestoreDb.collection('/billing')
+            .doc(uid)
+            .collection('meetings')
+            .doc(jobId)
+            .collection('tasks')
+            .get()
+        for (doc of tasks.docs) {
+            //console.log(`Cancel task: ${doc.data().id}`)
+            deleteTask(doc.data().id)
+            doc.ref.delete();
+        }
+  
+        return true
+    } catch (error) {
+        console.error(error);
+        return false
+    }
+}
+
+
 const trackReminder = async (uid, id, taskName, type, firestoreDb) => {
     try {
         await firestoreDb.collection('/users')
@@ -156,4 +215,6 @@ module.exports = {
     setAuthorizationReminders,
     setMeetingReminders,
     cancelAllReminders,
+    scheduleBillingForJob,
+    cancelAllBillingTasks,
 }

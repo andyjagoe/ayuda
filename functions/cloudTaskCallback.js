@@ -59,8 +59,8 @@ exports.handler = async function(req, res, firestoreDb, emailHandler) {
         case 'task.billing.standard':
             {
                 console.log('task.billing.standard')
-                const { userDoc } = await getSnaps(uid, id, firestoreDb)
-                await calculateBilling(uid, id, userDoc.zoomId, firestoreDb)
+                const { userDoc, rateDoc } = await getSnaps(uid, id, firestoreDb)
+                await calculateBilling(uid, id, userDoc.zoomId, rateDoc, firestoreDb)
                 // 2. Remove zoom_map entries for this meeting (instead of in jobDeleteTasks)
             }
             break;
@@ -85,7 +85,7 @@ async function needsAuthorization (jobDoc, rateDoc) {
 }
 
 
-async function calculateBilling(uid, jobId, hostZoomId, firestoreDb) {
+async function calculateBilling(uid, jobId, hostZoomId, rateDoc, firestoreDb) {
     try {
         const events = await firestoreDb.collection('/billing')
             .doc(uid)
@@ -144,6 +144,13 @@ async function calculateBilling(uid, jobId, hostZoomId, firestoreDb) {
         console.log(`Meeting length in seconds: ${meetingLengthInSeconds}`)
 
         // Calculate charges based on hourly rate and length of meeting
+        const charge = (meetingLengthInSeconds  / 3600) * rateDoc.rate
+        const stripeCharge = Math.round(charge * 100)
+        console.log(`Rate: ${rateDoc.rate} Charge: ${charge} stripeCharge: ${stripeCharge}`)
+
+        // Capture charge due
+
+        // Send emails to provider and client
 
         return true
     } catch (error) {
@@ -151,6 +158,7 @@ async function calculateBilling(uid, jobId, hostZoomId, firestoreDb) {
         return false
     }
 }
+
 
 async function getSnaps(uid, jobId, firestoreDb) {
     if (!(typeof jobId === 'string') || jobId.length === 0) {

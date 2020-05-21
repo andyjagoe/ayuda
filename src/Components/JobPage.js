@@ -427,7 +427,7 @@ Password: ${jobRecord.password}
                           <CopyIcon />
                         </IconButton>
                         <IconButton
-                          onClick={() => { navigate(jobRecord.start_url); }}
+                          onClick={() => { window.open(jobRecord.start_url, '_blank'); }}
                         >
                           <ArrowForwardIosIcon />
                         </IconButton>
@@ -455,7 +455,7 @@ Password: ${jobRecord.password}
                           <CopyIcon />                                                  
                         </IconButton>
                         <IconButton
-                          onClick={() => { navigate(jobRecord.join_url); }}
+                          onClick={() => { window.open(jobRecord.join_url, '_blank'); }}
                         >
                           <ArrowForwardIosIcon />
                         </IconButton>

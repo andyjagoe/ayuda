@@ -3,7 +3,7 @@ const {CloudTasksClient} = require('@google-cloud/tasks');
 const cloudTasksClient = new CloudTasksClient();
 const serviceAccountEmail = 'cloud-tasks@ayuda-9ea45.iam.gserviceaccount.com';
 const project = 'ayuda-9ea45';
-const queue = 'reminders';
+const queue = 'tasks';
 const location = 'us-central1';
 
 
@@ -179,7 +179,7 @@ const addTask = async (payload, unixTime) => {
 
     // Construct the fully qualified queue name.
     const parent = cloudTasksClient.queuePath(project, location, queue);
-    const url = `https://${location}-${project}.cloudfunctions.net/sendReminderCallback`
+    const url = `https://${location}-${project}.cloudfunctions.net/cloudTaskCallback`
 
     const task = {
         httpRequest: {

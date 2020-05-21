@@ -95,10 +95,10 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'fetchCheckoutSe
     });
 }
 
-if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'sendReminderCallback') {
-    const sendReminderCallback = require('./sendReminderCallback');
-    exports.sendReminderCallback = functions.https.onRequest((req, res) => {
-        return sendReminderCallback.handler(req, res, firestoreDb, emailHandler);
+if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'cloudTaskCallback') {
+    const cloudTaskCallback = require('./cloudTaskCallback');
+    exports.cloudTaskCallback = functions.https.onRequest((req, res) => {
+        return cloudTaskCallback.handler(req, res, firestoreDb, emailHandler);
     });
 }
 

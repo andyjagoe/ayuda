@@ -59,8 +59,8 @@ exports.handler = async function(req, res, firestoreDb, emailHandler) {
         case 'task.billing.standard':
             {
                 console.log('task.billing.standard')
-                const { userDoc, rateDoc } = await getSnaps(uid, id, firestoreDb)
-                await calculateBilling(uid, id, userDoc.zoomId, rateDoc, firestoreDb)
+                const { userDoc, jobDoc, rateDoc } = await getSnaps(uid, id, firestoreDb)
+                await calculateBilling(uid, id, userDoc.zoomId, jobDoc, rateDoc, firestoreDb)
                 // 2. Remove zoom_map entries for this meeting (instead of in jobDeleteTasks)
             }
             break;
@@ -85,7 +85,7 @@ async function needsAuthorization (jobDoc, rateDoc) {
 }
 
 
-async function calculateBilling(uid, jobId, hostZoomId, rateDoc, firestoreDb) {
+async function calculateBilling(uid, jobId, hostZoomId, jobDoc, rateDoc, firestoreDb) {
     try {
         const events = await firestoreDb.collection('/billing')
             .doc(uid)
@@ -134,27 +134,131 @@ async function calculateBilling(uid, jobId, hostZoomId, rateDoc, firestoreDb) {
             }
         }
 
-        var meetingLengthInSeconds = 0
-        if  (bothOnStartTimes.length === bothOnEndTimes.length) {
-            for (i = 0; i < bothOnEndTimes.length; i++) {
-                const t = bothOnEndTimes[i].when.diff(bothOnStartTimes[i].when, 'seconds')
-                meetingLengthInSeconds = meetingLengthInSeconds + t                 
-            }    
+        // Verify we have a valid data set of start and end times
+        if  (bothOnStartTimes.length !== bothOnEndTimes.length) {
+            console.error(`Error processing meeting times. bothOnStartTimes: ${bothOnStartTimes} ` +
+                `bothOnEndTimes: ${bothOnEndTimes}`)
+            return false
         }
+
+        var meetingLengthInSeconds = 0
+        var itemizedBillingSegments = [] // bothOn time segments of at least 30 seconds long
+        // Calculate meeting length in seconds
+        for (i = 0; i < bothOnEndTimes.length; i++) {
+            const t = bothOnEndTimes[i].when.diff(bothOnStartTimes[i].when, 'seconds')
+            meetingLengthInSeconds = meetingLengthInSeconds + t
+            itemizedBillingSegments.push({
+                start_time: bothOnStartTimes[i].when,
+                end_time: bothOnEndTimes[i].when,
+                duration: t,
+            })
+        }  
         console.log(`Meeting length in seconds: ${meetingLengthInSeconds}`)
 
         // Calculate charges based on hourly rate and length of meeting
         const charge = (meetingLengthInSeconds  / 3600) * rateDoc.rate
+
+        //Check that charge exceeds minimum of $1
+        if (charge < 1) {
+            console.error(`Minimum charge of $1 not met: ${charge}`)
+            //TODO: kick off action related to minimum charge not met. Or just process min charge?
+            return false
+        }
+
+        // Convert amount into format Stripe uses without decimals
         const stripeCharge = Math.round(charge * 100)
+
+        // Calculate share transferred to provider after our service fee
+        const transfer = Math.round(stripeCharge - (60 + (stripeCharge * 4.9)/100)) //TODO: make sure we have a min charge so this is > 0
         console.log(`Rate: ${rateDoc.rate} Charge: ${charge} stripeCharge: ${stripeCharge}`)
 
-        // Capture charge due
+        // Check that the provider is setup with Stripe account
+        const stripeSnap = await firestoreDb.collection('/stripe').doc(uid).get()
+        if (!stripeSnap.exists) {
+            console.error('No stripe credentials!') 
+            //TODO: kick off action to correct no provider stripe credentials
+            return false
+        }
 
-        // Send emails to provider and client
+        //TODO: If the meeting does not have a payment authorization, send an email invoice for payment
+        if  (!('payment_intent' in jobDoc)) {
+            console.log(`We have no authorization for job: ${JSON.stringify(jobDoc)}`)
+            //TODO: kick off authorization/payment request to client
+            return false
+        }
+
+        // If the meeting has a payment authorization, retrieve it
+        const intent = await stripe.paymentIntents.retrieve(jobDoc.payment_intent)            
+        console.log(`PaymentIntent: ${JSON.stringify(intent)}`)
+
+        // Verify payment authorization is valid
+        if (intent.status === 'succeeded') {
+            console.error(`This transaction has already been  processed: ${intent.status}`)
+            //TODO: send out request for new payment/authorization
+            return false
+        } else if (intent.status !== 'requires_capture') {
+            console.error(`Unexpected status: ${intent.status}`)
+            //TODO: error and return
+            return false
+        }
+
+        if (intent.amount_capturable < stripeCharge)  {
+            console.error(`Authorization insufficient ${intent.amount_capturable} < ${stripeCharge}`)
+            //TODO: send out request for new payment/authorization
+            return false
+        }
+
+        // Collect payment
+        const payment = await stripe.paymentIntents.capture(
+            jobDoc.payment_intent,
+            {amount_to_capture: stripeCharge,
+            transfer_data: {
+                amount: transfer
+            }}
+        )
+        console.log(`Payment successful: ${payment.description}: ` +
+            `${payment.amount_received} total - ${payment.amount_received - payment.transfer_data.amount} fee ` +
+            ` = ${payment.transfer_data.amount} `)
+
+        // Mark jobRecord as paid
+        await firestoreDb.collection('/users')
+        .doc(uid)
+        .collection('meetings')
+        .doc(jobId)
+        .set({
+            status: 'paid'
+        }, { merge: true })
+
+        // Prevent future charges for this job. -> remove zoom mapping meeting-ended event will not generate no billings?
+        
+        // Store record of payment with details needed for a receipt
+        const receipt =  {
+            description: payment.description,
+            created: moment(),
+            billing_segments: itemizedBillingSegments,
+            lengthInSeconds: meetingLengthInSeconds,
+            rate: rateDoc.rate,
+            stripe_cust_id: payment.customer,
+            cust_id: jobDoc.payer_id,
+            rate_id: jobDoc.rate_id,
+            topic: jobDoc.topic,
+            total_paid: payment.amount_received,
+            provider_received: payment.transfer_data.amount,
+        }
+        const receiptResult = await firestoreDb.collection('/billing')
+        .doc(uid)
+        .collection('meetings')
+        .doc(jobId)
+        .collection("receipts")
+        .add(receipt)
+
+        // Send receipt/processed emails to provider and client
+        console.log(`Receipt: ${JSON.stringify(receiptResult)} ${JSON.stringify(receipt)}`)
 
         return true
     } catch (error) {
         console.error(error);
+        console.log(`calculateBilling Error: ${JSON.stringify(error)}`)
         return false
     }
 }

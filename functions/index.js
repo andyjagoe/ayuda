@@ -98,7 +98,7 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'fetchCheckoutSe
 if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'cloudTaskCallback') {
     const cloudTaskCallback = require('./cloudTaskCallback');
     exports.cloudTaskCallback = functions.https.onRequest((req, res) => {
-        return cloudTaskCallback.handler(req, res, firestoreDb, emailHandler, admin);
+        return cloudTaskCallback.handler(req, res, firestoreDb, emailHandler, admin, zoomHelper, taskHandler);
     });
 }
 

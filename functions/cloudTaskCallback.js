@@ -4,7 +4,7 @@ const _ = require('lodash');
 const stripe = require('stripe')('sk_test_K0y591XvPNiX9UJaxdaZcSK6');
 
 
-exports.handler = async function(req, res, firestoreDb, emailHandler, admin) {
+exports.handler = async function(req, res, firestoreDb, emailHandler, admin, zoomHelper, taskHandler) {
     //console.log(req.body.data)
     const id = req.body.data.id;
     const uid = req.body.data.uid;
@@ -61,7 +61,7 @@ exports.handler = async function(req, res, firestoreDb, emailHandler, admin) {
                 console.log('task.billing.standard')
                 const { user, userDoc, jobDoc, customerDoc, rateDoc } = await getSnaps(uid, id, firestoreDb)
                 await calculateBilling(user, id, userDoc.zoomId, jobDoc, customerDoc, rateDoc, 
-                    firestoreDb, emailHandler, admin)
+                    firestoreDb, emailHandler, admin, zoomHelper, taskHandler)
                 // 2. Remove zoom_map entries for this meeting (instead of in jobDeleteTasks)
             }
             break;
@@ -88,7 +88,7 @@ async function needsAuthorization (jobDoc, rateDoc) {
 
 
 async function calculateBilling(user, jobId, hostZoomId, jobDoc, customerDoc, rateDoc, 
-    firestoreDb, emailHandler, admin) {
+    firestoreDb, emailHandler, admin, zoomHelper, taskHandler) {
     try {
         // get all events from the job
         const events = await firestoreDb.collection('/billing')
@@ -243,8 +243,6 @@ async function calculateBilling(user, jobId, hostZoomId, jobDoc, customerDoc, ra
             status: 'paid'
         }, { merge: true })
 
-        //TODO: Prevent future charges for this job. -> remove zoom mapping meeting-ended event will not generate no billings?
-        
         // Store record of payment with details needed for a receipt
         const receipt =  {
             description: payment.description,

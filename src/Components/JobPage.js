@@ -553,7 +553,7 @@ Password: ${jobRecord.password}
               aria-labelledby="alert-dialog-delete-job"
               aria-describedby="alert-dialog-delete-job-description"
             >
-              <DialogTitle id="alert-dialog-title">{"Delete this job?"}</DialogTitle>
+              <DialogTitle id="alert-dialog-title">{"Cancel this job?"}</DialogTitle>
               <DialogActions>
                 <Button onClick={handleClose} color="primary">
                   Cancel

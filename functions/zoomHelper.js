@@ -39,10 +39,10 @@ const dataFromZoomMap = async (host_id, meeting_id, firestoreDb) => {
 }
 
 
-const removeZoomMap = async (userDoc, jobDoc, firestoreDb) => {
+const removeZoomMap = async (zoomUserId, jobDoc, firestoreDb) => {
     try {
         await firestoreDb.collection('/zoom_map')
-        .doc(userDoc.zoomId)
+        .doc(zoomUserId)
         .collection('meetings')
         .doc(jobDoc.id)
         .delete();

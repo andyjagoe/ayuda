@@ -10,7 +10,7 @@ exports.handler = async function(snapshot, context, firestoreDb, emailHandler, t
         await emailHandler.sendCancelJobProviderEmail(user, jobDoc, customerDoc, rateDoc);
         await emailHandler.sendCancelJobClientEmail(user, jobDoc, customerDoc, rateDoc);
         await taskHandler.cancelAllReminders(user.uid, jobDoc.ref_id, firestoreDb)
-        await zoomHelper.removeZoomMap(userDoc, jobDoc, firestoreDb)
+        await zoomHelper.removeZoomMap(userDoc.zoomId, jobDoc, firestoreDb)
 
         return true           
 

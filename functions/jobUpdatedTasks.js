@@ -107,6 +107,20 @@ exports.handler = async function(change, context, firestoreDb, emailHandler, tas
         }   
     }
     
+    if (currentJobDoc.status !== 'completed' && newJobDoc.status === 'completed') {
+        try {
+            await taskHandler.cancelAllReminders(uid, newJobDoc.ref_id, firestoreDb)
+            
+            //TODO: enable removing zoom map when we have option to run billing
+            //await zoomHelper.removeZoomMap(hostZoomId, jobDoc, firestoreDb)
+
+            return true           
+        } catch (error) {
+            console.error("Error: ", error);
+            return false
+        }   
+    }
+
 
     // Check if user facing values changed. If yes, trigger update emails
     const oldValues = {

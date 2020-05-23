@@ -187,6 +187,7 @@ export default function CustomerChooser(props) {
     <React.Fragment>
                 <Autocomplete
                   value={payerDetails}
+                  disabled={props.disabled}
                   onChange={(event, newValue) => {
                     if (typeof newValue === 'string') {
                         // timeout to avoid instant validation of the dialog's form.

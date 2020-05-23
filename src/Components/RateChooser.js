@@ -174,6 +174,7 @@ export default function RateChooser(props) {
     <React.Fragment>
                 <Autocomplete
                   value={rateDetails}
+                  disabled={props.disabled}
                   onChange={(event, newValue) => {
                     if (typeof newValue === 'string') {
                         // timeout to avoid instant validation of the dialog's form.

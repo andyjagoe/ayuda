@@ -81,6 +81,7 @@ const JobPage = (props) => {
   const [disable, setDisabled] = useState(false)
   const [topic, setTopic] = useState(jobRecord.topic);
   const [status, setStatus] = useState('');
+  const [changesDisabled, setChangesDisabled] = useState(true);
   const [payer, setPayer] = useState(null);
   const [rate, setRate] = useState(null);
   const [notes, setNotes] = useState(jobRecord.agenda);
@@ -106,7 +107,7 @@ const JobPage = (props) => {
   useEffect(() => {
     if (firstRender.current) {
       firstRender.current = false
-      formatStatus(jobRecord.status);
+      handleStatus(jobRecord.status);
       return
     }
     setDisabled(formValidation())
@@ -136,6 +137,7 @@ const JobPage = (props) => {
         || rate == null
         || startBeforeEnd
         || startToFinish > 23
+        || changesDisabled
         ) {
       return true
     } else {
@@ -152,13 +154,19 @@ const JobPage = (props) => {
 
 
   // Handle formatting for status  value
-  const formatStatus  = (status) => {
+  const handleStatus  = (status) => {
     if (status === 'authorized')  {
-      setStatus('Confirmed')
+      setStatus('Confirmed');
+      setChangesDisabled(false);
+      return true
+    } else if (status === 'pending')  {
+      setChangesDisabled(false);
     } else {
-      setStatus(jobRecord.status.charAt(0).toUpperCase() + 
-      jobRecord.status.substr(1))
+      setChangesDisabled(true);
     }
+    setStatus(jobRecord.status.charAt(0).toUpperCase() + 
+    jobRecord.status.substr(1))
+    return  true
   }
 
   // Adjust end date when user changes start date
@@ -306,6 +314,7 @@ Password: ${jobRecord.password}
                     name="topic"
                     variant="outlined"
                     required
+                    disabled={changesDisabled}
                     fullWidth
                     id="topic"
                     label="What's the call about?"
@@ -317,13 +326,15 @@ Password: ${jobRecord.password}
                 </Grid>
                 <Grid item xs={6}>
                 <CustomerChooser 
-                  parentCallback={customerCallbackFunction} 
+                  parentCallback={customerCallbackFunction}
+                  disabled={changesDisabled}
                   initialCustomerId={jobRecord.payer_id}
                 />
                 </Grid>
                 <Grid item xs={6}>
                 <RateChooser 
-                  parentCallback={rateCallbackFunction} 
+                  parentCallback={rateCallbackFunction}
+                  disabled={changesDisabled}
                   initialRateId={jobRecord.rate_id}
                 />
                 </Grid>
@@ -332,6 +343,7 @@ Password: ${jobRecord.password}
                     <DateTimePicker 
                       required
                       disablePast
+                      disabled={changesDisabled}
                       maxDate={maxDate}
                       maxDateMessage="Schedule only availble for one year."
                       inputVariant="outlined"
@@ -351,6 +363,7 @@ Password: ${jobRecord.password}
                     <DateTimePicker 
                       required
                       disablePast
+                      disabled={changesDisabled}
                       openTo="hours"
                       maxDate={maxDate}
                       maxDateMessage="Schedule only availble for one year."
@@ -368,6 +381,7 @@ Password: ${jobRecord.password}
                     autoComplete="notes"
                     name="notes"
                     variant="outlined"
+                    disabled={changesDisabled}
                     fullWidth
                     multiline
                     rowsMax={4}
@@ -506,6 +520,7 @@ Password: ${jobRecord.password}
                 fullWidth
                 variant="contained"
                 color="secondary"
+                disabled={changesDisabled}
                 className={classes.submit}
                 startIcon={<DeleteIcon />}
                 onClick={handleClickOpen}

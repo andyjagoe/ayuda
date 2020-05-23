@@ -423,6 +423,53 @@ const sendReminderJobClientEmail = (user, jobRecord, customerDoc, rateDoc, type)
 }
 
 
+const sendReceiptJobProviderEmail = (user, jobRecord, customerDoc, rateDoc, receipt, receiptId) => {
+    const receipt_job_provider = {
+        template: "receipt-job-provider",
+        message: {
+            to: formatToName(user),
+        },
+        locals: {                 
+            name: user.name,
+            product_name: productName,
+            support_email: supportEmail,
+            preheader: `You've received a payment from ${customerDoc.name}.`,
+            current_job_doc: formatJobDoc(jobRecord, customerDoc, rateDoc),
+            receipt: receipt,
+            receipt_date: moment.unix(receipt.created.seconds).tz(jobRecord.tz).format('MMMM Do, YYYY'),
+            receipt_id: receiptId,
+        },        
+    }
+
+    return email.send(receipt_job_provider)
+}
+
+
+const sendReceiptJobClientEmail = (user, jobRecord, customerDoc, rateDoc, receipt, receiptId) => {
+    const receipt_job_client = {
+        template: "receipt-job-client",
+        message: {
+            to: formatToName({
+                name: customerDoc.name,
+                email: customerDoc.email
+            }),
+        },
+        locals: {                 
+            name: user.name,
+            product_name: productName,
+            support_email: supportEmail,
+            preheader: `This email is the receipt for your session with ${user.name}. No payment is due.`,
+            current_job_doc: formatJobDoc(jobRecord, customerDoc, rateDoc),
+            receipt: receipt,
+            receipt_date: moment.unix(receipt.created.seconds).tz(jobRecord.tz).format('MMMM Do, YYYY'),
+            receipt_id: receiptId,
+        },
+    }
+
+    return email.send(receipt_job_client)
+}
+
+
 
 module.exports = {
     sendWelcomeEmail,
@@ -437,4 +484,6 @@ module.exports = {
     sendConfirmedJobClientEmail,
     sendReminderJobProviderEmail,
     sendReminderJobClientEmail,
+    sendReceiptJobProviderEmail,
+    sendReceiptJobClientEmail,
 }

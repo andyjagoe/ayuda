@@ -4,7 +4,7 @@ const _ = require('lodash');
 const stripe = require('stripe')('sk_test_K0y591XvPNiX9UJaxdaZcSK6');
 
 
-exports.handler = async function(req, res, firestoreDb, emailHandler) {
+exports.handler = async function(req, res, firestoreDb, emailHandler, admin) {
     //console.log(req.body.data)
     const id = req.body.data.id;
     const uid = req.body.data.uid;
@@ -59,8 +59,9 @@ exports.handler = async function(req, res, firestoreDb, emailHandler) {
         case 'task.billing.standard':
             {
                 console.log('task.billing.standard')
-                const { userDoc, jobDoc, rateDoc } = await getSnaps(uid, id, firestoreDb)
-                await calculateBilling(uid, id, userDoc.zoomId, jobDoc, rateDoc, firestoreDb)
+                const { user, userDoc, jobDoc, customerDoc, rateDoc } = await getSnaps(uid, id, firestoreDb)
+                await calculateBilling(user, id, userDoc.zoomId, jobDoc, customerDoc, rateDoc, 
+                    firestoreDb, emailHandler, admin)
                 // 2. Remove zoom_map entries for this meeting (instead of in jobDeleteTasks)
             }
             break;
@@ -85,10 +86,11 @@ async function needsAuthorization (jobDoc, rateDoc) {
 }
 
 
-async function calculateBilling(uid, jobId, hostZoomId, jobDoc, rateDoc, firestoreDb) {
+async function calculateBilling(user, jobId, hostZoomId, jobDoc, customerDoc, rateDoc, 
+    firestoreDb, emailHandler, admin) {
     try {
         const events = await firestoreDb.collection('/billing')
-            .doc(uid)
+            .doc(user.uid)
             .collection('meetings')
             .doc(jobId)
             .collection('events')
@@ -142,7 +144,7 @@ async function calculateBilling(uid, jobId, hostZoomId, jobDoc, rateDoc, firesto
         }
 
         var meetingLengthInSeconds = 0
-        var itemizedBillingSegments = [] // bothOn time segments of at least 30 seconds long
+        var itemizedBillingSegments = []
         // Calculate meeting length in seconds
         for (i = 0; i < bothOnEndTimes.length; i++) {
             const t = bothOnEndTimes[i].when.diff(bothOnStartTimes[i].when, 'seconds')
@@ -173,7 +175,7 @@ async function calculateBilling(uid, jobId, hostZoomId, jobDoc, rateDoc, firesto
         console.log(`Rate: ${rateDoc.rate} Charge: ${charge} stripeCharge: ${stripeCharge}`)
 
         // Check that the provider is setup with Stripe account
-        const stripeSnap = await firestoreDb.collection('/stripe').doc(uid).get()
+        const stripeSnap = await firestoreDb.collection('/stripe').doc(user.uid).get()
         if (!stripeSnap.exists) {
             console.error('No stripe credentials!') 
             //TODO: kick off action to correct no provider stripe credentials
@@ -189,11 +191,11 @@ async function calculateBilling(uid, jobId, hostZoomId, jobDoc, rateDoc, firesto
 
         // If the meeting has a payment authorization, retrieve it
         const intent = await stripe.paymentIntents.retrieve(jobDoc.payment_intent)            
-        console.log(`PaymentIntent: ${JSON.stringify(intent)}`)
+        //console.log(`PaymentIntent: ${JSON.stringify(intent)}`)
 
         // Verify payment authorization is valid
         if (intent.status === 'succeeded') {
-            console.error(`This transaction has already been  processed: ${intent.status}`)
+            console.error(`This transaction has already been processed: ${intent.status}`)
             //TODO: send out request for new payment/authorization
             return false
         } else if (intent.status !== 'requires_capture') {
@@ -222,19 +224,19 @@ async function calculateBilling(uid, jobId, hostZoomId, jobDoc, rateDoc, firesto
 
         // Mark jobRecord as paid
         await firestoreDb.collection('/users')
-        .doc(uid)
+        .doc(user.uid)
         .collection('meetings')
         .doc(jobId)
         .set({
             status: 'paid'
         }, { merge: true })
 
-        // Prevent future charges for this job. -> remove zoom mapping meeting-ended event will not generate no billings?
+        //TODO: Prevent future charges for this job. -> remove zoom mapping meeting-ended event will not generate no billings?
         
         // Store record of payment with details needed for a receipt
         const receipt =  {
             description: payment.description,
-            created: moment(),
+            created: admin.firestore.Timestamp.fromDate(new Date()),
             billing_segments: itemizedBillingSegments,
             lengthInSeconds: meetingLengthInSeconds,
             rate: rateDoc.rate,
@@ -244,16 +246,25 @@ async function calculateBilling(uid, jobId, hostZoomId, jobDoc, rateDoc, firesto
             topic: jobDoc.topic,
             total_paid: payment.amount_received,
             provider_received: payment.transfer_data.amount,
+            statement_descriptor: payment.charges.data[0].calculated_statement_descriptor,
+            payment_method_details: payment.charges.data[0].payment_method_details,
         }
         const receiptResult = await firestoreDb.collection('/billing')
-        .doc(uid)
+        .doc(user.uid)
         .collection('meetings')
         .doc(jobId)
         .collection("receipts")
         .add(receipt)
 
+        //console.log(`Receipt: ${JSON.stringify(receiptResult)} ${JSON.stringify(receipt)}`)
+        //console.log(`Receipt Id: ${JSON.stringify(receiptResult.id)}`)
+        //console.log(`paymentResult: ${JSON.stringify(payment)}`)
+
         // Send receipt/processed emails to provider and client
-        console.log(`Receipt: ${JSON.stringify(receiptResult)} ${JSON.stringify(receipt)}`)
+        await emailHandler.sendReceiptJobClientEmail(user, jobDoc, customerDoc, rateDoc, receipt, receiptResult.id)
+        await emailHandler.sendReceiptJobProviderEmail(user, jobDoc, customerDoc, rateDoc, receipt, receiptResult.id)
+        
+        //TODO: error checking that email sent successfully
 
         return true
     } catch (error) {

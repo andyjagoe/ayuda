@@ -1,0 +1,58 @@
+<%- include('../html-header.ejs') %>
+
+                      <div class="f-fallback">
+                        <h1>Hi, <%= current_job_doc.customer_name %>!</h1>
+                        <p>Thanks for using <%= product_name %>. This email is the receipt for your session with <%= name %>. No payment is due.</p>
+                        <% if(receipt.payment_method_details.type === 'card') { %>
+                          <p>This purchase will appear as “<%= receipt.statement_descriptor %>” on your credit card statement for your <%= receipt.payment_method_details.card.brand %> ending in <%= receipt.payment_method_details.card.last4 %>.</p>
+                        <% } %>
+                        
+                        <table class="purchase" width="100%" cellpadding="0" cellspacing="0" role="presentation">
+                          <tr>
+                            <td>
+                              <h3>Invoice# <%= receipt_id %></h3></td>
+                            <td>
+                              <h3 class="align-right"><%= receipt_date %></h3></td>
+                          </tr>
+                          <tr>
+                            <td colspan="2">
+                              <table class="purchase_content" width="100%" cellpadding="0" cellspacing="0">
+                                <tr>
+                                  <th class="purchase_heading" align="left">
+                                    <p class="f-fallback">Description</p>
+                                  </th>
+                                  <th class="purchase_heading" align="right">
+                                    <p class="f-fallback">Amount</p>
+                                  </th>
+                                </tr>
+                                <tr>
+                                  <td width="80%" class="purchase_item">
+                                    <span class="f-fallback">
+                                    <%= current_job_doc.topic  %>: <%= current_job_doc.job_date_time %> for 
+                                    <%= (receipt.lengthInSeconds/60).toFixed(2)  %> minutes @ <%= current_job_doc.rate_name %> per hour
+                                  </span>
+                                </td>
+                                  <td class="align-right" width="20%" class="purchase_item"><span class="f-fallback">$<%= (receipt.total_paid /100).toFixed(2)  %></span></td>
+                                </tr>
+
+                                <tr>
+                                  <td width="80%" class="purchase_footer" valign="middle">
+                                    <p class="f-fallback purchase_total purchase_total--label">Total</p>
+                                  </td>
+                                  <td width="20%" class="purchase_footer" valign="middle">
+                                    <p class="f-fallback purchase_total">$<%= (receipt.total_paid /100).toFixed(2)  %></p>
+                                  </td>
+                                </tr>
+                              </table>
+                            </td>
+                          </tr>
+                        </table>
+
+                        <p>If you have any questions about this receipt, please <a href="mailto:<%= support_email %>">email our customer success team</a>.</p>
+                        <p>Thanks,
+                          <br>The <%= product_name %> Team</p>
+                        
+                      </div>
+
+
+<%- include('../html-footer.ejs') %>

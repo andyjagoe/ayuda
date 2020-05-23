@@ -25,6 +25,8 @@ import { makeStyles } from '@material-ui/core/styles';
 import { UserContext } from "../providers/UserProvider";
 import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
+import Alert from '@material-ui/lab/Alert';
+import Collapse from '@material-ui/core/Collapse';
 import { DateTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import CustomerChooser from './CustomerChooser';
 import RateChooser from './RateChooser';
@@ -302,6 +304,7 @@ Password: ${jobRecord.password}
             <Typography component="h1" variant="h5">
               Job details
             </Typography>
+
             <form 
               className={classes.form} 
               noValidate
@@ -504,6 +507,13 @@ Password: ${jobRecord.password}
                 </Grid>
 
             </Grid>
+
+            <Collapse in={changesDisabled} timeout="0">
+              <Alert severity="info">
+                Job has started. No changes or cancellations.
+              </Alert>
+            </Collapse>
+
             <Button
                 //type="submit"
                 fullWidth

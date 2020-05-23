@@ -148,6 +148,15 @@ const JobPage = (props) => {
       return moment(Math[method]((+date) / (+duration)) * (+duration)); 
   } 
 
+
+  // Adjust end date when user changes start date
+  const updateEndDate = (event) => {
+    const duration = moment(end).diff(moment(start), 'minutes')
+    const updatedEndDate = moment(event).tz(jobRecord.tz).add(duration,"m").toDate()
+    handleEndDateChange(updatedEndDate);
+  }
+
+
   // Handle password show/hide
   const handleClickShowPassword = () => {
     setValues({ ...values, showPassword: !values.showPassword });
@@ -322,8 +331,8 @@ Password: ${jobRecord.password}
                       name="start"
                       value={start}
                       onChange={val => {
+                        updateEndDate(val);
                         handleStartDateChange(val);
-                        handleEndDateChange(val);
                       }}
                       />
                   </MuiPickersUtilsProvider>
@@ -492,7 +501,7 @@ Password: ${jobRecord.password}
                 startIcon={<DeleteIcon />}
                 onClick={handleClickOpen}
             >
-                Delete Job
+                Cancel Job
             </Button>
             </form>
 

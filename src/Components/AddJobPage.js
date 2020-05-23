@@ -163,6 +163,15 @@ export default function AddJobPage(props) {
 
   }
 
+
+  // Adjust end date when user changes start date
+  const updateEndDate = (event) => {
+    const duration = moment(end).diff(moment(start), 'minutes')
+    const updatedEndDate = moment(event).add(duration,"m").toDate()
+    handleEndDateChange(updatedEndDate);
+  }
+
+  
   // Receive customer data from customer child component
   const customerCallbackFunction = (childData) => {
     setPayer(childData)
@@ -226,8 +235,8 @@ export default function AddJobPage(props) {
                       value={start}
                       //onChange={handleStartDateChange}
                       onChange={val => {
+                        updateEndDate(val);
                         handleStartDateChange(val);
-                        handleEndDateChange(val);
                       }}
                       />
                   </MuiPickersUtilsProvider>

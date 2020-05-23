@@ -21,6 +21,7 @@ exports.handler = async function(req, res, firestoreDb, admin, zoomHelper, taskH
                     const {userDoc, jobDoc} = await zoomHelper.dataFromZoomMap(host_id, id, firestoreDb)
                     const when = admin.firestore.Timestamp.fromDate(new Date(payload.object.start_time))
                     await addMeetingEvent(userDoc.uid, jobDoc.id, event, when, payload, firestoreDb)
+                    await handleMeetingStarted(userDoc.uid, jobDoc.id, firestoreDb)
                 } catch (error) {
                     console.error(error)
                 }                
@@ -77,6 +78,25 @@ exports.handler = async function(req, res, firestoreDb, admin, zoomHelper, taskH
     // Return a response to acknowledge receipt of the event
     return res.sendStatus(200)
     
+}
+
+
+const handleMeetingStarted = async (uid, jobId, firestoreDb) => {
+    try {
+        await firestoreDb.collection('/users')
+        .doc(uid)
+        .collection('meetings')
+        .doc(jobId)
+        .set({
+            status: 'started'
+        }, { merge: true })
+        
+        return true
+    } catch (error) {
+        console.error(error);
+        console.log(`handleMeetingStarted Error: ${JSON.stringify(error)}`)
+        return false
+    }    
 }
 
 

@@ -1,7 +1,7 @@
 var moment = require('moment-timezone');
 const functions = require('firebase-functions');
 const axios = require('axios');
-const zoomToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOm51bGwsImlzcyI6IkFUZ2l2aEhuUUh5SDlYOXE0Z0E3aHciLCJleHAiOjE1OTAxMTgzNjUsImlhdCI6MTU4OTUxMzU2NX0.c217fUqdDN4ZVMqM2otRKMxiv3aB_gYOYnV7pzL3Xhk';
+const zoomToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOm51bGwsImlzcyI6IkFUZ2l2aEhuUUh5SDlYOXE0Z0E3aHciLCJleHAiOjE1OTA4NTc2NDMsImlhdCI6MTU5MDI1Mjg0M30.Nd5qmYtTXW3Ys2-saAS6ut0-hYf_7kL86HjXFn7aCgk';
 
 
 exports.handler = function(data, context, firestoreDb, admin) {
@@ -65,9 +65,6 @@ exports.handler = function(data, context, firestoreDb, admin) {
     const tzAdjustedStart = moment(start).tz(tz);  //TODO catch cases when tz missing
     
 
-    var currentJobDoc = null;
-    var newJobDoc = null;
-
     return firestoreDb.collection('/users')
     .doc(uid)
     .collection('meetings')
@@ -97,8 +94,9 @@ exports.handler = function(data, context, firestoreDb, admin) {
         });
     })   
     .then(response => {
-        //console.log('response data: ', response.data);
-        newJobDoc = {
+        //console.log(`Response: ${JSON.stringify(response.data)}`);
+
+        const newJobDoc = {
             payer: payer,
             payer_id: payer_id,
             rate_id: rate_id,
@@ -115,12 +113,12 @@ exports.handler = function(data, context, firestoreDb, admin) {
             .set(newJobDoc, { merge: true });
     })
     .then(ref => {
-        //console.log('Job successfully updated');
+        console.log('Job successfully updated');
         return true;
     })
     .catch(error => {
-        console.error("updateJob Error: ", error);
-        return false;
+        console.error(`Error: ${JSON.stringify(error)}`);
+        throw new functions.https.HttpsError('failed-precondition', error.message);
     });
 
 }

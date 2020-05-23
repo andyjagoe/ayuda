@@ -58,7 +58,7 @@ exports.handler = function(data, context, firestoreDb, admin) {
     })
     .catch(error => {
         console.error("addCustomer Error: ", error);
-        return false;
+        throw new functions.https.HttpsError('failed-precondition', error.message);
     });
 
 }

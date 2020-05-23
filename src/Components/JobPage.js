@@ -80,6 +80,7 @@ const JobPage = (props) => {
   // Handle updateable form elements
   const [disable, setDisabled] = useState(false)
   const [topic, setTopic] = useState(jobRecord.topic);
+  const [status, setStatus] = useState('');
   const [payer, setPayer] = useState(null);
   const [rate, setRate] = useState(null);
   const [notes, setNotes] = useState(jobRecord.agenda);
@@ -105,6 +106,7 @@ const JobPage = (props) => {
   useEffect(() => {
     if (firstRender.current) {
       firstRender.current = false
+      formatStatus(jobRecord.status);
       return
     }
     setDisabled(formValidation())
@@ -148,6 +150,16 @@ const JobPage = (props) => {
       return moment(Math[method]((+date) / (+duration)) * (+duration)); 
   } 
 
+
+  // Handle formatting for status  value
+  const formatStatus  = (status) => {
+    if (status === 'authorized')  {
+      setStatus('Confirmed')
+    } else {
+      setStatus(jobRecord.status.charAt(0).toUpperCase() + 
+      jobRecord.status.substr(1))
+    }
+  }
 
   // Adjust end date when user changes start date
   const updateEndDate = (event) => {
@@ -240,26 +252,25 @@ Password: ${jobRecord.password}
 
   // Handle update job
   async function updateJob() {
-    var updateJob = firebase.functions().httpsCallable('updateJob');
-    await updateJob({
-      job_id: props.jobId, 
-      topic: topic,
-      payer: payer.name,
-      payer_id: payer.id,
-      rate_id: rate.id,
-      notes: notes,
-      zoom_id: jobRecord.id,
-      start: start.toISOString(),
-      duration: moment(end).diff(moment(start), 'minutes'),
-      tz: jobRecord.tz
-    })
-    .then(function(result) {
-        navigate('/');
-    })
-    .catch(function(error) {
-        console.log(error.message);
-        //TODO: Handle user navigation for error state
-    });
+    try {
+      var updateJob = firebase.functions().httpsCallable('updateJob');
+      await updateJob({
+        job_id: props.jobId, 
+        topic: topic,
+        payer: payer.name,
+        payer_id: payer.id,
+        rate_id: rate.id,
+        notes: notes,
+        zoom_id: jobRecord.id,
+        start: start.toISOString(),
+        duration: moment(end).diff(moment(start), 'minutes'),
+        tz: jobRecord.tz
+      })
+      navigate('/');
+    } catch (error) {
+      console.error("Error: ", error);
+      return false
+    }    
   }
 
 
@@ -379,7 +390,7 @@ Password: ${jobRecord.password}
                     fullWidth
                     id="status"
                     label="Status"
-                    value={jobRecord.status}
+                    value={status}
                 />
                 </Grid>
                 <Grid item xs={12}>

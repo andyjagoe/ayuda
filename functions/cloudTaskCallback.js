@@ -86,6 +86,25 @@ async function needsAuthorization (jobDoc, rateDoc) {
 }
 
 
+async function handleMeetingStarted (user, jobId) {
+    try {
+        await firestoreDb.collection('/users')
+        .doc(user.uid)
+        .collection('meetings')
+        .doc(jobId)
+        .set({
+            status: 'started'
+        }, { merge: true })
+        
+        return true
+    } catch (error) {
+        console.error(error);
+        console.log(`handleMeetingStarted Error: ${JSON.stringify(error)}`)
+        return false
+    }    
+}
+
+
 async function calculateBilling(user, jobId, hostZoomId, jobDoc, customerDoc, rateDoc, 
     firestoreDb, emailHandler, admin) {
     try {
@@ -342,8 +361,8 @@ async function getSnaps(uid, jobId, firestoreDb) {
             rateDoc: rateDoc,
         }
 
-    } catch (error) {
-        console.error("Error: ", error);
-        return false
-    }
+        } catch (error) {
+            console.error("Error: ", error);
+            return false
+        }
 }

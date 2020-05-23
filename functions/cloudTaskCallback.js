@@ -86,28 +86,11 @@ async function needsAuthorization (jobDoc, rateDoc) {
 }
 
 
-async function handleMeetingStarted (user, jobId) {
-    try {
-        await firestoreDb.collection('/users')
-        .doc(user.uid)
-        .collection('meetings')
-        .doc(jobId)
-        .set({
-            status: 'started'
-        }, { merge: true })
-        
-        return true
-    } catch (error) {
-        console.error(error);
-        console.log(`handleMeetingStarted Error: ${JSON.stringify(error)}`)
-        return false
-    }    
-}
-
 
 async function calculateBilling(user, jobId, hostZoomId, jobDoc, customerDoc, rateDoc, 
     firestoreDb, emailHandler, admin) {
     try {
+        // get all events from the job
         const events = await firestoreDb.collection('/billing')
             .doc(user.uid)
             .collection('meetings')
@@ -182,9 +165,19 @@ async function calculateBilling(user, jobId, hostZoomId, jobDoc, customerDoc, ra
         //Check that charge exceeds minimum of $1
         if (charge < 1) {
             console.error(`Minimum charge of $1 not met: ${charge}`)
-            //TODO: kick off action related to minimum charge not met. Or just process min charge?
+            //TODO: in future consider emailing provider to say minimum meeting charge not met?
             return false
         }
+
+        // Mark jobRecord as completed
+        await firestoreDb.collection('/users')
+        .doc(user.uid)
+        .collection('meetings')
+        .doc(jobId)
+        .set({
+            status: 'completed'
+        }, { merge: true })
+        
 
         // Convert amount into format Stripe uses without decimals
         const stripeCharge = Math.round(charge * 100)

@@ -83,6 +83,7 @@ const JobPage = (props) => {
   const [disable, setDisabled] = useState(false)
   const [topic, setTopic] = useState(jobRecord.topic);
   const [status, setStatus] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
   const [changesDisabled, setChangesDisabled] = useState(true);
   const [payer, setPayer] = useState(null);
   const [rate, setRate] = useState(null);
@@ -156,15 +157,22 @@ const JobPage = (props) => {
 
 
   // Handle formatting for status  value
-  const handleStatus  = (status) => {
+  const handleStatus = (status) => {
     if (status === 'authorized')  {
       setStatus('Confirmed');
       setChangesDisabled(false);
       return true
     } else if (status === 'pending')  {
       setChangesDisabled(false);
+    } else if (status === 'completed')  {
+      setChangesDisabled(true);
+      setAlertMessage('Job has ended. No payment received.')
+    } else if (status === 'paid')  {
+      setChangesDisabled(true);
+      setAlertMessage('Job has ended. Payment received.')
     } else {
       setChangesDisabled(true);
+      setAlertMessage('Job has started. No changes or cancellations.')
     }
     setStatus(jobRecord.status.charAt(0).toUpperCase() + 
     jobRecord.status.substr(1))
@@ -510,7 +518,7 @@ Password: ${jobRecord.password}
 
             <Collapse in={changesDisabled}>
               <Alert severity="info">
-                Job has started. No changes or cancellations.
+                {alertMessage}
               </Alert>
             </Collapse>
 

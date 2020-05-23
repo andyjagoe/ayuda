@@ -508,7 +508,7 @@ Password: ${jobRecord.password}
 
             </Grid>
 
-            <Collapse in={changesDisabled} timeout="0">
+            <Collapse in={changesDisabled}>
               <Alert severity="info">
                 Job has started. No changes or cancellations.
               </Alert>

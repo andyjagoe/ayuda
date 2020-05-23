@@ -245,7 +245,6 @@ Password: ${jobRecord.password}
     })
     .catch(function(error) {
         console.log(error.message);
-        //TODO: Handle user navigation for error state
     });
   }
 
@@ -268,8 +267,7 @@ Password: ${jobRecord.password}
       })
       navigate('/');
     } catch (error) {
-      console.error("Error: ", error);
-      return false
+        console.log(error.message);
     }    
   }
 

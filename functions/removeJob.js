@@ -36,6 +36,11 @@ exports.handler = function(data, context, firestoreDb) {
             console.log('No such job!');
             throw new functions.https.HttpsError('failed-precondition', 'Unable to verify state.');
         }
+        if(!(doc.data().status === 'pending' || doc.data().status === 'authorized')) {
+            throw new functions.https.HttpsError('failed-precondition', 
+                `Cannot cancel job with state: ${doc.data().status}`);
+        }
+
         return axios({
             method: 'delete',
             url: `https://api.zoom.us/v2/meetings/${doc.data().id}`,

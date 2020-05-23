@@ -75,7 +75,11 @@ exports.handler = function(data, context, firestoreDb, admin) {
         console.log('No such document!');
         throw new functions.https.HttpsError('failed-precondition', 'Unable to verify state.');
         }
-        //console.log('Verified user owns this meeting');
+        if(!(doc.data().status === 'pending' || doc.data().status === 'authorized')) {
+            throw new functions.https.HttpsError('failed-precondition', 
+                `Cannot update job with state: ${doc.data().status}`);
+        }
+
         return axios({
             method: 'patch',
             url: `https://api.zoom.us/v2/meetings/${zoom_id}`,
@@ -117,7 +121,8 @@ exports.handler = function(data, context, firestoreDb, admin) {
         return true;
     })
     .catch(error => {
-        console.error(`Error: ${JSON.stringify(error)}`);
+        console.error(error);
+        console.log(`Error: ${JSON.stringify(error.message)}`);
         throw new functions.https.HttpsError('failed-precondition', error.message);
     });
 

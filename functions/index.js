@@ -36,10 +36,10 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'addJob') {
     });
 }
 
-if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'removeJob') {
-    const removeJob = require('./removeJob');
-    exports.removeJob = functions.https.onCall((data, context) => {
-        return removeJob.handler(data, context, firestoreDb);
+if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'cancelJob') {
+    const cancelJob = require('./cancelJob');
+    exports.cancelJob = functions.https.onCall((data, context) => {
+        return cancelJob.handler(data, context, firestoreDb);
     });
 }
 
@@ -62,15 +62,7 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'jobUpdatedTasks
     const jobUpdatedTasks = require('./jobUpdatedTasks');
     exports.jobUpdatedTasks = functions.firestore.document('/users/{uid}/meetings/{meeting_id}')
     .onUpdate((change, context) => {    
-        return jobUpdatedTasks.handler(change, context, firestoreDb, emailHandler, taskHandler);
-    });
-}
-
-if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'jobDeletedTasks') {
-    const jobDeletedTasks = require('./jobDeletedTasks');
-    exports.jobDeletedTasks = functions.firestore.document('/users/{uid}/meetings/{meeting_id}')
-    .onDelete((snapshot, context) => {    
-        return jobDeletedTasks.handler(snapshot, context, firestoreDb, emailHandler, taskHandler, zoomHelper);
+        return jobUpdatedTasks.handler(change, context, firestoreDb, emailHandler, taskHandler, zoomHelper);
     });
 }
 

@@ -41,23 +41,14 @@ exports.handler = function(data, context, firestoreDb) {
                 `Cannot cancel job with state: ${doc.data().status}`);
         }
 
-        return axios({
-            method: 'delete',
-            url: `https://api.zoom.us/v2/meetings/${doc.data().id}`,
-            headers: {
-              'Authorization': `Bearer ${zoomToken}`,
-              'User-Agent': 'Zoom-api-Jwt-Request',
-              'content-type': 'application/json'
-            }
-        });
-    })    
-    .then(response => {
-        //console.log(response)
         return firestoreDb.collection('/users')
-        .doc(uid)
-        .collection('meetings')
-        .doc(id)
-        .delete();
+            .doc(uid)
+            .collection('meetings')
+            .doc(id)
+            .set({
+                status: 'cancelled',
+                cancelled: true,
+            }, { merge: true });
     })
     .then(ref => {
         //console.log('Removed job with ID: ', id);

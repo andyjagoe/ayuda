@@ -117,7 +117,8 @@ exports.handler = function(data, context, firestoreDb, admin) {
             start_url: response.data.start_url,
             join_url: response.data.join_url,
             password: response.data.password,
-            status: 'pending',                
+            status: 'pending',
+            cancelled: false,               
         }
         return firestoreDb.collection('/users')
             .doc(uid)

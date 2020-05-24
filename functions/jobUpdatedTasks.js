@@ -82,7 +82,7 @@ async function needsAuthorization (jobDoc, rateDoc) {
 }
 
 
-exports.handler = async function(change, context, firestoreDb, emailHandler, taskHandler) {
+exports.handler = async function(change, context, firestoreDb, emailHandler, taskHandler, zoomHelper) {
     var currentJobDoc = change.before.data();
     var newJobDoc = change.after.data();
     currentJobDoc.ref_id = context.params.meeting_id
@@ -91,7 +91,7 @@ exports.handler = async function(change, context, firestoreDb, emailHandler, tas
 
 
     // Check to see if this is a pending job that has been authorized
-    if (currentJobDoc.status === 'pending' && newJobDoc.status === 'authorized') {
+    if (currentJobDoc.status !== 'authorized' && newJobDoc.status === 'authorized') {
         //TODO: do we need to check validity of payment intent?
 
         try {
@@ -110,10 +110,28 @@ exports.handler = async function(change, context, firestoreDb, emailHandler, tas
     if (currentJobDoc.status !== 'completed' && newJobDoc.status === 'completed') {
         try {
             await taskHandler.cancelAllReminders(uid, newJobDoc.ref_id, firestoreDb)
-            
-            //TODO: enable removing zoom map when we have option to run billing
-            //await zoomHelper.removeZoomMap(hostZoomId, jobDoc, firestoreDb)
+        
+            //const { userDoc } = await getSnaps( uid, currentJobDoc, newJobDoc, firestoreDb)
+            //TODO: send emails that meeting has been completed
+            //await zoomHelper.removeZoomMap(userDoc.zoomId, newJobDoc, firestoreDb)
 
+            return true           
+        } catch (error) {
+            console.error("Error: ", error);
+            return false
+        }   
+    }
+
+    if (currentJobDoc.status !== 'cancelled' && newJobDoc.status === 'cancelled') {
+        try {
+            const { user,  userDoc, newCustomerDoc, newRateDoc 
+            } = await getSnaps( uid, currentJobDoc, newJobDoc, firestoreDb)
+
+            await emailHandler.sendCancelJobProviderEmail(user, newJobDoc, newCustomerDoc, newRateDoc);
+            await emailHandler.sendCancelJobClientEmail(user, newJobDoc, newCustomerDoc, newRateDoc);
+            await taskHandler.cancelAllReminders(user.uid, newJobDoc.ref_id, firestoreDb)
+            await zoomHelper.removeZoomMap(userDoc.zoomId, newJobDoc, firestoreDb)
+    
             return true           
         } catch (error) {
             console.error("Error: ", error);

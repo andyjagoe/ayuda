@@ -170,6 +170,9 @@ const JobPage = (props) => {
     } else if (status === 'paid')  {
       setChangesDisabled(true);
       setAlertMessage('Job has ended. Payment received.')
+    } else if (status === 'cancelled')  {
+      setChangesDisabled(true);
+      setAlertMessage('This job has been cancelled.')
     } else {
       setChangesDisabled(true);
       setAlertMessage('Job has started. No changes or cancellations.')
@@ -252,9 +255,9 @@ Password: ${jobRecord.password}
     setOpen(false);
   };
 
-  async function removeJob() {
-    var removeJob = firebase.functions().httpsCallable('removeJob');
-    await removeJob({
+  async function cancelJob() {
+    var cancelJob = firebase.functions().httpsCallable('cancelJob');
+    await cancelJob({
       id: props.jobId, 
     })
     .then(function(result) {
@@ -558,7 +561,7 @@ Password: ${jobRecord.password}
                 <Button onClick={handleClose} color="primary">
                   Cancel
                 </Button>
-                <Button onClick={removeJob} color="primary" autoFocus>
+                <Button onClick={cancelJob} color="primary" autoFocus>
                   OK
                 </Button>
               </DialogActions>

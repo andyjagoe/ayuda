@@ -28,6 +28,7 @@ export default class Jobs extends Component {
             .collection("/users")
             .doc(uid)
             .collection('meetings')
+            .where('cancelled','==', false)
             .where('t', '>', moment().subtract(12,"h").toDate()) //upcoming as of 12 hours ago
             .orderBy('t')
             .get()

@@ -23,6 +23,9 @@ import Container from '@material-ui/core/Container';
 import { navigate } from "@reach/router"
 import { makeStyles } from '@material-ui/core/styles';
 import { UserContext } from "../providers/UserProvider";
+import clsx from 'clsx';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import { green } from '@material-ui/core/colors';
 import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import Alert from '@material-ui/lab/Alert';
@@ -66,7 +69,26 @@ const useStyles = makeStyles((theme) => ({
   },
   details_container: {
     marginBottom: theme.spacing(3),
-  }
+  },
+  wrapper: {
+    margin: theme.spacing(3, 0, 2),
+    position: 'relative',
+    width: '100%',
+  },
+  buttonSuccess: {
+    backgroundColor: green[500],
+    '&:hover': {
+      backgroundColor: green[700],
+    },
+  },
+  buttonProgress: {
+    color: green[500],
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    marginTop: -12,
+    marginLeft: -12,
+  },
 }));
 
 const JobPage = (props) => {
@@ -105,6 +127,12 @@ const JobPage = (props) => {
   const [endError, setEndError] = useState(false)
   const [endErrorLabel, setEndErrorLabel] = useState(null)
   
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const buttonClassname = clsx({
+    [classes.buttonSuccess]: success,
+  });
+
 
   // Validate data before allowing save/update
   useEffect(() => {
@@ -255,24 +283,36 @@ Password: ${jobRecord.password}
     setOpen(false);
   };
 
+  
   async function cancelJob() {
+    setDisabled(true)
+
     var cancelJob = firebase.functions().httpsCallable('cancelJob');
     await cancelJob({
       id: props.jobId, 
     })
     .then(function(result) {
         console.log(result.data);
+        setDisabled(false)
         navigate('/');
     })
     .catch(function(error) {
         console.log(error.message);
-    });
+        setDisabled(false)
+      });
   }
 
 
   // Handle update job
   async function updateJob() {
     try {
+      setDisabled(true)
+
+      if (!loading) {
+        setSuccess(false);
+        setLoading(true);
+      }
+
       var updateJob = firebase.functions().httpsCallable('updateJob');
       await updateJob({
         job_id: props.jobId, 
@@ -286,9 +326,15 @@ Password: ${jobRecord.password}
         duration: moment(end).diff(moment(start), 'minutes'),
         tz: jobRecord.tz
       })
+      setDisabled(false)
+      setSuccess(true);
+      setLoading(false);
       navigate('/');
     } catch (error) {
         console.log(error.message);
+        setDisabled(false)
+        setSuccess(false);
+        setLoading(false);
     }    
   }
 
@@ -525,18 +571,23 @@ Password: ${jobRecord.password}
               </Alert>
             </Collapse>
 
-            <Button
-                //type="submit"
-                fullWidth
-                variant="contained"
-                color="default"
-                className={classes.submit}
-                startIcon={<SaveIcon />}
-                onClick={updateJob}
-                disabled={disable}
-            >
-                Save Job
-            </Button>
+            <div className={classes.root}>
+              <div className={classes.wrapper}>
+                <Button
+                  variant="contained"
+                  color="default"
+                  fullWidth
+                  className={buttonClassname}
+                  startIcon={<SaveIcon />}
+                  onClick={updateJob}
+                  disabled={disable}
+                >
+                  Save Job
+                </Button>
+                {loading && <CircularProgress size={24} className={classes.buttonProgress} />}
+              </div>
+            </div>
+
             <Button
                 fullWidth
                 variant="contained"
@@ -561,7 +612,7 @@ Password: ${jobRecord.password}
                 <Button onClick={handleClose} color="primary">
                   Cancel
                 </Button>
-                <Button onClick={cancelJob} color="primary" autoFocus>
+                <Button onClick={cancelJob} color="primary" autoFocus disabled={changesDisabled}>
                   OK
                 </Button>
               </DialogActions>

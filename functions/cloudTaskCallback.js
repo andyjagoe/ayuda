@@ -183,7 +183,7 @@ async function calculateBilling(user, jobId, hostZoomId, jobDoc, customerDoc, ra
         const stripeCharge = Math.round(charge * 100)
 
         // Calculate share transferred to provider after our service fee
-        const transfer = Math.round(stripeCharge - (60 + (stripeCharge * 4.9)/100)) //TODO: make sure we have a min charge so this is > 0
+        const transfer = Math.round(stripeCharge - (60 + (stripeCharge * 4.9)/100))
         console.log(`Rate: ${rateDoc.rate} Charge: ${charge} stripeCharge: ${stripeCharge}`)
 
         // Check that the provider is setup with Stripe account

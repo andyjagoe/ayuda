@@ -11,6 +11,9 @@ import Container from '@material-ui/core/Container';
 import { navigate } from "@reach/router"
 import { makeStyles } from '@material-ui/core/styles';
 import { UserContext } from "../providers/UserProvider";
+import clsx from 'clsx';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import { green } from '@material-ui/core/colors';
 import MenuAppBar from './MenuAppBar';
 import CustomerChooser from './CustomerChooser';
 import RateChooser from './RateChooser';
@@ -36,8 +39,28 @@ const useStyles = makeStyles((theme) => ({
     width: '100%', // Fix IE 11 issue.
     marginTop: theme.spacing(3),
   },
-  submit: {
+  root: {
+    display: 'flex',
+    alignItems: 'center',
+  },
+  wrapper: {
     margin: theme.spacing(3, 0, 2),
+    position: 'relative',
+    width: '100%',
+  },
+  buttonSuccess: {
+    backgroundColor: green[500],
+    '&:hover': {
+      backgroundColor: green[700],
+    },
+  },
+  buttonProgress: {
+    color: green[500],
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    marginTop: -12,
+    marginLeft: -12,
   },
 }));
 
@@ -71,7 +94,11 @@ export default function AddJobPage(props) {
   const [notesError, setNotesError] = useState(null)
 
 
-
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const buttonClassname = clsx({
+    [classes.buttonSuccess]: success,
+  });
 
   const maxDate = moment().add(1,"Y");
   function round(date, duration, method) {
@@ -130,6 +157,7 @@ export default function AddJobPage(props) {
 
   }
   
+
   async function handleSubmit(event) {
     event.preventDefault();
 
@@ -142,6 +170,13 @@ export default function AddJobPage(props) {
     
     if (!didTryrequest) {
         setDidTryrequest(true)
+        setDisabled(true)
+
+        if (!loading) {
+          setSuccess(false);
+          setLoading(true);
+        }
+
         var addJob = firebase.functions().httpsCallable('addJob');
         await addJob({payer: payer.name,
           payer_id: payer.id, 
@@ -153,10 +188,16 @@ export default function AddJobPage(props) {
         })
         .then(function(result) {
             console.log(result.data);
+            setDisabled(false)
+            setSuccess(true);
+            setLoading(false);
             navigate('/');
         })
         .catch(function(error) {
             console.log(error.message);
+            setDisabled(false)
+            setSuccess(false);
+            setLoading(false);
             //TODO: Handle user navigation for error state
         });
     }            
@@ -233,7 +274,6 @@ export default function AddJobPage(props) {
                       id="start"
                       name="start"
                       value={start}
-                      //onChange={handleStartDateChange}
                       onChange={val => {
                         updateEndDate(val);
                         handleStartDateChange(val);
@@ -276,16 +316,23 @@ export default function AddJobPage(props) {
                 />
                 </Grid>
             </Grid>
-            <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                color="primary"
-                disabled={disable}
-                className={classes.submit}
-            >
-                Add Job
-            </Button>
+
+            <div className={classes.root}>
+              <div className={classes.wrapper}>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                  fullWidth
+                  className={buttonClassname}
+                  disabled={disable}
+                >
+                  Add Job
+                </Button>
+                {loading && <CircularProgress size={24} className={classes.buttonProgress} />}
+              </div>
+            </div>
+
             <Grid container justify="flex-end">
                 <Grid item>
                 <Link href="#" variant="body2">

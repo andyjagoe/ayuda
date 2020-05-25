@@ -1,86 +1,19 @@
 const _ = require('lodash/core');
 const moment = require('moment');
-const stripe = require('stripe')('sk_test_K0y591XvPNiX9UJaxdaZcSK6');
 
 
-async function getSnaps(uid, currentJobDoc, newJobDoc, firestoreDb) {
-    try {
-        const [
-            userSnap,
-            currentCustomerSnap,
-            newCustomerSnap,
-            currentRateSnap,
-            newRateSnap        
-        ] = await Promise.all([
-            firestoreDb.collection('/users').doc(uid).get(),
-            firestoreDb.collection('/users').doc(uid).collection('customers').doc(currentJobDoc.payer_id).get(),
-            firestoreDb.collection('/users').doc(uid).collection('customers').doc(newJobDoc.payer_id).get(),
-            firestoreDb.collection('/users').doc(uid).collection('rates').doc(currentJobDoc.rate_id).get(),
-            firestoreDb.collection('/users').doc(uid).collection('rates').doc(newJobDoc.rate_id).get(),
-        ])
 
-        // check for empty documents
-        if (!userSnap.exists) {
-            console.log('No such user!')
-            return false
-        }
-        if (!currentCustomerSnap.exists) {
-            console.log('No such customer (current)!') 
-            return false
-        }
-        if (!newCustomerSnap.exists) {
-            console.log('No such customer (new)!') 
-            return false
-        }
-        if (!currentRateSnap.exists) {
-            console.log('No such rate (current)!') 
-            return false
-        }
-        if (!newRateSnap.exists) {
-            console.log('No such rate (new)!') 
-            return false
-        }
+exports.handler = async function(change, context, firestoreDb, emailHandler, taskHandler, zoomHelper, 
+        admin, billing) {
 
-        const user = {
-            uid: uid,
-            name: userSnap.data().displayName,
-            email: userSnap.data().email,
-        }    
-        var currentCustomerDoc = currentCustomerSnap.data()
-        currentCustomerDoc.id = currentCustomerSnap.id;
-        var newCustomerDoc = newCustomerSnap.data()
-        newCustomerDoc.id = newCustomerSnap.id;
-        var currentRateDoc = currentRateSnap.data()
-        currentRateDoc.id = currentRateSnap.id;
-        var newRateDoc = newRateSnap.data()
-        newRateDoc.id = newRateSnap.id;
-
-        return {
-            user: user,
-            userDoc: userSnap.data(),
-            currentCustomerDoc: currentCustomerDoc,
-            newCustomerDoc: newCustomerDoc,
-            currentRateDoc: currentRateDoc,
-            newRateDoc: newRateDoc,
-        }
-    } catch (error) {
-        console.error("Error: ", error);
-        return false
-    }
-}
-
-
-exports.handler = async function(change, context, firestoreDb, emailHandler, 
-                                taskHandler, zoomHelper, admin, billing) {
     const uid = context.params.uid;    
     var currentJobDoc = change.before.data();
     var newJobDoc = change.after.data();
     currentJobDoc.ref_id = context.params.meeting_id
     newJobDoc.ref_id = context.params.meeting_id
 
-    console.log(`currentJobDoc: ${JSON.stringify(currentJobDoc)}`);
-    console.log(`newJobDoc: ${JSON.stringify(newJobDoc)}`);
-
+    //console.log(`currentJobDoc: ${JSON.stringify(currentJobDoc)}`);
+    //console.log(`newJobDoc: ${JSON.stringify(newJobDoc)}`);
 
     // Check to see if this is a pending job that has been authorized
     if (currentJobDoc.status !== 'authorized' && newJobDoc.status === 'authorized') {
@@ -246,4 +179,71 @@ exports.handler = async function(change, context, firestoreDb, emailHandler,
 
 
     return true
+}
+
+
+const getSnaps = async (uid, currentJobDoc, newJobDoc, firestoreDb) => {
+    try {
+        const [
+            userSnap,
+            currentCustomerSnap,
+            newCustomerSnap,
+            currentRateSnap,
+            newRateSnap        
+        ] = await Promise.all([
+            firestoreDb.collection('/users').doc(uid).get(),
+            firestoreDb.collection('/users').doc(uid).collection('customers').doc(currentJobDoc.payer_id).get(),
+            firestoreDb.collection('/users').doc(uid).collection('customers').doc(newJobDoc.payer_id).get(),
+            firestoreDb.collection('/users').doc(uid).collection('rates').doc(currentJobDoc.rate_id).get(),
+            firestoreDb.collection('/users').doc(uid).collection('rates').doc(newJobDoc.rate_id).get(),
+        ])
+
+        // check for empty documents
+        if (!userSnap.exists) {
+            console.log('No such user!')
+            return false
+        }
+        if (!currentCustomerSnap.exists) {
+            console.log('No such customer (current)!') 
+            return false
+        }
+        if (!newCustomerSnap.exists) {
+            console.log('No such customer (new)!') 
+            return false
+        }
+        if (!currentRateSnap.exists) {
+            console.log('No such rate (current)!') 
+            return false
+        }
+        if (!newRateSnap.exists) {
+            console.log('No such rate (new)!') 
+            return false
+        }
+
+        const user = {
+            uid: uid,
+            name: userSnap.data().displayName,
+            email: userSnap.data().email,
+        }    
+        var currentCustomerDoc = currentCustomerSnap.data()
+        currentCustomerDoc.id = currentCustomerSnap.id;
+        var newCustomerDoc = newCustomerSnap.data()
+        newCustomerDoc.id = newCustomerSnap.id;
+        var currentRateDoc = currentRateSnap.data()
+        currentRateDoc.id = currentRateSnap.id;
+        var newRateDoc = newRateSnap.data()
+        newRateDoc.id = newRateSnap.id;
+
+        return {
+            user: user,
+            userDoc: userSnap.data(),
+            currentCustomerDoc: currentCustomerDoc,
+            newCustomerDoc: newCustomerDoc,
+            currentRateDoc: currentRateDoc,
+            newRateDoc: newRateDoc,
+        }
+    } catch (error) {
+        console.error("Error: ", error);
+        return false
+    }
 }

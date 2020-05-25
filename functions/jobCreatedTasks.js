@@ -52,7 +52,7 @@ async function getSnaps(uid, jobDoc, firestoreDb) {
 }
 
 
-exports.handler = async function(snapshot, context, firestoreDb, emailHandler, taskHandler) {
+exports.handler = async function(snapshot, context, firestoreDb, emailHandler) {
     const uid = context.params.uid;    
 
     var jobDoc = snapshot.data();

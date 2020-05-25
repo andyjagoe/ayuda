@@ -1,4 +1,3 @@
-const functions = require('firebase-functions');
 const zoomVerificationToken = 'ZLXFn9VjQS2cHoG_y0_GUg';
 
 
@@ -18,12 +17,13 @@ exports.handler = async function(req, res, firestoreDb, admin, zoomHelper, taskH
                 const host_id = payload.object.host_id
                 const id = payload.object.id
                 try {
-                    const {userDoc, jobDoc} = await zoomHelper.dataFromZoomMap(host_id, id, firestoreDb)
+                    const {userMap, jobMap} = await zoomHelper.dataFromZoomMap(host_id, id, firestoreDb)
                     const when = admin.firestore.Timestamp.fromDate(new Date(payload.object.start_time))
-                    await addMeetingEvent(userDoc.uid, jobDoc.id, event, when, payload, firestoreDb)
-                    await handleMeetingStarted(userDoc.uid, jobDoc.id, firestoreDb)
+                    await addMeetingEvent(userMap.uid, jobMap.id, event, when, payload, firestoreDb)
+                    await handleMeetingStarted(userMap.uid, jobMap.id, firestoreDb)
                 } catch (error) {
                     console.error(error)
+                    return res.status(400).end();
                 }                
             }
             break;
@@ -33,12 +33,13 @@ exports.handler = async function(req, res, firestoreDb, admin, zoomHelper, taskH
                 const host_id = payload.object.host_id
                 const id = payload.object.id
                 try {
-                    const {userDoc, jobDoc} = await zoomHelper.dataFromZoomMap(host_id, id, firestoreDb)
+                    const {userMap, jobMap} = await zoomHelper.dataFromZoomMap(host_id, id, firestoreDb)
                     const when = admin.firestore.Timestamp.fromDate(new Date(payload.object.end_time))
-                    await addMeetingEvent(userDoc.uid, jobDoc.id, event, when, payload, firestoreDb)
-                    await taskHandler.scheduleBillingForJob(userDoc.uid, jobDoc.id, when, firestoreDb)
+                    await addMeetingEvent(userMap.uid, jobMap.id, event, when, payload, firestoreDb)
+                    await handleMeetingEnded(userMap.uid, jobMap.id, taskHandler, firestoreDb, admin)                    
                 } catch (error) {
                     console.error(error)
+                    return res.status(400).end();
                 }
             }
             break;
@@ -48,11 +49,12 @@ exports.handler = async function(req, res, firestoreDb, admin, zoomHelper, taskH
                 const host_id = payload.object.host_id
                 const id = payload.object.id
                 try {
-                    const {userDoc, jobDoc} = await zoomHelper.dataFromZoomMap(host_id, id, firestoreDb)
+                    const {userMap, jobMap} = await zoomHelper.dataFromZoomMap(host_id, id, firestoreDb)
                     const when = admin.firestore.Timestamp.fromDate(new Date(payload.object.participant.join_time))
-                    await addMeetingEvent(userDoc.uid, jobDoc.id, event, when, payload, firestoreDb)
+                    await addMeetingEvent(userMap.uid, jobMap.id, event, when, payload, firestoreDb)
                 } catch (error) {
                     console.error(error)
+                    return res.status(400).end();
                 }
             }
             break;
@@ -62,11 +64,12 @@ exports.handler = async function(req, res, firestoreDb, admin, zoomHelper, taskH
                 const host_id = payload.object.host_id
                 const id = payload.object.id
                 try {
-                    const {userDoc, jobDoc} = await zoomHelper.dataFromZoomMap(host_id, id, firestoreDb)
+                    const {userMap, jobMap} = await zoomHelper.dataFromZoomMap(host_id, id, firestoreDb)
                     const when = admin.firestore.Timestamp.fromDate(new Date(payload.object.participant.leave_time))
-                    await addMeetingEvent(userDoc.uid, jobDoc.id, event, when, payload, firestoreDb)
+                    await addMeetingEvent(userMap.uid, jobMap.id, event, when, payload, firestoreDb)
                 } catch (error) {
                     console.error(error)
+                    return res.status(400).end();
                 }
             }
             break;
@@ -83,19 +86,61 @@ exports.handler = async function(req, res, firestoreDb, admin, zoomHelper, taskH
 
 const handleMeetingStarted = async (uid, jobId, firestoreDb) => {
     try {
-        await firestoreDb.collection('/users')
-        .doc(uid)
-        .collection('meetings')
-        .doc(jobId)
-        .set({
-            status: 'started'
-        }, { merge: true })
+        const status = await getJobStatus(uid, jobId, firestoreDb)
+        if (status === 'pending' || status === 'authorized') {
+            await firestoreDb.collection('/users')
+            .doc(uid)
+            .collection('meetings')
+            .doc(jobId)
+            .set({
+                status: 'started'
+            }, { merge: true })    
+        }
         
         return true
     } catch (error) {
         console.error(error);
         console.log(`handleMeetingStarted Error: ${JSON.stringify(error)}`)
-        return false
+        throw error
+    }    
+}
+
+
+const handleMeetingEnded = async (uid, jobId, taskHandler, firestoreDb, admin) => {
+    try {
+        const status = await getJobStatus(uid, jobId, firestoreDb)
+
+        if (status === 'pending' || 
+            status === 'authorized' ||
+            status === 'started' ) {    
+                await taskHandler.cancelMeetingCompletedTasks(uid, jobId, firestoreDb)
+
+                const timeNow = admin.firestore.Timestamp.fromDate(new Date())
+                await taskHandler.scheduleCompletionForJob(uid, jobId, timeNow, firestoreDb)
+        }
+        
+        return true
+    } catch (error) {
+        console.error(error);
+        console.log(`handleMeetingEnded Error: ${JSON.stringify(error)}`)
+        throw error
+    }    
+}
+
+
+const getJobStatus = async (uid, jobId, firestoreDb) => {
+    try {
+        const jobSnap = await firestoreDb.collection('/users')
+        .doc(uid)
+        .collection('meetings')
+        .doc(jobId)
+        .get()
+
+        return jobSnap.data().status
+    } catch (error) {
+        console.error(error);
+        console.log(`getJobStatus Error: ${JSON.stringify(error)}`)
+        throw error
     }    
 }
 
@@ -122,6 +167,7 @@ const addMeetingEvent = async (uid, id, type, when, payload, firestoreDb) => {
 
     } catch (error) {
         console.error(error);
+        console.log(`addMeetingEvent Error: ${JSON.stringify(error)}`)
         throw error
     }
 

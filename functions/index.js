@@ -1,6 +1,7 @@
 const admin = require('firebase-admin');
 const functions = require('firebase-functions');
 admin.initializeApp(functions.config().firebase);
+const billing = require('./billing');
 const emailHandler = require('./emailHandler');
 const calendarHandler = require('./calendarHandler');
 const taskHandler = require('./taskHandler');
@@ -62,7 +63,8 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'jobUpdatedTasks
     const jobUpdatedTasks = require('./jobUpdatedTasks');
     exports.jobUpdatedTasks = functions.firestore.document('/users/{uid}/meetings/{meeting_id}')
     .onUpdate((change, context) => {    
-        return jobUpdatedTasks.handler(change, context, firestoreDb, emailHandler, taskHandler, zoomHelper);
+        return jobUpdatedTasks.handler(change, context, firestoreDb, emailHandler, taskHandler, 
+            zoomHelper, admin, billing);
     });
 }
 
@@ -83,14 +85,14 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'addCustomer') {
 if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'fetchCheckoutSession') {
     const fetchCheckoutSession = require('./fetchCheckoutSession');
     exports.fetchCheckoutSession = functions.https.onCall((data, context) => {
-        return fetchCheckoutSession.handler(data, context, firestoreDb);
+        return fetchCheckoutSession.handler(data, context, firestoreDb, billing);
     });
 }
 
 if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'cloudTaskCallback') {
     const cloudTaskCallback = require('./cloudTaskCallback');
     exports.cloudTaskCallback = functions.https.onRequest((req, res) => {
-        return cloudTaskCallback.handler(req, res, firestoreDb, emailHandler, admin, zoomHelper, taskHandler);
+        return cloudTaskCallback.handler(req, res, firestoreDb, emailHandler, admin, zoomHelper, taskHandler, billing);
     });
 }
 

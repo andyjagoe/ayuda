@@ -1,4 +1,3 @@
-const moment = require('moment');
 
 
 const dataFromZoomMap = async (host_id, meeting_id, firestoreDb) => {
@@ -26,10 +25,9 @@ const dataFromZoomMap = async (host_id, meeting_id, firestoreDb) => {
         if (!jobSnap.exists) {
             throw new Error(`No such job: ${meeting_id}`)
         }
-
         return {
-            userDoc: userSnap.data(),
-            jobDoc: jobSnap.data(),
+            userMap: userSnap.data(),
+            jobMap: jobSnap.data(),
         }
 
     } catch (error) {

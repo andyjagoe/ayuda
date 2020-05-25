@@ -25,20 +25,8 @@ const formatRateDescription = (rateRecord) => {
 }
 
 
-async function needsAuthorization (jobDoc, rateDoc) {
-    if (!('payment_intent' in jobDoc)) {
-        return true
-    }
-    const intent = await stripe.paymentIntents.retrieve(jobDoc.payment_intent)            
-    if (intent.amount_capturable < rateDoc.rate * (jobDoc.d / 60) * 100) {
-        return true
-    }
-    return false
-}
 
-
-
-exports.handler = async function(data, context, firestoreDb) {
+exports.handler = async function(data, context, firestoreDb, billing) {
 
     const id = data.id;
     const uid = data.uid;
@@ -118,7 +106,7 @@ exports.handler = async function(data, context, firestoreDb) {
 
 
         //Check to see if there is already a valid paymentIntent for this job
-        const needsAuth  = await needsAuthorization(jobRecord, rateRecord)
+        const needsAuth  = await billing.needsAuthorization(jobRecord, rateRecord)
         if (!needsAuth) {
             //TODO: better error message for users who click on old/expired links
             return {sessionId: null, hasValidAuth: true}

@@ -70,24 +70,16 @@ async function getSnaps(uid, currentJobDoc, newJobDoc, firestoreDb) {
 }
 
 
-async function needsAuthorization (jobDoc, rateDoc) {
-    if (!('payment_intent' in jobDoc)) {
-        return true
-    }
-    const intent = await stripe.paymentIntents.retrieve(jobDoc.payment_intent)            
-    if (intent.amount_capturable < rateDoc.rate * (jobDoc.d / 60) * 100) {
-        return true
-    }
-    return false
-}
-
-
-exports.handler = async function(change, context, firestoreDb, emailHandler, taskHandler, zoomHelper) {
+exports.handler = async function(change, context, firestoreDb, emailHandler, 
+                                taskHandler, zoomHelper, admin, billing) {
+    const uid = context.params.uid;    
     var currentJobDoc = change.before.data();
     var newJobDoc = change.after.data();
     currentJobDoc.ref_id = context.params.meeting_id
     newJobDoc.ref_id = context.params.meeting_id
-    const uid = context.params.uid;    
+
+    console.log(`currentJobDoc: ${JSON.stringify(currentJobDoc)}`);
+    console.log(`newJobDoc: ${JSON.stringify(newJobDoc)}`);
 
 
     // Check to see if this is a pending job that has been authorized
@@ -100,25 +92,42 @@ exports.handler = async function(change, context, firestoreDb, emailHandler, tas
 
             await emailHandler.sendConfirmedJobClientEmail(user, newJobDoc, newCustomerDoc, newRateDoc)
             await emailHandler.sendConfirmedJobProviderEmail(user, newJobDoc, newCustomerDoc, newRateDoc);
-            return true           
+            return null           
         } catch (error) {
             console.error("Error: ", error);
-            return false
+            return null
         }   
     }
     
     if (currentJobDoc.status !== 'completed' && newJobDoc.status === 'completed') {
         try {
-            await taskHandler.cancelAllReminders(uid, newJobDoc.ref_id, firestoreDb)
-        
-            //const { userDoc } = await getSnaps( uid, currentJobDoc, newJobDoc, firestoreDb)
+            // 'completed' is after meeting ends provided both parties were on and min charge > $1
+            await taskHandler.cancelAllReminders(uid, newJobDoc.ref_id, firestoreDb)        
             //TODO: send emails that meeting has been completed
-            //await zoomHelper.removeZoomMap(userDoc.zoomId, newJobDoc, firestoreDb)
+            const when = admin.firestore.Timestamp.fromDate(new Date())
+            await taskHandler.scheduleBillingForJob(uid, newJobDoc.ref_id, when, firestoreDb)
 
-            return true           
+            return null           
+        } catch (error) {
+            console.log(`completed error: ${JSON.stringify(error)}`);
+            console.error("Error: ", error);
+            return null
+        }   
+    }
+
+    if (currentJobDoc.status !== 'paid' && newJobDoc.status === 'paid') {
+        try {
+            const { user,  userDoc, newCustomerDoc, newRateDoc 
+            } = await getSnaps( uid, currentJobDoc, newJobDoc, firestoreDb)
+
+            //TODO: send receipt emails that billing is completed
+
+            await zoomHelper.removeZoomMap(userDoc.zoomId, newJobDoc, firestoreDb)
+
+            return null           
         } catch (error) {
             console.error("Error: ", error);
-            return false
+            return null
         }   
     }
 
@@ -132,10 +141,10 @@ exports.handler = async function(change, context, firestoreDb, emailHandler, tas
             await taskHandler.cancelAllReminders(user.uid, newJobDoc.ref_id, firestoreDb)
             await zoomHelper.removeZoomMap(userDoc.zoomId, newJobDoc, firestoreDb)
     
-            return true           
+            return null           
         } catch (error) {
             console.error("Error: ", error);
-            return false
+            return null
         }   
     }
 
@@ -212,7 +221,7 @@ exports.handler = async function(change, context, firestoreDb, emailHandler, tas
         const validToAuthDate = moment(newJobDoc.t.toDate()).subtract(2, 'days')
         if (moment().isAfter(validToAuthDate) && newRateDoc.rate !== 0) {
             // Check paymentIntent and whether sufficient $ is authorized. If not, send auth request. 
-            const needsAuth  = await needsAuthorization(newJobDoc, newRateDoc)
+            const needsAuth  = await billing.needsAuthorization(newJobDoc, newRateDoc)
             if (needsAuth) {
                 await emailHandler.sendAuthorizeJobClientEmail(user, newJobDoc, newCustomerDoc, newRateDoc);
             }

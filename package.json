@@ -17,6 +17,7 @@
     "axios": "^0.19.2",
     "copy-to-clipboard": "^3.3.1",
     "firebase": "^7.14.1",
+    "firebase-functions": "^3.6.1",
     "material-auto-rotating-carousel": "^3.0.2",
     "material-kit-react": "^1.8.0",
     "material-ui-phone-number": "^2.2.6",

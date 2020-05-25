@@ -117,7 +117,7 @@ exports.handler = async function(data, context, firestoreDb, billing) {
             //TODO: better error message for users who click on old/expired links
             return {sessionId: null, 
                     hasValidAuth: true, 
-                    successMessage: "Your session has already been booked"}
+                    successMessage: "Your session is already booked"}
         }
     
 

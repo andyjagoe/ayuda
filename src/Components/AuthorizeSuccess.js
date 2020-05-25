@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Avatar from '@material-ui/core/Avatar';
 import CheckIcon from '@material-ui/icons/Check';
 import Typography from '@material-ui/core/Typography';
@@ -36,10 +36,26 @@ const useStyles = makeStyles((theme) => ({
 export default function AuthorizeSuccess(props) {
     const classes = useStyles();
     const parsed = queryString.parse(props.location.search);
+    const [successMessage, setSuccessMessage] = useState('Your session has been booked')
 
-    useEffect(() => { 
-        handleSessionID()
+    useEffect(() => {
+      handleSessionID()
+      loadSuccessMessage(props)
     });
+
+    function loadSuccessMessage(props) {
+      try {
+        const msg = props.location.state.success_message
+        console.log(msg)
+        if (!msg) {   
+            return
+        }
+        setSuccessMessage(msg)  
+      } catch (error) {
+        console.log("Using default success message");
+      }
+
+    }
 
     async function handleSessionID() {
         if (!parsed.session_id) {   
@@ -62,7 +78,7 @@ export default function AuthorizeSuccess(props) {
                 <CheckIcon />
             </Avatar>
             <Typography component="h1" variant="h5">
-                Your session has been booked
+                {successMessage}
             </Typography>
             <Grid container spacing={2} style={{ padding: 40}}>
                 <Grid item xs={12}>

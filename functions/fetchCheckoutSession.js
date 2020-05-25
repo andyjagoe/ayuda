@@ -104,12 +104,20 @@ exports.handler = async function(data, context, firestoreDb, billing) {
         const rateRecord = rateSnap.data();
         const stripeRecord = stripeSnap.data();
 
+        //Check to see if this item has already been paid
+        if (jobRecord.status === 'paid') {
+            return {sessionId: null, 
+                    hasValidAuth: true, 
+                    successMessage: "Your session has already been paid"}
+        }
 
         //Check to see if there is already a valid paymentIntent for this job
         const needsAuth  = await billing.needsAuthorization(jobRecord, rateRecord)
         if (!needsAuth) {
             //TODO: better error message for users who click on old/expired links
-            return {sessionId: null, hasValidAuth: true}
+            return {sessionId: null, 
+                    hasValidAuth: true, 
+                    successMessage: "Your session has already been booked"}
         }
     
 

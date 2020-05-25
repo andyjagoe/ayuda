@@ -47,7 +47,7 @@ export default function Authorize(props) {
                                         rid: parsed.rid
                                         });
             if (snap.data.hasValidAuth === true) {
-              navigate('/authorize_success')
+              navigate('/authorize_success', { state: { success_message: snap.data.successMessage } })
             } else {
               const sessionId = snap.data.sessionId
               const stripe = await stripePromise;

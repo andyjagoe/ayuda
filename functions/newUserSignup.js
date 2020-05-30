@@ -1,4 +1,3 @@
-const axios = require('axios');
 
 
 exports.handler = function(event, firestoreDb, admin, zoomHelper) {
@@ -6,7 +5,8 @@ exports.handler = function(event, firestoreDb, admin, zoomHelper) {
 
     var zoomResponse = null
 
-    return axios({
+    const myAxios = zoomHelper.getAxiosWithInterceptor()
+    return myAxios({
         method: 'post',
         url: 'https://api.zoom.us/v2/users',
         data: {
@@ -15,11 +15,6 @@ exports.handler = function(event, firestoreDb, admin, zoomHelper) {
               "email": event.email,
               "type": 1,
             }
-        },
-        headers: {
-          'Authorization': `Bearer ${zoomHelper.getJwtToken()}`,
-          'User-Agent': 'Zoom-api-Jwt-Request',
-          'content-type': 'application/json'
         }
     })
     .then((response) => {

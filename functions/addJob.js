@@ -1,6 +1,5 @@
 var moment = require('moment-timezone');
 const functions = require('firebase-functions');
-const axios = require('axios');
 
 
 function generatePassword() {
@@ -72,7 +71,8 @@ exports.handler = function(data, context, firestoreDb, admin, zoomHelper) {
             throw new functions.https.HttpsError('failed-precondition', 'No Zoom ID available.');
         }
         userDoc = doc.data();
-        return axios({
+        const myAxios = zoomHelper.getAxiosWithInterceptor()
+        return myAxios({
             method: 'post',
             url: `https://api.zoom.us/v2/users/${userDoc.zoomId}/meetings`,
             data: {
@@ -90,11 +90,6 @@ exports.handler = function(data, context, firestoreDb, admin, zoomHelper) {
                   "use_pmi": false,
                   "audio": "voip"
                 }
-            },
-            headers: {
-              'Authorization': `Bearer ${zoomHelper.getJwtToken()}`,
-              'User-Agent': 'Zoom-api-Jwt-Request',
-              'content-type': 'application/json'
             }
         });
     })

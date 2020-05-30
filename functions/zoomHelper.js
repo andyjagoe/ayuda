@@ -1,24 +1,53 @@
 const functions = require('firebase-functions');
 const axios = require('axios');
-const createAuthRefreshInterceptor = require('axios-auth-refresh');
- 
+const jwt = require('jsonwebtoken');
+const authRefresh = require('axios-auth-refresh');
 
-const refreshAuthLogic = failedRequest => axios.post('https://www.example.com/auth/token/refresh')
-    .then(tokenRefreshResponse => {
-        localStorage.setItem('token', tokenRefreshResponse.data.token);
-        failedRequest.response.config.headers['Authorization'] = 'Bearer ' + tokenRefreshResponse.data.token;
-        return Promise.resolve();
+
+
+const axiosInstance = axios.create({
+    headers: {
+        'User-Agent': 'Zoom-api-Jwt-Request',
+        'content-type': 'application/json'
+      }
 });
- 
 
-// Instantiate the interceptor (you can chain it as it returns the axios instance)
+axiosInstance.interceptors.request.use(request => {
+    request.headers['Authorization'] = `Bearer ${getJwtToken()}`;
+    return request;
+});
+
+var jwtToken = ''
+
+const refreshAuthLogic = (failedRequest) => {
+    console.log("refreshAuthLogic")
+    return new Promise((resolve, reject) => {
+        const payload = {
+            iss: functions.config().zoom.apikey,
+            exp: ((new Date()).getTime() + 5000)
+        };
+        const token = jwt.sign(payload, functions.config().zoom.refreshtoken);
+        resolve(token);
+    })
+    .then(tokenRefreshResponse =>  {
+        console.log("tokenRefreshResponse: " , tokenRefreshResponse)
+        jwtToken = tokenRefreshResponse
+        failedRequest.response.config.headers['Authorization'] = 'Bearer ' + tokenRefreshResponse;
+        return Promise.resolve();
+    })
+}
+
+authRefresh.default(axiosInstance, refreshAuthLogic);
+
+
 const getAxiosWithInterceptor = () => {
-    return createAuthRefreshInterceptor(axios, refreshAuthLogic);
+    return axiosInstance;
 }
 
 
 const getJwtToken = () => {
-    return functions.config().zoom.jwttoken;
+    //return functions.config().zoom.jwttoken;
+    return jwtToken;
 }
 
 
@@ -80,4 +109,5 @@ module.exports = {
     removeZoomMap,
     getAxiosWithInterceptor,
     getJwtToken,
+    refreshAuthLogic,
 }

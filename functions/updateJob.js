@@ -1,6 +1,5 @@
 var moment = require('moment-timezone');
 const functions = require('firebase-functions');
-const axios = require('axios');
 
 
 exports.handler = function(data, context, firestoreDb, admin, zoomHelper) {
@@ -78,8 +77,9 @@ exports.handler = function(data, context, firestoreDb, admin, zoomHelper) {
             throw new functions.https.HttpsError('failed-precondition', 
                 `Cannot update job with state: ${doc.data().status}`);
         }
-
-        return axios({
+        
+        const myAxios = zoomHelper.getAxiosWithInterceptor()
+        return myAxios({
             method: 'patch',
             url: `https://api.zoom.us/v2/meetings/${zoom_id}`,
             data: {
@@ -88,16 +88,11 @@ exports.handler = function(data, context, firestoreDb, admin, zoomHelper) {
                 "duration": duration,
                 "timezone": tz,
                 "agenda": notes,
-            },
-            headers: {
-              'Authorization': `Bearer ${zoomHelper.getJwtToken()}`,
-              'User-Agent': 'Zoom-api-Jwt-Request',
-              'content-type': 'application/json'
             }
         });
     })   
     .then(response => {
-        //console.log(`Response: ${JSON.stringify(response.data)}`);
+        console.log(`Response: ${JSON.stringify(response.data)}`);
 
         const newJobDoc = {
             payer: payer,

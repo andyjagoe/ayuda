@@ -31,6 +31,7 @@ export default function CustomerChooser(props) {
   const [customers, setCustomers] = useState([])
 
   const firstRender = useRef(true)
+  const [gotCustomerRecord, setGotCustomerRecord] = useState(false)
   const [disable, setDisabled] = useState(true)
     
 
@@ -49,13 +50,19 @@ export default function CustomerChooser(props) {
 
   useEffect(() => {
     if (firstRender.current) {
-        getCustomerList()
         firstRender.current = false
       return
     }
+
+    if (props.initialCustomerId != null) {
+      if (gotCustomerRecord) {return}
+      getCustomerList()
+      setGotCustomerRecord(true)
+    }
+
     setDisabled(formValidation())
-    
-  }, [payerDetails, payerName, payerEmail])
+
+  }, [payerDetails, payerName, payerEmail, props.initialCustomerId])
 
 
   const formValidation = () => {

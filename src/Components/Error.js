@@ -38,7 +38,7 @@ export default function Error(props) {
 
     useEffect(() => { 
         loadErrorMessage(props.location.state.error)
-    });
+    }, []);
 
     function loadErrorMessage(err) {
         if (!err) {   

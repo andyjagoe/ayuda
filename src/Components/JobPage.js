@@ -36,6 +36,7 @@ import RateChooser from './RateChooser';
 import MomentUtils from '@date-io/moment';
 import firebase from 'firebase/app';
 import 'firebase/functions';
+import { firestore } from "../firebase";
 import copy from 'copy-to-clipboard';
 var moment = require('moment');
 
@@ -94,39 +95,43 @@ const useStyles = makeStyles((theme) => ({
 const JobPage = (props) => {
   const classes = useStyles();
   const user = useContext(UserContext);
-  const {displayName, email} = user;
-
-  //TODO: If jobRecord not set then try to retrieve from Firestore using url params
-  const jobRecord = props.location.state.jobRecord;
+  const {displayName, email, uid} = user;
 
   const firstRender = useRef(true)
 
   // Handle updateable form elements
+  const emptyRecord = {
+    topic: '',
+    agenda: '',
+    t: {seconds: 0},
+    tz: '',
+    d:  0,
+    payer_id: '',
+    rate_id: '',
+    id: '',
+    status: '',
+    join_url: '',
+    start_url: '',
+    password: '',
+  }
+  const [jobRecord, setJobRecord] = useState(emptyRecord) // props.location.state.jobRecord;
+
   const [disable, setDisabled] = useState(false)
-  const [topic, setTopic] = useState(jobRecord.topic);
+  const [topic, setTopic] = useState('');
   const [status, setStatus] = useState('');
-  const [alertMessage, setAlertMessage] = useState('');
   const [changesDisabled, setChangesDisabled] = useState(true);
   const [payer, setPayer] = useState(null);
   const [rate, setRate] = useState(null);
-  const [notes, setNotes] = useState(jobRecord.agenda);
-  const [values, setValues] = useState({
-    showPassword: false,
-  });
-  const [start, handleStartDateChange] = useState(moment
-    .unix(jobRecord.t.seconds)
-    .tz(jobRecord.tz)  
-    .toDate()
-  );
-  const [end, handleEndDateChange] = useState(moment
-    .unix(jobRecord.t.seconds)
-    .tz(jobRecord.tz)
-    .add(jobRecord.d,"m")
-    .toDate()
-  );
+  const [notes, setNotes] = useState('');
+
+  const [values, setValues] = useState({showPassword: false});
+  const [start, handleStartDateChange] = useState(null);
+  const [end, handleEndDateChange] = useState(null);
   const [endError, setEndError] = useState(false)
   const [endErrorLabel, setEndErrorLabel] = useState(null)
   
+  const [alertMessage, setAlertMessage] = useState('');
+
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const buttonClassname = clsx({
@@ -136,14 +141,39 @@ const JobPage = (props) => {
 
   // Validate data before allowing save/update
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const result = await firestore
+        .collection("/users")
+        .doc(uid)
+        .collection('meetings')
+        .doc(props.jobId)
+        .get()
+
+        if (!result.exists) {
+          return
+        }
+
+        setJobRecord(result.data());
+        assignJobValues(result.data())
+        handleStatus(result.data().status);
+      } catch (error) {
+          console.error(error);
+      }
+
+    };
+ 
     if (firstRender.current) {
       firstRender.current = false
+      fetchData();  // check for props.location.state.jobRecord first
       handleStatus(jobRecord.status);
       return
     }
     setDisabled(formValidation())
     
   }, [payer, rate, topic, start, end])
+
+
 
   const formValidation = () => {
     var startBeforeEnd = moment(end).isBefore(start);
@@ -177,6 +207,22 @@ const JobPage = (props) => {
   }
 
 
+  const assignJobValues = (result) => {
+    setTopic(result.topic);
+    setStatus(result.status)
+    setNotes(result.agenda)
+    handleStartDateChange(moment
+      .unix(result.t.seconds)
+      .tz(result.tz)  
+      .toDate())
+    handleEndDateChange(moment
+      .unix(result.t.seconds)
+      .tz(result.tz)
+      .add(result.d,"m")
+      .toDate())
+  }
+
+
   // Set max date for start and end dates
   const maxDate = moment().add(1,"Y");
   function round(date, duration, method) {
@@ -186,6 +232,10 @@ const JobPage = (props) => {
 
   // Handle formatting for status  value
   const handleStatus = (status) => {
+    if (status == undefined) {
+      return false
+    }
+
     if (status === 'authorized')  {
       setStatus('Confirmed');
       setChangesDisabled(false);
@@ -201,13 +251,15 @@ const JobPage = (props) => {
     } else if (status === 'cancelled')  {
       setChangesDisabled(true);
       setAlertMessage('This job has been cancelled.')
+    } else if (status === '')  {
+      setChangesDisabled(true);
+      setAlertMessage('No job found.')
     } else {
       setChangesDisabled(true);
       setAlertMessage('Job has started. No changes or cancellations.')
     }
-    setStatus(jobRecord.status.charAt(0).toUpperCase() + 
-    jobRecord.status.substr(1))
-    return  true
+    setStatus(status.charAt(0).toUpperCase() + status.substr(1))
+    return true
   }
 
   // Adjust end date when user changes start date
@@ -249,6 +301,9 @@ const JobPage = (props) => {
   const [openCopyDialog, toggleOpenCopyDialog] = React.useState(false);
   const [invitation, setInvitation] = useState("")
   const handleOpenCopyDialog = () => {
+    if (status === '') {
+      return
+    }
     setInvitation(getInvitationMarkup())
     toggleOpenCopyDialog(true);
   };

@@ -40,7 +40,7 @@ export default function Checkout(props) {
     const parsed = queryString.parse(props.location.search);
 
     useEffect(() => { 
-    });
+    }, []);
 
     async function redirectToStripe() {
         if (!parsed.id) {   

@@ -41,7 +41,7 @@ export default function AuthorizeSuccess(props) {
     useEffect(() => {
       handleSessionID()
       loadSuccessMessage(props)
-    });
+    }, []);
 
     function loadSuccessMessage(props) {
       try {

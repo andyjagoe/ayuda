@@ -28,6 +28,7 @@ export default function RateChooser(props) {
   const [rates, setRates] = useState([])
 
   const firstRender = useRef(true)
+  const [gotRateRecord, setGotRateRecord] = useState(false)
   const [disable, setDisabled] = useState(true)
     
 
@@ -40,13 +41,20 @@ export default function RateChooser(props) {
 
   useEffect(() => {
     if (firstRender.current) {
-        getRateList()
-        firstRender.current = false
+      firstRender.current = false
       return
     }
+
+    if (props.initialRateId != null) {
+      if (gotRateRecord) {return}
+      getRateList()
+      setGotRateRecord(true)
+    }
+
     setDisabled(formValidation())
-    
-  }, [rateDetails, rateName])
+
+  }, [rateDetails, rateName, props.initialRateId])
+
 
 
   const formValidation = () => {
@@ -162,6 +170,7 @@ export default function RateChooser(props) {
         if (props.initialRateId != null) {
             let rateIndex = rate_records.findIndex(x => x.id === props.initialRateId);
             setRateDetails(rate_records[rateIndex])
+            sendData(rate_records[rateIndex])
         }
     })
     .catch(err => {

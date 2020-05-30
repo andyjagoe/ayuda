@@ -18,7 +18,7 @@ export default function Authorize(props) {
           firstRender.current = false
           redirectToStripe()
         }        
-    })
+    }, [])
     
 
     async function redirectToStripe() {

@@ -386,7 +386,7 @@ Password: ${jobRecord.password}
       setLoading(false);
       navigate('/');
     } catch (error) {
-        console.log(error.message);
+        console.log(error);
         setDisabled(false)
         setSuccess(false);
         setLoading(false);

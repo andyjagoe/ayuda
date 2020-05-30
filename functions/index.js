@@ -12,7 +12,7 @@ var firestoreDb = admin.firestore();
 if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'newUserSignup') {
     const newUserSignup = require('./newUserSignup');
     exports.newUserSignup = functions.auth.user().onCreate((event) => {
-        return newUserSignup.handler(event, firestoreDb, admin);
+        return newUserSignup.handler(event, firestoreDb, admin, zoomHelper);
     });
 }
 
@@ -33,7 +33,7 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'connectStripe')
 if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'addJob') {
     const addJob = require('./addJob');
     exports.addJob = functions.https.onCall((data, context) => {
-        return addJob.handler(data, context, firestoreDb, admin);
+        return addJob.handler(data, context, firestoreDb, admin, zoomHelper);
     });
 }
 
@@ -47,7 +47,7 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'cancelJob') {
 if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'updateJob') {
     const updateJob = require('./updateJob');
     exports.updateJob = functions.https.onCall((data, context) => {
-        return updateJob.handler(data, context, firestoreDb, admin);
+        return updateJob.handler(data, context, firestoreDb, admin, zoomHelper);
     });
 }
 

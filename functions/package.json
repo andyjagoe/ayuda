@@ -16,6 +16,7 @@
     "@google-cloud/tasks": "^2.0.0",
     "aws-sdk": "^2.670.0",
     "axios": "^0.19.2",
+    "axios-auth-refresh": "^2.2.6",
     "calendar-link": "^1.2.5",
     "ejs": "^3.1.2",
     "email-templates": "^7.0.4",

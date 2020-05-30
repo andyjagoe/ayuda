@@ -1,3 +1,25 @@
+const functions = require('firebase-functions');
+const axios = require('axios');
+const createAuthRefreshInterceptor = require('axios-auth-refresh');
+ 
+
+const refreshAuthLogic = failedRequest => axios.post('https://www.example.com/auth/token/refresh')
+    .then(tokenRefreshResponse => {
+        localStorage.setItem('token', tokenRefreshResponse.data.token);
+        failedRequest.response.config.headers['Authorization'] = 'Bearer ' + tokenRefreshResponse.data.token;
+        return Promise.resolve();
+});
+ 
+
+// Instantiate the interceptor (you can chain it as it returns the axios instance)
+const getAxiosWithInterceptor = () => {
+    return createAuthRefreshInterceptor(axios, refreshAuthLogic);
+}
+
+
+const getJwtToken = () => {
+    return functions.config().zoom.jwttoken;
+}
 
 
 const dataFromZoomMap = async (host_id, meeting_id, firestoreDb) => {
@@ -55,5 +77,7 @@ const removeZoomMap = async (zoomUserId, jobDoc, firestoreDb) => {
 
 module.exports = {
     dataFromZoomMap,
-    removeZoomMap
+    removeZoomMap,
+    getAxiosWithInterceptor,
+    getJwtToken,
 }

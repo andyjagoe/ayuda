@@ -1,7 +1,6 @@
 var moment = require('moment-timezone');
 const functions = require('firebase-functions');
 const axios = require('axios');
-const zoomToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOm51bGwsImlzcyI6IkFUZ2l2aEhuUUh5SDlYOXE0Z0E3aHciLCJleHAiOjE1OTA4NTc2NDMsImlhdCI6MTU5MDI1Mjg0M30.Nd5qmYtTXW3Ys2-saAS6ut0-hYf_7kL86HjXFn7aCgk';
 
 
 function generatePassword() {
@@ -14,7 +13,7 @@ function generatePassword() {
     return retVal;
 }
 
-exports.handler = function(data, context, firestoreDb, admin) {
+exports.handler = function(data, context, firestoreDb, admin, zoomHelper) {
     //console.log(JSON.stringify(context.rawRequest.headers, null, 2));
 
     const payer = data.payer;
@@ -93,7 +92,7 @@ exports.handler = function(data, context, firestoreDb, admin) {
                 }
             },
             headers: {
-              'Authorization': `Bearer ${zoomToken}`,
+              'Authorization': `Bearer ${zoomHelper.getJwtToken()}`,
               'User-Agent': 'Zoom-api-Jwt-Request',
               'content-type': 'application/json'
             }

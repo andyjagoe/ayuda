@@ -20,7 +20,6 @@ axiosInstance.interceptors.request.use(request => {
 var jwtToken = ''
 
 const refreshAuthLogic = (failedRequest) => {
-    console.log("refreshAuthLogic")
     return new Promise((resolve, reject) => {
         const payload = {
             iss: functions.config().zoom.apikey,
@@ -30,7 +29,7 @@ const refreshAuthLogic = (failedRequest) => {
         resolve(token);
     })
     .then(tokenRefreshResponse =>  {
-        console.log("tokenRefreshResponse: " , tokenRefreshResponse)
+        //console.log("tokenRefreshResponse: " , tokenRefreshResponse)
         jwtToken = tokenRefreshResponse
         failedRequest.response.config.headers['Authorization'] = 'Bearer ' + tokenRefreshResponse;
         return Promise.resolve();

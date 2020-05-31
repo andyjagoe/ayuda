@@ -53,8 +53,8 @@ exports.handler = function(data, context, firestoreDb, admin) {
         });
     })
     .then(ref => {
-        //console.log('Added customer with ID: ', ref.id);
-        return true;
+        console.log('Added customer with ID: ', ref.id);
+        return {id: ref.id};
     })
     .catch(error => {
         console.error("addCustomer Error: ", error);

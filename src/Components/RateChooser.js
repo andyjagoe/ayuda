@@ -40,6 +40,8 @@ export default function RateChooser(props) {
 
 
   useEffect(() => {
+    setDisabled(formValidation())
+
     if (firstRender.current) {
       if (props.addJob === true) {
         getRateList()
@@ -53,8 +55,6 @@ export default function RateChooser(props) {
       getRateList()
       setGotRateRecord(true)
     }
-
-    setDisabled(formValidation())
 
   }, [rateDetails, rateName, props.initialRateId])
 

@@ -49,6 +49,8 @@ export default function CustomerChooser(props) {
 
 
   useEffect(() => {
+    setDisabled(formValidation())
+
     if (firstRender.current) {
       if (props.addJob === true) {
           getCustomerList()
@@ -62,8 +64,6 @@ export default function CustomerChooser(props) {
       getCustomerList()
       setGotCustomerRecord(true)
     }
-
-    setDisabled(formValidation())
 
   }, [payerDetails, payerName, payerEmail, props.initialCustomerId, props.addJob])
 
@@ -128,28 +128,26 @@ export default function CustomerChooser(props) {
 
     // Add new customer    
     var addCustomer = firebase.functions().httpsCallable('addCustomer');
-    await addCustomer({
-      name: customerDialogValue.name,
-      email: customerDialogValue.email,
-      phone: customerDialogValue.phone,
-    })
-    .then(ref => {        
-        //console.log('Added document with ID: ', ref.id);
-        let newCust = {
-            name: customerDialogValue.name,
-            id: ref.id,
-            email: customerDialogValue.name,
-            phone: customerDialogValue.phone,
-        };
-        setPayerDetails(newCust);
-        let tempCusts = customers;
-        tempCusts.push(newCust);
-        tempCusts.sort((a, b) => (a.name > b.name) ? 1 : -1)
-        setCustomers(tempCusts);
-    })
-    .catch(error => {
-        console.error("Add customer error: ", error);
-    });
+    try {
+      const newCustomer = await addCustomer({
+        name: customerDialogValue.name,
+        email: customerDialogValue.email,
+        phone: customerDialogValue.phone,
+      })
+      let newCust = {
+          name: customerDialogValue.name,
+          id: newCustomer.data.id,
+          email: customerDialogValue.name,
+          phone: customerDialogValue.phone,
+      };
+      setPayerDetails(newCust);
+      let tempCusts = customers;
+      tempCusts.push(newCust);
+      tempCusts.sort((a, b) => (a.name > b.name) ? 1 : -1)
+      setCustomers(tempCusts);
+    } catch (error) {
+      console.error(error);
+    }
 
     handleCloseCustomerDialog();
   };  
@@ -179,7 +177,6 @@ export default function CustomerChooser(props) {
     })
     .then(customer_records => {
         setCustomers(customer_records);
-        //console.log(customer_records)
 
         //Choose selected customer if available
         if (props.initialCustomerId != null) {

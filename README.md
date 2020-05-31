@@ -1,5 +1,5 @@
 Setup requires setting the following Firebase environment variables prior to deploying:
-* zoom.jwttoken
+* zoom.apikey
 * zoom.refreshtoken
 
 `firebase functions:config:set zoom.jwttoken="JWT token for API access" zoom.refreshtoken="refresh token to create new JWT tokens"`

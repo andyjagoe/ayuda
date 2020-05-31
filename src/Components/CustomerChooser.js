@@ -50,7 +50,10 @@ export default function CustomerChooser(props) {
 
   useEffect(() => {
     if (firstRender.current) {
-        firstRender.current = false
+      if (props.addJob === true) {
+          getCustomerList()
+      }
+      firstRender.current = false
       return
     }
 
@@ -62,7 +65,7 @@ export default function CustomerChooser(props) {
 
     setDisabled(formValidation())
 
-  }, [payerDetails, payerName, payerEmail, props.initialCustomerId])
+  }, [payerDetails, payerName, payerEmail, props.initialCustomerId, props.addJob])
 
 
   const formValidation = () => {

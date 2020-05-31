@@ -460,7 +460,7 @@ Password: ${jobRecord.password}
                       disablePast
                       disabled={changesDisabled}
                       maxDate={maxDate}
-                      maxDateMessage="Schedule only availble for one year."
+                      maxDateMessage="Schedule only available for one year."
                       inputVariant="outlined"
                       label="When does it start?"
                       id="start"

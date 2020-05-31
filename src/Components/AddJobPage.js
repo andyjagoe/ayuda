@@ -257,10 +257,10 @@ export default function AddJobPage(props) {
                   />
                 </Grid>
                 <Grid item xs={6}>
-                  <CustomerChooser parentCallback={customerCallbackFunction} />
+                  <CustomerChooser parentCallback={customerCallbackFunction} addJob />
                 </Grid>
                 <Grid item xs={6}>
-                  <RateChooser parentCallback={rateCallbackFunction} />
+                  <RateChooser parentCallback={rateCallbackFunction} addJob />
                 </Grid>
                 <Grid item xs={6}>
                   <MuiPickersUtilsProvider variant="outlined" utils={MomentUtils}>

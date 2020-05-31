@@ -41,6 +41,9 @@ export default function RateChooser(props) {
 
   useEffect(() => {
     if (firstRender.current) {
+      if (props.addJob === true) {
+        getRateList()
+      }
       firstRender.current = false
       return
     }

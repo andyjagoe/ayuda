@@ -17,7 +17,6 @@ import AuthorizeSuccess from "./AuthorizeSuccess";
 import { UserContext } from "../providers/UserProvider";
 
 
-
 function Application() {
   const user = useContext(UserContext)
 

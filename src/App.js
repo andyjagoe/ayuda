@@ -1,5 +1,5 @@
 import React from "react";
-import Application from "./Components/Application";
+import Application from "./views/Application";
 import UserProvider from "./providers/UserProvider";
 import { ThemeProvider } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';

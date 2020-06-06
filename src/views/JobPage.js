@@ -1,5 +1,5 @@
 import React, { useContext, useState, useRef, useEffect } from 'react';
-import MenuAppBar from './MenuAppBar';
+import MenuAppBar from 'components/MenuAppBar';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -31,8 +31,8 @@ import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import Alert from '@material-ui/lab/Alert';
 import Collapse from '@material-ui/core/Collapse';
 import { DateTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
-import CustomerChooser from './CustomerChooser';
-import RateChooser from './RateChooser';
+import CustomerChooser from 'components/CustomerChooser';
+import RateChooser from 'components/RateChooser';
 import MomentUtils from '@date-io/moment';
 import firebase from 'firebase/app';
 import 'firebase/functions';

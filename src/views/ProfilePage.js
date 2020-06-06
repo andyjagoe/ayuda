@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import MenuAppBar from './MenuAppBar';
+import MenuAppBar from 'components/MenuAppBar';
 
 
 

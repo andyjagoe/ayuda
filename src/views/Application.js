@@ -3,7 +3,12 @@ import { Router } from "@reach/router";
 import SignIn from "./SignIn";
 import Register from "./Register";
 import ConnectStripe from "./ConnectStripe";
-import HomePage from "./HomePage";
+import SignedInHomePage from "./SignedInHomePage";
+import SignedOutHomePage from "./SignedOutHomePage";
+import ContactUsPage from "./ContactUsPage";
+import PrivacyPolicyPage from "./PrivacyPolicyPage";
+import TermsOfServicePage from "./TermsOfServicePage";
+import SupportPage from "./SupportPage";
 import ProfilePage from "./ProfilePage";
 import AccountPage from "./AccountPage";
 import JobPage from "./JobPage";
@@ -24,7 +29,7 @@ function Application() {
     user ?
     <Router>
       <LoadingPage path="/loading" />
-      <HomePage path="/" />
+      <SignedInHomePage path="/" />
       <Register path="/register" />
       <ConnectStripe path="/connect-stripe" />
       <ProfilePage path="/profile" />
@@ -35,14 +40,23 @@ function Application() {
       <Authorize path="/authorize" />
       <AuthorizeSuccess path="/authorize_success" />
       <Checkout path="/checkout" />
+      <ContactUsPage path="/contact" />
+      <SupportPage path="/support" />      
+      <PrivacyPolicyPage path="/privacy" />      
+      <TermsOfServicePage path="/tos" />              
       <Error path="/error" />
     </Router>
   :      
     <Router>
-      <SignIn path="/" />
+      <SignedOutHomePage path="/" />
+      <SignIn path="signin/" />
       <Authorize path="/authorize" />
       <AuthorizeSuccess path="/authorize_success" />
       <Checkout path="/checkout" />
+      <ContactUsPage path="/contact" />
+      <SupportPage path="/support" />
+      <PrivacyPolicyPage path="/privacy" />  
+      <TermsOfServicePage path="/tos" />              
       <Error path="/error" />
     </Router>
   );

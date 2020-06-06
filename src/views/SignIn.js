@@ -15,6 +15,7 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import { navigate } from "@reach/router"; 
 import { makeStyles } from '@material-ui/core/styles';
+import SignedOutAppBar from 'components/SignedOutAppBar';
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 import {auth} from '../firebase';
 import {provider} from '../firebase';
@@ -51,9 +52,19 @@ const useStyles = makeStyles((theme) => ({
   title: {
     margin: theme.spacing(0, 0, 20),
   },
-  appbar: {
+  appBar: {
+    //borderBottom: `1px solid ${theme.palette.divider}`,
     background: '#ffffff80',
     boxShadow: 'none'
+  },
+  toolbar: {
+    flexWrap: 'wrap',
+  },
+  toolbarTitle: {
+      flexGrow: 1,
+  },
+  link: {
+      margin: theme.spacing(1, 1.5),
   },
   submit: {
     margin: theme.spacing(3, 0, 2),
@@ -81,9 +92,9 @@ const uiConfig = {
     //credentialHelper: firebaseui.auth.CredentialHelper.GOOGLE_YOLO,
     credentialHelper: firebaseui.auth.CredentialHelper.ACCOUNT_CHOOSER_COM,
     // Terms of service url.
-    'tosUrl': 'https://www.google.com',
+    'tosUrl': 'https://ayuda.live/tos',
     // Privacy policy url.
-    'privacyPolicyUrl': 'https://www.google.com'
+    'privacyPolicyUrl': 'https://ayuda.live/privacy'
 };
 
 
@@ -92,12 +103,15 @@ const SignIn = () => {
   //const [error, setError] = useState(null);
 
   return (
-    <React.Fragment>           
+    <React.Fragment>
+        <SignedOutAppBar />
         <Grid container component="main" className={classes.root}>
-        <CssBaseline />
+        <CssBaseline />        
         <Grid item xs={false} sm={4} md={7} className={classes.image} />
-        <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>        
-          <AppBar position="static" color="inherit" className={classes.appbar}>
+        <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>          
+
+          {/*}
+          <AppBar position="static" color="inherit" className={classes.appBar}>
             <Toolbar>
               <Typography   
                 variant="h6" 
@@ -109,14 +123,15 @@ const SignIn = () => {
               </Typography>
             </Toolbar>
           </AppBar>
+              */}
           <div className={classes.paper}>          
             <Avatar className={classes.avatar}>
               <LockOutlinedIcon />
             </Avatar>
-            {/*
             <Typography component="h1" variant="h5" className={classes.title}>
-              Sign in
+              Sign In
             </Typography>
+            {/*
             <Typography component="h1" variant="h5">
               Ayuda Live
             </Typography>

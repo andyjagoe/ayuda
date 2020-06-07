@@ -54,26 +54,25 @@ const useStyles = makeStyles((theme) => ({
 
 const cards = [
     {
-        headline: 'A complete toolkit',
-        subhead: `This is a media card. You can use this section to describe the content. 
-            Ayuda is the easiest way to get paid for consulting, coaching or anything you 
-            do by Zoom video call.`,
+        headline: 'Selling your time made easy',
+        subhead: `Email and calendar-based scheduling system with unlimited 1:1 
+            video calls. Bills generate automatically, and payment is collected 
+            by credit card once a call has ended.`,
         imageIsRight:  false,
         imageId: 'HJmxky8Fvmo'
     }, 
     {
         headline: 'No cost to get started',
-        subhead: `This is a media card. You can use this section to describe the content. 
-            Ayuda is the easiest way to get paid for consulting, coaching or anything you 
-            do by Zoom video call.`,
+        subhead: `Pricing built for everyone\u2014from part-time individuals to 
+            full-time small businesses. Pay only for what you use. No setup fees, 
+            monthly fees, or hidden fees.`,
         imageIsRight:  true,
         imageId: '9dYwCScW0Rs'
     }, 
     {
         headline: 'Help finding work',
-        subhead: `This is a media card. You can use this section to describe the content. 
-            Ayuda is the easiest way to get paid for consulting, coaching or anything you 
-            do by Zoom video call.`,
+        subhead: `Your time is valuable. And finding work can be hard. If you need help, 
+            use our templates and automated tools to make finding great work easier.`,
         imageIsRight:  false,
         imageId: 'PGnqT0rXWLs'
     }

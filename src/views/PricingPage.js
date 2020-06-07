@@ -58,13 +58,13 @@ const useStyles = makeStyles((theme) => ({
 
 const tiers = [
     {
-      title: "Pay only for the calls you charge for",
+      title: "Pay only for what you use",
       price: '4.9',
       description: [
         'Unlimited 1:1 video calls',
         'Accept credit card payments',
-        'Easy scheduling & reminder system',
-        'Automated invoicing and payment processing',
+        'Easy scheduling & reminders',
+        'Automated invoicing & payments',
         'No setup fees, monthly fees, or hidden fees',
       ],
       buttonText: 'Start now',

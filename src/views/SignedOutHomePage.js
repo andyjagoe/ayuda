@@ -79,7 +79,6 @@ const cards = [
     }
 ];
 
-
 const SignedOutHomePage = () => {
     const classes = useStyles();
 
@@ -122,6 +121,7 @@ const SignedOutHomePage = () => {
             </Grid>
             </Container>
             {/* End Benefit unit */}
+
 
         </main>
         <Footer />

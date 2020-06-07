@@ -8,6 +8,7 @@ import SignedOutHomePage from "./SignedOutHomePage";
 import ContactUsPage from "./ContactUsPage";
 import PrivacyPolicyPage from "./PrivacyPolicyPage";
 import TermsOfServicePage from "./TermsOfServicePage";
+import PricingPage from "./PricingPage";
 import SupportPage from "./SupportPage";
 import ProfilePage from "./ProfilePage";
 import AccountPage from "./AccountPage";
@@ -42,6 +43,7 @@ function Application() {
       <Checkout path="/checkout" />
       <ContactUsPage path="/contact" />
       <SupportPage path="/support" />      
+      <PricingPage path="/pricing" />              
       <PrivacyPolicyPage path="/privacy" />      
       <TermsOfServicePage path="/tos" />              
       <Error path="/error" />
@@ -55,6 +57,7 @@ function Application() {
       <Checkout path="/checkout" />
       <ContactUsPage path="/contact" />
       <SupportPage path="/support" />
+      <PricingPage path="/pricing" />              
       <PrivacyPolicyPage path="/privacy" />  
       <TermsOfServicePage path="/tos" />              
       <Error path="/error" />

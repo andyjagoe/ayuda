@@ -56,7 +56,7 @@ export default function SignedOutAppBar() {
                 <Link variant="button" color="textPrimary" href="/#features" className={classes.link}>
                 Features
                 </Link>
-                <Link variant="button" color="textPrimary" href="#" className={classes.link}>
+                <Link variant="button" color="textPrimary" href="/pricing" className={classes.link}>
                 Pricing
                 </Link>
             </nav>

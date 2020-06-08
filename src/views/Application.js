@@ -1,5 +1,6 @@
-import React, { useContext } from "react";
+import React from "react";
 import { Router } from "@reach/router";
+import PrivateRoute from "components/PrivateRoute";
 import SignIn from "./SignIn";
 import Register from "./Register";
 import ConnectStripe from "./ConnectStripe";
@@ -20,48 +21,43 @@ import Authorize from "./Authorize";
 import Checkout from "./Checkout";
 import Error from "./Error";
 import AuthorizeSuccess from "./AuthorizeSuccess";
-import { UserContext } from "../providers/UserProvider";
+import { makeStyles } from '@material-ui/core/styles';
+
+
+const useStyles = makeStyles((theme) => ({
+    loading: {
+      display: 'none',
+    },
+  }));
 
 
 function Application() {
-  const user = useContext(UserContext)
+  const classes = useStyles();
 
   return (
-    user ?
-    <Router>
-      <LoadingPage path="/loading" />
-      <SignedInHomePage path="/" />
-      <Register path="/register" />
-      <ConnectStripe path="/connect-stripe" />
-      <ProfilePage path="/profile" />
-      <AccountPage path="/account" />
-      <JobPage path="/job/:jobId" />
-      <GetJobPage path="/getjob" />
-      <AddJobPage path="/addjob" />
-      <Authorize path="/authorize" />
-      <AuthorizeSuccess path="/authorize_success" />
-      <Checkout path="/checkout" />
-      <ContactUsPage path="/contact" />
-      <SupportPage path="/support" />      
-      <PricingPage path="/pricing" />              
-      <PrivacyPolicyPage path="/privacy" />      
-      <TermsOfServicePage path="/tos" />              
-      <Error path="/error" />
-    </Router>
-  :      
-    <Router>
-      <SignedOutHomePage path="/" />
-      <SignIn path="signin/" />
-      <Authorize path="/authorize" />
-      <AuthorizeSuccess path="/authorize_success" />
-      <Checkout path="/checkout" />
-      <ContactUsPage path="/contact" />
-      <SupportPage path="/support" />
-      <PricingPage path="/pricing" />              
-      <PrivacyPolicyPage path="/privacy" />  
-      <TermsOfServicePage path="/tos" />              
-      <Error path="/error" />
-    </Router>
-  );
+  <Router id="ayudaMain" className={classes.loading}>
+    <SignedOutHomePage path="/" />
+    <SignIn path="signin/" />
+    <Authorize path="/authorize" />
+    <AuthorizeSuccess path="/authorize_success" />
+    <Checkout path="/checkout" />
+    <ContactUsPage path="/contact" />
+    <SupportPage path="/support" />
+    <PricingPage path="/pricing" />              
+    <PrivacyPolicyPage path="/privacy" />  
+    <TermsOfServicePage path="/tos" />              
+    <Error path="/error" />
+    {/* Protected Routes */}
+    <PrivateRoute path="/home" component={SignedInHomePage} />
+    <PrivateRoute path="/register" component={Register} />
+    <PrivateRoute path="/loading" component={LoadingPage} />
+    <PrivateRoute path="/connect-stripe" component={ConnectStripe} />
+    <PrivateRoute path="/profile" component={ProfilePage} />
+    <PrivateRoute path="/account" component={AccountPage} />
+    <PrivateRoute path="/job/:jobId" component={JobPage} />
+    <PrivateRoute path="/getjob" component={GetJobPage} />
+    <PrivateRoute path="/addjob" component={AddJobPage} />
+  </Router>
+  );  
 }
 export default Application;

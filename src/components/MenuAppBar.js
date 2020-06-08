@@ -60,7 +60,7 @@ export default function MenuAppBar() {
               variant="h6" 
               className={classes.title}
               onClick={() => {
-                navigate('/')
+                navigate('/home')
               }}
             >
               Ayuda
@@ -92,7 +92,7 @@ export default function MenuAppBar() {
                 onClose={handleClose}
               >
                 <MenuItem 
-                  onClick={() => { handleClose();navigate('/'); }}
+                  onClick={() => { handleClose();navigate('/home'); }}
                 >Home</MenuItem>
                 <MenuItem 
                   onClick={() => { handleClose();navigate('/profile'); }}

@@ -333,13 +333,6 @@ export default function AddJobPage(props) {
               </div>
             </div>
 
-            <Grid container justify="flex-end">
-                <Grid item>
-                <Link href="#" variant="body2">
-                    Need help?
-                </Link>
-                </Grid>
-            </Grid>
             </form>
         </div>
 

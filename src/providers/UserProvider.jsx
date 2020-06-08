@@ -1,17 +1,19 @@
 import React, { Component, createContext } from "react";
+import ReactDOM from 'react-dom'
 import { auth } from "../firebase";
 
 
-export const UserContext = createContext({ user: null });
+export const UserContext = createContext({ user: null});
 
 class UserProvider extends Component {
   state = {
-    user: null
+    user: null,
   };
 
   componentDidMount = () => {
     auth.onAuthStateChanged(async userAuth => {
-      this.setState({ user: userAuth});  
+      this.setState({ user: userAuth});
+      document.getElementById('ayudaMain').style.display = 'block';
     });
   };  
     

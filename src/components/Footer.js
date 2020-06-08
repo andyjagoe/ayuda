@@ -117,7 +117,7 @@ const Footer = () => {
               </Typography>
               <ul>
                 {footer.description.map((item) => (
-                  <li key={item}>
+                  <li key={item.href}>
                     <Link href={item.href} variant="subtitle1" color="textSecondary">
                       {item.name}
                     </Link>

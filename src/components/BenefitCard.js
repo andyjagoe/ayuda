@@ -38,8 +38,8 @@ const useStyles = makeStyles((theme) => ({
 
 function HeroText(props) {
     const classes = useStyles();
-    const headline = props.cardData.headline;
-    const subhead = props.cardData.subhead;
+    const headline = props.carddata.headline;
+    const subhead = props.carddata.subhead;
 
     return (
         <div className={classes.details}>
@@ -58,7 +58,7 @@ function HeroText(props) {
 
 function HeroMedia(props) {
     const classes = useStyles();
-    const imageId = props.cardData.imageId;
+    const imageId = props.carddata.imageId;
 
     return (
         <CardMedia
@@ -72,8 +72,8 @@ function HeroMedia(props) {
 
 const BenefitCard = (props) => {
     const classes = useStyles();
-    const imageIsRight = props.cardData.imageIsRight;
-    const cardData = props.cardData;
+    const imageIsRight = props.carddata.imageIsRight;
+    const cardData = props.carddata;
 
     return (
         <React.Fragment>
@@ -81,13 +81,13 @@ const BenefitCard = (props) => {
                 <Card className={classes.card}>
                     {imageIsRight ? ( 
                         <React.Fragment>
-                            <HeroText cardData={cardData} />
-                            <HeroMedia cardData={cardData}/>
+                            <HeroText carddata={cardData} />
+                            <HeroMedia carddata={cardData}/>
                         </React.Fragment>
                     ) : ( 
                         <React.Fragment>
-                            <HeroMedia cardData={cardData}/>
-                            <HeroText cardData={cardData} />
+                            <HeroMedia carddata={cardData}/>
+                            <HeroText carddata={cardData} />
                         </React.Fragment>
                     )}
                 </Card>

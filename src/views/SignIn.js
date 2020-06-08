@@ -1,4 +1,4 @@
-import React from "react";
+import React   from "react";
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -79,7 +79,7 @@ const uiConfig = {
     // Popup signin flow rather than redirect flow.
     signInFlow: 'redirect',
     // Redirect to /signedIn after sign in is successful. Alternatively you can provide a callbacks.signInSuccess function.
-    signInSuccessUrl: '/loading',
+    signInSuccessUrl: '/home',
     // We will display Google as auth providers.
     signInOptions: [
         {

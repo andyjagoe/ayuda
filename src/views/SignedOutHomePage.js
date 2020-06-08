@@ -113,8 +113,8 @@ const SignedOutHomePage = () => {
             <Container className={classes.cardGrid} maxWidth="md" id='features'>
             <Grid container spacing={4}>
                 {cards.map((card) => (
-                <Grid item key={card} xs={12}>
-                    <BenefitCard cardData={card} />
+                <Grid item key={card.headline} xs={12}>
+                    <BenefitCard carddata={card} />
                 </Grid>
                 ))}
             </Grid>

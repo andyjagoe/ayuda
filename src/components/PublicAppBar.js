@@ -52,7 +52,10 @@ export default function PublicAppBar() {
             >
                 Ayuda
             </Typography>
-            <nav>
+            <nav>                
+                <Link variant="button" color="textPrimary" href="/home" className={classes.link}>
+                { user ? 'Go to App' : ''}
+                </Link>
                 <Link variant="button" color="textPrimary" href="/#features" className={classes.link}>
                 Features
                 </Link>

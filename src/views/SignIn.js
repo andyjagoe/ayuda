@@ -15,7 +15,7 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import { navigate } from "@reach/router"; 
 import { makeStyles } from '@material-ui/core/styles';
-import SignedOutAppBar from 'components/SignedOutAppBar';
+import PublicAppBar from 'components/PublicAppBar';
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 import {auth} from '../firebase';
 import {provider} from '../firebase';
@@ -104,7 +104,7 @@ const SignIn = () => {
 
   return (
     <React.Fragment>
-        <SignedOutAppBar />
+        <PublicAppBar />
         <Grid container component="main" className={classes.root}>
         <CssBaseline />        
         <Grid item xs={false} sm={4} md={7} className={classes.image} />

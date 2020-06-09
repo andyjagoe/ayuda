@@ -27,6 +27,7 @@ function Application() {
 
   return (
   <Router>
+    {/* Public Routes */}
     <SignIn path="/signin" />
     <SignedOutHomePage path="/" />
     <Authorize path="/authorize" />

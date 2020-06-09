@@ -28,7 +28,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-export default function SignedOutAppBar() {
+export default function PublicAppBar() {
   const classes = useStyles();
   const user = useContext(UserContext);
 

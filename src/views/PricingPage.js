@@ -2,7 +2,7 @@ import React from "react";
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
-import SignedOutAppBar from 'components/SignedOutAppBar';
+import PublicAppBar from 'components/PublicAppBar';
 import Box from '@material-ui/core/Box';
 import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
@@ -79,7 +79,7 @@ const PricingPage = () => {
     return (
         <React.Fragment>
             <CssBaseline />
-            <SignedOutAppBar />
+            <PublicAppBar />
             <Container maxWidth="sm" component="main" className={classes.heroContent}>
                 <Typography component="h1" variant="h2" align="center" color="textPrimary">
                 Pricing

@@ -3,7 +3,7 @@ import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
-import SignedOutAppBar from 'components/SignedOutAppBar';
+import PublicAppBar from 'components/PublicAppBar';
 import BenefitCard from 'components/BenefitCard';
 import Footer from 'components/Footer';
 import { makeStyles } from '@material-ui/core/styles';
@@ -84,7 +84,7 @@ const SignedOutHomePage = () => {
     return (
         <React.Fragment>
         <CssBaseline />
-        <SignedOutAppBar />
+        <PublicAppBar />
         <main>
 
             {/* Hero unit */}

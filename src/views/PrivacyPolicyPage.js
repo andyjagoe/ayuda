@@ -4,7 +4,7 @@ import Typography from '@material-ui/core/Typography';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import Container from '@material-ui/core/Container';
-import SignedOutAppBar from 'components/SignedOutAppBar';
+import PublicAppBar from 'components/PublicAppBar';
 import Footer from 'components/Footer';
 import { makeStyles } from '@material-ui/core/styles';
 
@@ -39,7 +39,7 @@ const PrivacyPolicyPage = () => {
     return (
         <React.Fragment>
             <CssBaseline />
-            <SignedOutAppBar />
+            <PublicAppBar />
             <Container maxWidth="sm">
                 <div className={classes.heroContent}>
                     <Typography component="h1" variant="h2" align="center" color="textPrimary" gutterBottom>

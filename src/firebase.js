@@ -36,7 +36,8 @@ export const firestore = firebase.firestore();
 
 export const signOut = () => {
     auth.signOut();
-    window.location.assign('/');
+    document.getElementById('ayudaMain').style.display = 'block';
+    window.location.assign('/'); 
 };
 
 // Google OAuth Client ID, needed to support One-tap sign-up.

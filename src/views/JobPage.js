@@ -349,7 +349,7 @@ Password: ${jobRecord.password}
     .then(function(result) {
         console.log(result.data);
         setDisabled(false)
-        navigate('/');
+        navigate('/home');
     })
     .catch(function(error) {
         console.log(error.message);
@@ -384,7 +384,7 @@ Password: ${jobRecord.password}
       setDisabled(false)
       setSuccess(true);
       setLoading(false);
-      navigate('/');
+      navigate('/home');
     } catch (error) {
         console.log(error);
         setDisabled(false)

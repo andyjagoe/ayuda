@@ -34,7 +34,7 @@ function checkRegistration() {
     return isRegistered()
     .then(function(result) {
       if (result.data) {
-        navigate('/');
+        navigate('/home');
         return false;
       } else {
         navigate('/register');

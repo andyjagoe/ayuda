@@ -191,7 +191,7 @@ export default function AddJobPage(props) {
             setDisabled(false)
             setSuccess(true);
             setLoading(false);
-            navigate('/');
+            navigate('/home');
         })
         .catch(function(error) {
             console.log(error.message);

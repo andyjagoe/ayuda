@@ -54,7 +54,7 @@ export default function ConnectStripe(props) {
                 setResultMessage('Stripe connected successfully')
                 setResultSeverity('success')
                 setIsLoading(false)
-                navigate('/');
+                navigate('/home');
             }).catch(function(error) {
                 console.log(error.message);
                 setResultMessage(error.message)

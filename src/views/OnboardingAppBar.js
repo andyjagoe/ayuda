@@ -45,7 +45,7 @@ export default function OnboardingAppBar() {
             variant="h6" 
             className={classes.title}
             onClick={() => {
-              navigate('/')
+              navigate('/home')
             }}
           >
             Ayuda

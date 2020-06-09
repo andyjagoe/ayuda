@@ -21,21 +21,12 @@ import Authorize from "./Authorize";
 import Checkout from "./Checkout";
 import Error from "./Error";
 import AuthorizeSuccess from "./AuthorizeSuccess";
-import { makeStyles } from '@material-ui/core/styles';
-
-
-const useStyles = makeStyles((theme) => ({
-    loading: {
-      display: 'none',
-    },
-  }));
 
 
 function Application() {
-  const classes = useStyles();
 
   return (
-  <Router id="ayudaMain" className={classes.loading}>
+  <Router>
     <SignIn path="/signin" />
     <SignedOutHomePage path="/" />
     <Authorize path="/authorize" />

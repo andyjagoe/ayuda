@@ -36,7 +36,6 @@ export const firestore = firebase.firestore();
 
 export const signOut = () => {
     auth.signOut();
-    document.getElementById('ayudaMain').style.display = 'block';
     window.location.assign('/'); 
 };
 

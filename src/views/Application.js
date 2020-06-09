@@ -26,7 +26,7 @@ import AuthorizeSuccess from "./AuthorizeSuccess";
 function Application() {
 
   return (
-  <Router>
+  <Router primary={false}>
     {/* Public Routes */}
     <SignIn path="/signin" />
     <SignedOutHomePage path="/" />

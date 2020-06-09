@@ -34,7 +34,7 @@ export default function PublicAppBar() {
 
   const handleButton = () => {
     user ? signOut() :
-    navigate('/')
+    navigate('/signin')
   }
 
   return (
@@ -53,18 +53,20 @@ export default function PublicAppBar() {
                 Ayuda
             </Typography>
             <nav>                
-                <Link variant="button" color="textPrimary" href="/home" className={classes.link}>
+                <Link variant="button" color="textPrimary" onClick={() => {navigate('/home')}} 
+                    className={classes.link}>
                 { user ? 'Go to App' : ''}
                 </Link>
-                <Link variant="button" color="textPrimary" href="/#features" className={classes.link}>
+                <Link variant="button" color="textPrimary" onClick={() => {navigate('/#features')}}
+                     className={classes.link}>
                 Features
                 </Link>
-                <Link variant="button" color="textPrimary" href="/pricing" className={classes.link}>
+                <Link variant="button" color="textPrimary" onClick={() => {navigate('/pricing')}}
+                    className={classes.link}>
                 Pricing
                 </Link>
             </nav>
             <Button 
-                href="/signin" 
                 color="primary" 
                 variant="outlined" 
                 className={classes.link}

@@ -1,5 +1,4 @@
 import React, { Component, createContext } from "react";
-import ReactDOM from 'react-dom'
 import { auth } from "../firebase";
 
 
@@ -12,6 +11,7 @@ class UserProvider extends Component {
 
   componentDidMount = () => {
     auth.onAuthStateChanged(async userAuth => {
+      console.log('onAuthStateChanged');
       this.setState({ user: userAuth });
     });
   };  

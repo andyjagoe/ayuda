@@ -75,6 +75,7 @@ const useStyles = makeStyles((theme) => ({
 // Configure FirebaseUI.
 const uiConfig = {
     callbacks: {
+      //signInSuccessWithAuthResult: () => false      
     },
     // Popup signin flow rather than redirect flow.
     signInFlow: 'redirect',

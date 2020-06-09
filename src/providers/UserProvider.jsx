@@ -12,7 +12,7 @@ class UserProvider extends Component {
 
   componentDidMount = () => {
     auth.onAuthStateChanged(async userAuth => {
-      this.setState({ user: userAuth});
+      this.setState({ user: userAuth });
       document.getElementById('ayudaMain').style.display = 'block';
     });
   };  

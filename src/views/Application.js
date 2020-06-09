@@ -36,8 +36,8 @@ function Application() {
 
   return (
   <Router id="ayudaMain" className={classes.loading}>
+    <SignIn path="/signin" />
     <SignedOutHomePage path="/" />
-    <SignIn path="signin/" />
     <Authorize path="/authorize" />
     <AuthorizeSuccess path="/authorize_success" />
     <Checkout path="/checkout" />

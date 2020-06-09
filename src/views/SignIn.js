@@ -50,7 +50,7 @@ const useStyles = makeStyles((theme) => ({
     marginTop: theme.spacing(1),
   },
   title: {
-    margin: theme.spacing(0, 0, 20),
+    margin: theme.spacing(0, 0, 5),
   },
   appBar: {
     //borderBottom: `1px solid ${theme.palette.divider}`,

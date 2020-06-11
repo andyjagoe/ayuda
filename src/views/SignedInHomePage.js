@@ -73,6 +73,8 @@ const SignedInHomePage = () => {
       setPayouts((balance.data.payouts/100).toFixed(2))
     } catch (error) {
       console.log(error.message);
+      setTotalBalance('0.00')
+      setPayouts('0.00')
     }
   };
 

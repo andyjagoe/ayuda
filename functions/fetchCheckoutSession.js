@@ -125,7 +125,8 @@ exports.handler = async function(data, context, firestoreDb, billing) {
         const dateDescription = formatDateDescription(jobRecord)
         const rateDescription = formatRateDescription(rateRecord)
         const charge = rateRecord.rate * (jobRecord.d / 60) * 100
-        const transfer = Math.round(charge - (60 + (charge * 4.9)/100))  //TODO: make sure we have a min charge so this is > 0
+        //const transfer = Math.round(charge - (60 + (charge * 4.9)/100))  //TODO: make sure we have a min charge so this is > 0
+        const transfer = billing.calculateTransfer(charge)
 
         const stripeSession = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],

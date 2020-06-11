@@ -18,7 +18,7 @@ exports.handler = async function(req, res, firestoreDb, admin) {
     switch (event.type) {
         case 'checkout.session.completed':
             console.log('checkout.session.completed')
-            console.log(event.data)
+            //console.log(event.data)
             await handleCheckoutSucceeded(
                 event.data.object.payment_intent, 
                 event.data.object.client_reference_id, 

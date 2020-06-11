@@ -86,6 +86,7 @@ const SignedInHomePage = () => {
       })
     .catch(function(error) {
         console.log(error);
+        navigate('/register');
     });
   };
 

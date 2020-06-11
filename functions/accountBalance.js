@@ -1,4 +1,5 @@
 const functions = require('firebase-functions');
+const moment = require('moment');
 var stripe = require('stripe')('sk_test_K0y591XvPNiX9UJaxdaZcSK6');
 
 
@@ -15,30 +16,43 @@ exports.handler = async function(data, context, firestoreDb, admin) {
         'while authenticated.');      
     }
 
-    return firestoreDb.collection('/stripe').doc(uid).get()
-    .then(doc => {
-        if (!doc.exists) {
-        console.log('No stripe account for this user');
-        throw new functions.https.HttpsError('failed-precondition', 'Unable to verify state.');
+
+    try {
+        const stripeDoc = await firestoreDb.collection('/stripe').doc(uid).get()
+        if (!stripeDoc.exists) {
+            console.log('No stripe account for this user');
+            throw new functions.https.HttpsError('failed-precondition', 'Unable to verify state.');
         }
-        
-        return stripe.balance.retrieve({
-            stripeAccount: doc.data().stripe_user_id
+
+        const balance = await stripe.balance.retrieve({
+            stripeAccount: stripeDoc.data().stripe_user_id
         });
-    })
-    .then(ref => {
-        console.log('Account balance object: ', JSON.stringify(ref));
-        const available = ref.available.find(obj => obj.currency === 'usd');
-        const pending = ref.pending.find(obj => obj.currency === 'usd');        
+        //console.log('Account balance object: ', JSON.stringify(balance));
+        const available = balance.available.find(obj => obj.currency === 'usd');
+        const pending = balance.pending.find(obj => obj.currency === 'usd');
+            
+        const payouts = await stripe.payouts.list(
+            {
+                created: {
+                    gt: moment().subtract(7, 'days').unix(),
+                }
+            },
+            {stripeAccount: stripeDoc.data().stripe_user_id}
+        );        
+        //console.log('Payouts: ', JSON.stringify(payouts));
+        var payoutTotal = 0;
+        for (index = 0; index < payouts.data.length; index++) { 
+            payoutTotal = payoutTotal + payouts.data[index].amount
+        }
+
         return {
-            available: available.amount, 
-            pending: pending.amount,
-            total: available.amount + pending.amount,
+            balance: available.amount + pending.amount,
+            payouts: payoutTotal,
         };
-    })
-    .catch(error => {
-        console.error("account Error: ", error);
+    
+    } catch (error) {
+        console.error("Error: ", error);
         throw new functions.https.HttpsError('failed-precondition', error.message);
-    });
+    } 
 
 }

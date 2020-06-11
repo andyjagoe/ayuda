@@ -9,13 +9,15 @@ import Container from '@material-ui/core/Container';
 import { navigate } from "@reach/router";
 import { UserContext } from "../providers/UserProvider";
 import Jobs from 'components/Jobs';
+import Link from '@material-ui/core/Link';
+import Paper from '@material-ui/core/Paper';
 import firebase from 'firebase/app';
 import 'firebase/functions';
 
 
 const useStyles = makeStyles((theme) => ({
   paper: {
-    marginTop: theme.spacing(8),
+    marginTop: theme.spacing(6),
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -31,8 +33,12 @@ const useStyles = makeStyles((theme) => ({
   submit: {
     margin: theme.spacing(3, 0, 2),
   },
-  account: {
-    marginBottom: theme.spacing(6),
+  balances: {
+    width: '100%',
+    padding: theme.spacing(2),
+  },
+  welcome: {
+    marginTop: theme.spacing(8),
   },
   jobs: {
     marginTop: theme.spacing(6),
@@ -49,7 +55,7 @@ const SignedInHomePage = () => {
   const user = useContext(UserContext);
   const {displayName} = user;
   const [totalBalance, setTotalBalance] = React.useState('');
-  const [availableBalance, setAvailableBalance] = React.useState('');
+  const [totalPayouts, setPayouts] = React.useState('');
   const firstRender = useRef(true)
 
   useEffect(() => {
@@ -63,33 +69,47 @@ const SignedInHomePage = () => {
     var accountBalance = firebase.functions().httpsCallable('accountBalance');
     try {
       const balance = await accountBalance();
-      setTotalBalance((balance.data.total/100).toFixed(2))
-      setAvailableBalance(`$${(balance.data.available/100).toFixed(2)} available`)
+      setTotalBalance((balance.data.balance/100).toFixed(2))
+      setPayouts((balance.data.payouts/100).toFixed(2))
     } catch (error) {
       console.log(error.message);
     }
   };
+
+  const goToAccount = async () => {
+    var stripeLoginLink = firebase.functions().httpsCallable('stripeLoginLink');
+    await stripeLoginLink()
+    .then(function(result) {
+        window.open(result.data.url, '_blank');
+      })
+    .catch(function(error) {
+        console.log(error);
+    });
+  };
+
 
   return (
     <React.Fragment>
     <MenuAppBar />
     <Container component="main" maxWidth="xs">      
       <div className={classes.paper}>
-        <Grid container spacing={2} className={classes.account}>
+      <Paper className={classes.balances}  variant='elevation' elevation={1}>
+        <Grid container spacing={2}>
           <Grid item xs={12}>
             <Typography variant="body2">
               Your Balance
             </Typography>              
             <Typography component="h1" variant="h3">
-              ${totalBalance}
+              ${totalBalance} 
             </Typography>
-            <Typography variant="body2" color="textSecondary">
-              {availableBalance}
-            </Typography>              
+            <Link variant="body2" color="textSecondary" onClick={() => { goToAccount(); }}>
+              Recent payouts: ${totalPayouts}
+            </Link>
           </Grid>
         </Grid>
+      </Paper>
 
-        <Typography component="h1" variant="h4">
+        <Typography component="h1" variant="h4" className={classes.welcome}>
           Welcome, {displayName}!
         </Typography>
         

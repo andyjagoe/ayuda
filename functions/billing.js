@@ -51,10 +51,11 @@ const isBillable = async (uid, jobId, zoomId, rateDoc, firestoreDb) => {
 
 
 const calculateTransfer = (charge) => {
-    const centFee = 60;
-    const percentFee = 4.9;
+    const centFee = 75;
+    const percentFee = 5.25;
     return Math.round(charge - (centFee + (charge * percentFee)/100))
 }
+
 
 const runBilling  = async (user, jobId, hostZoomId, jobDoc, customerDoc, rateDoc, 
     firestoreDb, emailHandler, admin, billing) => {
@@ -78,7 +79,6 @@ const runBilling  = async (user, jobId, hostZoomId, jobDoc, customerDoc, rateDoc
 
         const charge = (meetingLengthInSeconds  / 3600) * rateDoc.rate
         const stripeCharge = Math.round(charge * 100)
-        //const transfer = Math.round(stripeCharge - (60 + (stripeCharge * 4.9)/100))
         const transfer = calculateTransfer(stripeCharge)
         console.log(`Rate: ${rateDoc.rate} Charge: ${charge} stripeCharge: ${stripeCharge}`)
 

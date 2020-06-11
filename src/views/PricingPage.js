@@ -59,7 +59,7 @@ const useStyles = makeStyles((theme) => ({
 const tiers = [
     {
       title: "Pay only for what you use",
-      price: '4.9',
+      price: '5.25',
       description: [
         'Unlimited 1:1 video calls',
         'Accept credit card payments',
@@ -107,7 +107,7 @@ const PricingPage = () => {
                             </Typography>
                             <Box className={classes.cardPricingCents}>
                                 <Typography variant="h6" color="textPrimary">
-                                    &nbsp;&nbsp;+ 60¢
+                                    &nbsp;&nbsp;+ 75¢
                                 </Typography>                                
                             </Box>                                
                         </div>

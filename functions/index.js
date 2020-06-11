@@ -96,6 +96,20 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'cloudTaskCallba
     });
 }
 
+if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'accountBalance') {
+    const accountBalance = require('./accountBalance');
+    exports.accountBalance = functions.https.onCall((data, context) => {
+        return accountBalance.handler(data, context, firestoreDb, admin);
+    });
+}
+
+if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'stripeLoginLink') {
+    const stripeLoginLink = require('./stripeLoginLink');
+    exports.stripeLoginLink = functions.https.onCall((data, context) => {
+        return stripeLoginLink.handler(data, context, firestoreDb, admin);
+    });
+}
+
 if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'stripeCallback') {
     const stripeCallback = require('./stripeCallback');
     exports.stripeCallback = functions.https.onRequest((req, res) => {

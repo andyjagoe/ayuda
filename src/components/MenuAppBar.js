@@ -11,6 +11,8 @@ import Menu from '@material-ui/core/Menu';
 import { UserContext } from "../providers/UserProvider";
 import { navigate } from "@reach/router";
 import {signOut} from '../firebase';
+import firebase from 'firebase/app';
+import 'firebase/functions';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -45,6 +47,18 @@ export default function MenuAppBar() {
 
   const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  const goToAccount = async () => {
+    handleClose();
+    var stripeLoginLink = firebase.functions().httpsCallable('stripeLoginLink');
+    await stripeLoginLink()
+    .then(function(result) {
+        window.open(result.data.url, '_blank');
+      })
+    .catch(function(error) {
+        console.log(error);
+    });
   };
 
   return (
@@ -98,7 +112,7 @@ export default function MenuAppBar() {
                   onClick={() => { handleClose();navigate('/profile'); }}
                 >Profile</MenuItem>
                 <MenuItem 
-                  onClick={() => { handleClose();navigate('/account'); }}
+                  onClick={() => { goToAccount(); }}
                 >Account</MenuItem>
                 <MenuItem onClick={() => {signOut()}}>Sign out</MenuItem>                
               </Menu>

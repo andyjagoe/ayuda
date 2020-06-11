@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useRef } from "react";
 import { makeStyles } from '@material-ui/core/styles';
 import MenuAppBar from 'components/MenuAppBar';
 import Button from '@material-ui/core/Button';
@@ -9,6 +9,8 @@ import Container from '@material-ui/core/Container';
 import { navigate } from "@reach/router";
 import { UserContext } from "../providers/UserProvider";
 import Jobs from 'components/Jobs';
+import firebase from 'firebase/app';
+import 'firebase/functions';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -46,7 +48,28 @@ const SignedInHomePage = () => {
   const classes = useStyles();
   const user = useContext(UserContext);
   const {displayName} = user;
-  
+  const [totalBalance, setTotalBalance] = React.useState('');
+  const [availableBalance, setAvailableBalance] = React.useState('');
+  const firstRender = useRef(true)
+
+  useEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false
+      getAccountBalance()
+    }
+  }, [])
+
+  const getAccountBalance = async () => {
+    var accountBalance = firebase.functions().httpsCallable('accountBalance');
+    try {
+      const balance = await accountBalance();
+      setTotalBalance((balance.data.total/100).toFixed(2))
+      setAvailableBalance(`$${(balance.data.available/100).toFixed(2)} available`)
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
   return (
     <React.Fragment>
     <MenuAppBar />
@@ -58,8 +81,11 @@ const SignedInHomePage = () => {
               Your Balance
             </Typography>              
             <Typography component="h1" variant="h3">
-              $0.00
+              ${totalBalance}
             </Typography>
+            <Typography variant="body2" color="textSecondary">
+              {availableBalance}
+            </Typography>              
           </Grid>
         </Grid>
 

@@ -1,9 +1,14 @@
 
 
-exports.handler = function(event, firestoreDb, admin, zoomHelper) {
+exports.handler = function(event, firestoreDb, admin, zoomHelper, emailHandler) {
     //console.log(event);
 
     var zoomResponse = null
+    const user = {
+        uid: event.uid,
+        name: event.displayName,
+        email: event.email,
+    }
 
     const myAxios = zoomHelper.getAxiosWithInterceptor()
     return myAxios({
@@ -37,7 +42,11 @@ exports.handler = function(event, firestoreDb, admin, zoomHelper) {
         });
     })  
     .then(response => {
-        console.log('newUserSignup succeeded: ', response);
+        //console.log('newUserSignup added to db: ', JSON.stringify(response));
+        return emailHandler.sendWelcomeEmail(user)
+    })  
+    .then(response => {
+        //console.log('newUserSignup success: ', JSON.stringify(response));
         return true;
     })  
     .catch(error => {

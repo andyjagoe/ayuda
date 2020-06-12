@@ -18,13 +18,17 @@ exports.handler = async function(req, res, firestoreDb, admin) {
     switch (event.type) {
         case 'checkout.session.completed':
             console.log('checkout.session.completed')
-            //console.log(event.data)
+            //console.log(JSON.stringify(event.data))
             await handleCheckoutSucceeded(
                 event.data.object.payment_intent, 
                 event.data.object.client_reference_id, 
                 firestoreDb,
                 admin
             )
+            break;
+        case 'payout.paid':
+            console.log('payout.paid')
+            console.log(JSON.stringify(event.data))
             break;
         default:
             // Unexpected event type

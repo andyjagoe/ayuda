@@ -12,7 +12,7 @@ var firestoreDb = admin.firestore();
 if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'newUserSignup') {
     const newUserSignup = require('./newUserSignup');
     exports.newUserSignup = functions.auth.user().onCreate((event) => {
-        return newUserSignup.handler(event, firestoreDb, admin, zoomHelper);
+        return newUserSignup.handler(event, firestoreDb, admin, zoomHelper, emailHandler);
     });
 }
 

@@ -1,7 +1,12 @@
 Setup requires setting the following Firebase environment variables prior to deploying:
+* ayuda.url
+* aws.accesskeyid
+* aws.secretaccesskey
+* aws.region
 * zoom.apikey
 * zoom.refreshtoken
 
+For example: 
 `firebase functions:config:set zoom.jwttoken="JWT token for API access" zoom.refreshtoken="refresh token to create new JWT tokens"`
 
 

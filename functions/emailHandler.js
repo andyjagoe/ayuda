@@ -1,11 +1,12 @@
+const functions = require('firebase-functions');
 var nodemailer = require("nodemailer");
 const path = require('path');
 const Email = require('email-templates');
 const AWS = require("aws-sdk");
 AWS.config.update({
-    accessKeyId: "AKIAXVJ7W2BSYI26P3ZN",
-    secretAccessKey: "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",
-    region: "us-west-2"
+    accessKeyId: functions.config().aws.accesskeyid,
+    secretAccessKey: functions.config().aws.secretaccesskey,
+    region: functions.config().aws.region,
 });
 var transporter = nodemailer.createTransport({
     SES: new AWS.SES({
@@ -39,6 +40,7 @@ const email = new Email({
 
 
 const productName = 'Ayuda Live'
+const productURL = functions.config().ayuda.url || 'https://ayuda.live'
 const supportEmail = 'support@ayuda.live'
 
 
@@ -99,6 +101,8 @@ const sendWelcomeEmail = (user) => {
         locals: {                 
             name: user.name,
             product_name: productName,
+            action_url: `${productURL}/home`,
+            signin_url: `${productURL}/signin`,
             preheader: `Thanks for trying out ${productName}. We’ve pulled together some information and resources to help you get started.`,
             email: user.email,
             support_email: supportEmail      

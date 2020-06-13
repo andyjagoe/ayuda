@@ -214,13 +214,6 @@ export default function Register(props) {
             >
                 Save and Continue
             </Button>
-            <Grid container justify="flex-end">
-                <Grid item>
-                <Link href="#" variant="body2">
-                    Need help?
-                </Link>
-                </Grid>
-            </Grid>
             </form>
         </div>
         </Container>

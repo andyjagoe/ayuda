@@ -104,7 +104,7 @@ export default function Register(props) {
   stripeConnectUrl.searchParams.set("redirect_uri", `${props.location.origin}/connect-stripe`);
   stripeConnectUrl.searchParams.set("client_id", "ca_H6rAXET2pmOzBHnNrhEnwYPfPLEiZohY");
   stripeConnectUrl.searchParams.set("stripe_user[email]", email);
-  stripeConnectUrl.searchParams.set("stripe_user[url]", `https://ayuda-9ea45.web.app/p/${uid}`); //TODO: fix url
+  stripeConnectUrl.searchParams.set("stripe_user[url]", `https://ayuda.live/p/${uid}`); //TODO: fix url
   stripeConnectUrl.searchParams.set("stripe_user[business_type]", "individual");
   stripeConnectUrl.searchParams.set("stripe_user[country]", "US");
   

@@ -16,7 +16,6 @@ import AccountPage from "./AccountPage";
 import JobPage from "./JobPage";
 import GetJobPage from "./GetJobPage";
 import AddJobPage from "./AddJobPage";
-import LoadingPage from "./LoadingPage";
 import Authorize from "./Authorize";
 import Checkout from "./Checkout";
 import Error from "./Error";
@@ -42,7 +41,6 @@ function Application() {
     {/* Protected Routes */}
     <PrivateRoute path="/home" component={SignedInHomePage} />
     <PrivateRoute path="/register" component={Register} />
-    <PrivateRoute path="/loading" component={LoadingPage} />
     <PrivateRoute path="/connect-stripe" component={ConnectStripe} />
     <PrivateRoute path="/profile" component={ProfilePage} />
     <PrivateRoute path="/account" component={AccountPage} />

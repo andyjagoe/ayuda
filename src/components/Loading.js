@@ -1,11 +1,8 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Container from '@material-ui/core/Container';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import { navigate } from "@reach/router";
 import { makeStyles } from '@material-ui/core/styles';
-import firebase from 'firebase/app';
-import 'firebase/functions';
  
 
 const useStyles = makeStyles((theme) => ({
@@ -29,31 +26,8 @@ const useStyles = makeStyles((theme) => ({
   }));
 
 
-function checkRegistration() {
-    var isRegistered = firebase.functions().httpsCallable('isRegistered');
-    return isRegistered()
-    .then(function(result) {
-      if (result.data) {
-        navigate('/home');
-        return false;
-      } else {
-        navigate('/register');
-        return false;
-      }         
-    })
-    .catch(function(error) {
-        console.log(error.message);
-        return true;
-    });
-}
-
-export default function LoadingPage() {
+export default function Loading() {
   const classes = useStyles();
-
-  useEffect(() => { 
-    checkRegistration()
-  }, []);
-
   
   return (
     <React.Fragment>

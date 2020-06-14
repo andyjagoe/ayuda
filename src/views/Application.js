@@ -20,12 +20,14 @@ import Authorize from "./Authorize";
 import Checkout from "./Checkout";
 import Error from "./Error";
 import AuthorizeSuccess from "./AuthorizeSuccess";
+import ScrollToTop from "components/ScrollToTop";
 
 
 function Application() {
 
   return (
   <Router>
+    <ScrollToTop path="/">
     {/* Public Routes */}
     <SignIn path="/signin" />
     <SignedOutHomePage path="/" />
@@ -47,6 +49,7 @@ function Application() {
     <PrivateRoute path="/job/:jobId" component={JobPage} />
     <PrivateRoute path="/getjob" component={GetJobPage} />
     <PrivateRoute path="/addjob" component={AddJobPage} />
+    </ScrollToTop>
   </Router>
   );  
 }

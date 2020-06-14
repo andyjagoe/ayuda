@@ -1,8 +1,22 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /users/{userId}/{document=**} {
+    match /users/{userId} {
       allow read, update, delete, create: if request.auth.uid == userId;
     }
+
+    match /users/{userId}/meetings/{document=**} {
+      allow read, update, delete, create: if request.auth.uid == userId;
+    }
+
+    match /users/{userId}/customers/{document=**} {
+      allow read, update, delete, create: if request.auth.uid == userId;
+    }
+
+    match /users/{userId}/rates/{document=**} {
+      allow read: if request.auth.uid == userId;
+      allow update, delete, create: if request.auth.uid == userId && exists(/databases/$(database)/documents/stripe/$(userId));
+    }
+
   }
 }

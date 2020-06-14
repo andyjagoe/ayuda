@@ -21,16 +21,20 @@ exports.handler = function(data, context, firestoreDb) {
     return stripeRef.get()
     .then(doc => {
         if (!doc.exists) {
-            console.log('No such document!');
-            return false;
+            //console.log('No Stripe credentials for this user');
+            throw new functions.https.HttpsError('permission-denied', 'Payments not enabled.');
         } else {
             //console.log('Document data:', doc.data());
             return true;
         }
     })
     .catch(err => {
-        console.log('Error getting document', err);
-        throw new functions.https.HttpsError('internal', error.message);
+        console.log('Error getting document', JSON.stringify(err));
+        if (err.code === 'permission-denied') {
+            throw new functions.https.HttpsError(err.code, err.message);
+        } else {
+            throw new functions.https.HttpsError('internal', err.message);
+        }
     });
 
 }

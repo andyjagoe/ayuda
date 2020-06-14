@@ -6,9 +6,12 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogActions from '@material-ui/core/DialogActions';
+import Alert from '@material-ui/lab/Alert';
+import Collapse from '@material-ui/core/Collapse';
 import CurrencyTextField from '@unicef/material-ui-currency-textfield'
 import TextField from '@material-ui/core/TextField';
 import { UserContext } from "../providers/UserProvider";
+import { navigate } from "@reach/router";
 import firebase from 'firebase/app';
 import { firestore } from "../firebase"
 import 'firebase/functions';
@@ -26,6 +29,9 @@ export default function RateChooser(props) {
   const [rateName, setRateName] = useState("")
   const [rateNameError, setRateNameError] = useState(null)
   const [rates, setRates] = useState([])
+
+  const [alertMessage, setAlertMessage] = useState('Payments not set up');
+  const [showAlert, setShowAlert] = useState(false);
 
   const firstRender = useRef(true)
   const [gotRateRecord, setGotRateRecord] = useState(false)
@@ -82,6 +88,7 @@ export default function RateChooser(props) {
   const [openRateDialog, toggleOpenRateDialog] = React.useState(false);
 
   const handleCloseRateDialog = () => {
+    setShowAlert(false)
     setRateDialogValue({
       name: '',        
       rate: '',
@@ -111,8 +118,11 @@ export default function RateChooser(props) {
     event.preventDefault();
     event.stopPropagation()
 
+    setShowAlert(false)
+
     // Add new rate to Firestore
-    await firestore.collection('/users')
+    try {
+      const dbRef = await firestore.collection('/users')
         .doc(uid)
         .collection('rates')
         .add({
@@ -120,24 +130,27 @@ export default function RateChooser(props) {
             rate: parseFloat(rateDialogValue.name),
             currency: rateDialogValue.currency,
             t: firebase.firestore.Timestamp.fromDate(new Date()),
-    })
-    .then(ref => {        
-        //console.log('Added document with ID: ', ref.id);
-        let newRate = {
-            name: rateDialogValue.name,
-            rate: parseFloat(rateDialogValue.name),
-            currency: rateDialogValue.currency,
-            id: ref.id,
-        };
-        setRateDetails(newRate);
-        let tempRates = rates;
-        tempRates.push(newRate);
-        tempRates.sort((a, b) => (a.rate > b.rate) ? 1 : -1)
-        setRates(tempRates);
-    })
-    .catch(error => {
-        console.error("Add rate error: ", error);
-    });
+        })
+      let newRate = {
+        name: rateDialogValue.name,
+        rate: parseFloat(rateDialogValue.name),
+        currency: rateDialogValue.currency,
+        id: dbRef.id,
+      };
+      setRateDetails(newRate);
+      let tempRates = rates;
+      tempRates.push(newRate);
+      tempRates.sort((a, b) => (a.rate > b.rate) ? 1 : -1)
+      setRates(tempRates);
+
+    } catch (error) {
+      console.error("Error: ", error.message);
+      if (error.code === 'permission-denied') {
+        setShowAlert(true)
+      }
+
+      return null
+    } 
 
     handleCloseRateDialog();
   };  
@@ -270,6 +283,15 @@ export default function RateChooser(props) {
             <DialogTitle id="form-dialog-add-customer-title">Add new rate</DialogTitle>
             <DialogContent>
               <DialogContentText>
+                <Collapse in={showAlert}>
+                  <Alert severity="error" action={
+                    <Button color="inherit" size="small" onClick={() => { navigate('/setup-payments'); }} >
+                      ENABLE PAYMENTS
+                    </Button>
+                  }>
+                    {alertMessage}
+                  </Alert>
+                </Collapse>
               </DialogContentText>
               <div>
               <CurrencyTextField
@@ -283,7 +305,7 @@ export default function RateChooser(props) {
                 maximumValue="1000"
                 outputFormat="string"
                 decimalPlaces={0}
-		        decimalCharacter="."
+		            decimalCharacter="."
                 digitGroupSeparator=","
                 textAlign="left"
                 value={rateDialogValue.rate}

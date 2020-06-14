@@ -28,27 +28,27 @@ function Application() {
   return (
   <Router>
     <ScrollToTop path="/">
-    {/* Public Routes */}
-    <SignIn path="/signin" />
-    <SignedOutHomePage path="/" />
-    <Authorize path="/authorize" />
-    <AuthorizeSuccess path="/authorize_success" />
-    <Checkout path="/checkout" />
-    <ContactUsPage path="/contact" />
-    <SupportPage path="/support" />
-    <PricingPage path="/pricing" />              
-    <PrivacyPolicyPage path="/privacy" />  
-    <TermsOfServicePage path="/tos" />              
-    <Error path="/error" />
-    {/* Protected Routes */}
-    <PrivateRoute path="/home" component={SignedInHomePage} />
-    <PrivateRoute path="/setup-payments" component={SetupPayments} />
-    <PrivateRoute path="/connect-stripe" component={ConnectStripe} />
-    <PrivateRoute path="/profile" component={ProfilePage} />
-    <PrivateRoute path="/account" component={AccountPage} />
-    <PrivateRoute path="/job/:jobId" component={JobPage} />
-    <PrivateRoute path="/getjob" component={GetJobPage} />
-    <PrivateRoute path="/addjob" component={AddJobPage} />
+      {/* Public Routes */}
+      <SignIn path="/signin" />
+      <SignedOutHomePage path="/" />
+      <Authorize path="/authorize" />
+      <AuthorizeSuccess path="/authorize_success" />
+      <Checkout path="/checkout" />
+      <ContactUsPage path="/contact" />
+      <SupportPage path="/support" />
+      <PricingPage path="/pricing" />              
+      <PrivacyPolicyPage path="/privacy" />  
+      <TermsOfServicePage path="/tos" />              
+      <Error path="/error" />
+      {/* Protected Routes */}
+      <PrivateRoute path="/home" component={SignedInHomePage} />
+      <PrivateRoute path="/setup-payments" component={SetupPayments} />
+      <PrivateRoute path="/connect-stripe" component={ConnectStripe} />
+      <PrivateRoute path="/profile" component={ProfilePage} />
+      <PrivateRoute path="/account" component={AccountPage} />
+      <PrivateRoute path="/job/:jobId" component={JobPage} />
+      <PrivateRoute path="/getjob" component={GetJobPage} />
+      <PrivateRoute path="/addjob" component={AddJobPage} />
     </ScrollToTop>
   </Router>
   );  

@@ -203,9 +203,12 @@ export default function SetupPayments(props) {
                         label="What service do you plan to offer?"
                         >
                         <option aria-label="None" value="" />
-                        <option value={'tutoring'}>Online Tutoring</option>
                         <option value={'coaching'}>Online Coaching</option>
+                        <option value={'lessons'}>Online Lessons</option>
+                        <option value={'tutoring'}>Online Tutoring</option>
                         <option value={'babysitting'}>Online Babysitting</option>
+                        <option value={'service'}>Online Service Call</option>
+                        <option value={'other'}>Other</option>
                       </Select>
                     </FormControl>
                   </Grid>

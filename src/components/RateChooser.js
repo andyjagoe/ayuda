@@ -135,6 +135,7 @@ export default function RateChooser(props) {
     });
 
     toggleOpenRateDialog(false);
+    setSuccess(false);
   };
 
   const [rateDialogValue, setRateDialogValue] = React.useState({
@@ -374,13 +375,13 @@ export default function RateChooser(props) {
 
             </DialogContent>
             <DialogActions>
-            <div className={classes.root}>
-              <div className={classes.wrapper}>
-                <Button onClick={handleCloseRateDialog} color="primary">
-                  Cancel
-                </Button>
-                </div>
-            </div>
+              <div className={classes.root}>
+                <div className={classes.wrapper}>
+                  <Button onClick={handleCloseRateDialog} color="primary">
+                    Cancel
+                  </Button>
+                  </div>
+              </div>
               <div className={classes.root}>
                 <div className={classes.wrapper}>
                   <Button

@@ -7,6 +7,10 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogActions from '@material-ui/core/DialogActions';
+import { makeStyles } from '@material-ui/core/styles';
+import clsx from 'clsx';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import { green } from '@material-ui/core/colors';
 import { UserContext } from "../providers/UserProvider";
 import firebase from 'firebase/app';
 import { firestore } from "../firebase"
@@ -14,11 +18,38 @@ import 'firebase/functions';
 import MuiPhoneNumber from "material-ui-phone-number";
 
 
+const useStyles = makeStyles((theme) => ({
+  root: {
+    display: 'flex',
+    alignItems: 'center',
+  },
+  wrapper: {
+    margin: theme.spacing(3, 0, 2),
+    position: 'relative',
+    width: '100%',
+  },
+  buttonSuccess: {
+    backgroundColor: green[500],
+    '&:hover': {
+      backgroundColor: green[700],
+    },
+  },
+  buttonProgress: {
+    color: green[500],
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    marginTop: -12,
+    marginLeft: -12,
+  },
+}));
+
 
 const filter = createFilterOptions();
 
 
 export default function CustomerChooser(props) {
+  const classes = useStyles();
   const user = useContext(UserContext);
   const {uid} = user;
 
@@ -33,7 +64,14 @@ export default function CustomerChooser(props) {
   const firstRender = useRef(true)
   const [gotCustomerRecord, setGotCustomerRecord] = useState(false)
   const [disable, setDisabled] = useState(true)
-    
+ 
+  
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const buttonClassname = clsx({
+    [classes.buttonSuccess]: success,
+  });
+
 
   // Share payer selected data with parent object
   const sendData = (data) => {
@@ -113,6 +151,7 @@ export default function CustomerChooser(props) {
     });
 
     toggleOpenCustomerDialog(false);
+    setSuccess(false);
   };
 
   const [customerDialogValue, setCustomerDialogValue] = React.useState({
@@ -125,6 +164,13 @@ export default function CustomerChooser(props) {
   async function handleSubmitCustomerDialog (event) {    
     event.preventDefault();
     event.stopPropagation()
+
+    setDisabled(true)
+
+    if (!loading) {
+      setSuccess(false);
+      setLoading(true);
+    }
 
     // Add new customer    
     var addCustomer = firebase.functions().httpsCallable('addCustomer');
@@ -145,8 +191,15 @@ export default function CustomerChooser(props) {
       tempCusts.push(newCust);
       tempCusts.sort((a, b) => (a.name > b.name) ? 1 : -1)
       setCustomers(tempCusts);
+
+      setDisabled(false)
+      setSuccess(true);
+      setLoading(false);
     } catch (error) {
       console.error(error);
+      setDisabled(false)
+      setSuccess(false);
+      setLoading(false);
     }
 
     handleCloseCustomerDialog();
@@ -330,12 +383,31 @@ export default function CustomerChooser(props) {
               </div>
             </DialogContent>
             <DialogActions>
-              <Button onClick={handleCloseCustomerDialog} color="primary">
-                Cancel
-              </Button>
+              <div className={classes.root}>
+                  <div className={classes.wrapper}>
+                    <Button onClick={handleCloseCustomerDialog} color="primary">
+                      Cancel
+                    </Button>
+                    </div>
+              </div>
+              <div className={classes.root}>
+                <div className={classes.wrapper}>
+                  <Button
+                    type="submit"
+                    color="primary"
+                    className={buttonClassname}
+                    disabled={disable}
+                  >
+                    Add
+                  </Button>
+                  {loading && <CircularProgress size={24} className={classes.buttonProgress} />}
+                </div>
+              </div>
+              {/*}
               <Button type="submit" color="primary" disabled={disable}>
                 Add
               </Button>
+                */}
             </DialogActions>
           </form>
         </Dialog>

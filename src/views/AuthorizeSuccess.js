@@ -4,7 +4,7 @@ import CheckIcon from '@material-ui/icons/Check';
 import Typography from '@material-ui/core/Typography';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Container from '@material-ui/core/Container';
-import OnboardingAppBar from './OnboardingAppBar';
+import OnboardingAppBar from 'components/OnboardingAppBar';
 import Grid from '@material-ui/core/Grid';
 import { makeStyles } from '@material-ui/core/styles';
 import { loadStripe } from '@stripe/stripe-js';

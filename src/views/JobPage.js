@@ -4,6 +4,7 @@ import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
+import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import Link from '@material-ui/core/Link';
 import Grid from '@material-ui/core/Grid';
 import EventIcon from '@material-ui/icons/Event';
@@ -52,10 +53,13 @@ function CopyIcon(props) {
 
 const useStyles = makeStyles((theme) => ({
   paper: {
-    marginTop: theme.spacing(8),
+    marginTop: theme.spacing(6),
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
+  },
+  breadcrumb: {
+    marginTop: theme.spacing(4),
   },
   avatar: {
     margin: theme.spacing(1),
@@ -409,6 +413,12 @@ Password: ${jobRecord.password}
       <MenuAppBar />
       <Container component="main" maxWidth="xs">
         <CssBaseline />
+        <Breadcrumbs aria-label="breadcrumb" className={classes.breadcrumb} >
+          <Link color="inherit" onClick={() => { navigate('/home'); }}>
+            Home
+          </Link>
+          <Typography color="textPrimary">Job Details</Typography>
+        </Breadcrumbs>
         <div className={classes.paper}>
             <Avatar className={classes.avatar}>
             <EventIcon />

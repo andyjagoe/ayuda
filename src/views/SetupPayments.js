@@ -2,6 +2,8 @@ import React, { useContext, useState, useEffect, useRef } from 'react';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
+import Breadcrumbs from '@material-ui/core/Breadcrumbs';
+import Link from '@material-ui/core/Link';
 import TextField from '@material-ui/core/TextField';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
@@ -10,7 +12,7 @@ import Grid from '@material-ui/core/Grid';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
-import OnboardingAppBar from './OnboardingAppBar';
+import MenuAppBar from 'components/MenuAppBar';
 import { navigate } from "@reach/router"
 import { makeStyles } from '@material-ui/core/styles';
 import { UserContext } from "../providers/UserProvider";
@@ -20,10 +22,13 @@ var uuid4 = require('uuid4');
 
 const useStyles = makeStyles((theme) => ({
     paper: {
-      marginTop: theme.spacing(8),
+      marginTop: theme.spacing(6),
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
+    },
+    breadcrumb: {
+      marginTop: theme.spacing(4),
     },
     avatar: {
       margin: theme.spacing(1),
@@ -130,9 +135,15 @@ export default function SetupPayments(props) {
 
   return (
     <React.Fragment>
-        <OnboardingAppBar />      
+        <MenuAppBar />      
         <Container component="main" maxWidth="xs">
         <CssBaseline />
+        <Breadcrumbs aria-label="breadcrumb" className={classes.breadcrumb} >
+          <Link color="inherit" onClick={() => { navigate('/home'); }}>
+            Home
+          </Link>
+          <Typography color="textPrimary">Setup Payments</Typography>
+        </Breadcrumbs>
         <div className={classes.paper}>
             <Avatar className={classes.avatar}>
             <LockOutlinedIcon />

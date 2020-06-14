@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Container from '@material-ui/core/Container';
-import OnboardingAppBar from './OnboardingAppBar';
+import OnboardingAppBar from 'components/OnboardingAppBar';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import Avatar from '@material-ui/core/Avatar';
 import Typography from '@material-ui/core/Typography';

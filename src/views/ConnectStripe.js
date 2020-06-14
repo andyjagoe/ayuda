@@ -1,7 +1,7 @@
 import React, { useContext, useEffect } from 'react';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Container from '@material-ui/core/Container';
-import OnboardingAppBar from './OnboardingAppBar';
+import MenuAppBar from 'components/MenuAppBar';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Grid from '@material-ui/core/Grid';
 import Alert from '@material-ui/lab/Alert';
@@ -77,7 +77,7 @@ export default function ConnectStripe(props) {
   
   return (
     <React.Fragment>
-        <OnboardingAppBar />      
+        <MenuAppBar />      
         <Container component="main" maxWidth="xs">
         <CssBaseline />
         <div className={classes.paper}>

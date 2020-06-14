@@ -6,7 +6,6 @@ import TextField from '@material-ui/core/TextField';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import InputLabel from '@material-ui/core/InputLabel';
-import Link from '@material-ui/core/Link';
 import Grid from '@material-ui/core/Grid';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
@@ -41,7 +40,7 @@ const useStyles = makeStyles((theme) => ({
   }));
 
  
-export default function Register(props) {
+export default function SetupPayments(props) {
   const classes = useStyles();
   const user = useContext(UserContext);
 
@@ -141,7 +140,7 @@ export default function Register(props) {
             <LockOutlinedIcon />
             </Avatar>
             <Typography component="h1" variant="h5">
-              Complete your profile
+              Enable Payments
             </Typography>
             <form 
               className={classes.form} 

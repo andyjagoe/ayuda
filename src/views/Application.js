@@ -2,7 +2,7 @@ import React from "react";
 import { Router } from "@reach/router";
 import PrivateRoute from "components/PrivateRoute";
 import SignIn from "./SignIn";
-import Register from "./Register";
+import SetupPayments from "./SetupPayments";
 import ConnectStripe from "./ConnectStripe";
 import SignedInHomePage from "./SignedInHomePage";
 import SignedOutHomePage from "./SignedOutHomePage";
@@ -40,7 +40,7 @@ function Application() {
     <Error path="/error" />
     {/* Protected Routes */}
     <PrivateRoute path="/home" component={SignedInHomePage} />
-    <PrivateRoute path="/register" component={Register} />
+    <PrivateRoute path="/setup-payments" component={SetupPayments} />
     <PrivateRoute path="/connect-stripe" component={ConnectStripe} />
     <PrivateRoute path="/profile" component={ProfilePage} />
     <PrivateRoute path="/account" component={AccountPage} />

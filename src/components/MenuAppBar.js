@@ -58,7 +58,7 @@ export default function MenuAppBar() {
       })
     .catch(function(error) {
         console.log(error);
-        navigate('/register');
+        navigate('/setup-payments');
     });
   };
 

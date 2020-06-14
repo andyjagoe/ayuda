@@ -8,6 +8,10 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogActions from '@material-ui/core/DialogActions';
 import Alert from '@material-ui/lab/Alert';
 import Collapse from '@material-ui/core/Collapse';
+import { makeStyles } from '@material-ui/core/styles';
+import clsx from 'clsx';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import { green } from '@material-ui/core/colors';
 import CurrencyTextField from '@unicef/material-ui-currency-textfield'
 import TextField from '@material-ui/core/TextField';
 import { UserContext } from "../providers/UserProvider";
@@ -17,11 +21,38 @@ import { firestore } from "../firebase"
 import 'firebase/functions';
 
 
+const useStyles = makeStyles((theme) => ({
+  root: {
+    display: 'flex',
+    alignItems: 'center',
+  },
+  wrapper: {
+    margin: theme.spacing(3, 0, 2),
+    position: 'relative',
+    width: '100%',
+  },
+  buttonSuccess: {
+    backgroundColor: green[500],
+    '&:hover': {
+      backgroundColor: green[700],
+    },
+  },
+  buttonProgress: {
+    color: green[500],
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    marginTop: -12,
+    marginLeft: -12,
+  },
+}));
+
 
 const filter = createFilterOptions();
 
 
 export default function RateChooser(props) {
+  const classes = useStyles();
   const user = useContext(UserContext);
   const {uid} = user;
 
@@ -37,6 +68,13 @@ export default function RateChooser(props) {
   const [gotRateRecord, setGotRateRecord] = useState(false)
   const [disable, setDisabled] = useState(true)
     
+
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const buttonClassname = clsx({
+    [classes.buttonSuccess]: success,
+  });
+
 
   // Share payer selected data with parent object
   const sendData = (data) => {
@@ -119,7 +157,14 @@ export default function RateChooser(props) {
     event.stopPropagation()
 
     setShowAlert(false)
+    setDisabled(true)
 
+    if (!loading) {
+      setSuccess(false);
+      setLoading(true);
+    }
+
+    
     // Add new rate to Firestore
     try {
       const dbRef = await firestore.collection('/users')
@@ -143,11 +188,18 @@ export default function RateChooser(props) {
       tempRates.sort((a, b) => (a.rate > b.rate) ? 1 : -1)
       setRates(tempRates);
 
+      setDisabled(false)
+      setSuccess(true);
+      setLoading(false);
+
     } catch (error) {
       console.error("Error: ", error.message);
       if (error.code === 'permission-denied') {
         setShowAlert(true)
       }
+      setDisabled(false)
+      setSuccess(false);
+      setLoading(false);
 
       return null
     } 
@@ -322,12 +374,26 @@ export default function RateChooser(props) {
 
             </DialogContent>
             <DialogActions>
-              <Button onClick={handleCloseRateDialog} color="primary">
-                Cancel
-              </Button>
-              <Button type="submit" color="primary" disabled={disable}>
-                Add
-              </Button>
+            <div className={classes.root}>
+              <div className={classes.wrapper}>
+                <Button onClick={handleCloseRateDialog} color="primary">
+                  Cancel
+                </Button>
+                </div>
+            </div>
+              <div className={classes.root}>
+                <div className={classes.wrapper}>
+                  <Button
+                    type="submit"
+                    color="primary"
+                    className={buttonClassname}
+                    disabled={disable}
+                  >
+                    Add
+                  </Button>
+                  {loading && <CircularProgress size={24} className={classes.buttonProgress} />}
+                </div>
+              </div>
             </DialogActions>
           </form>
         </Dialog>

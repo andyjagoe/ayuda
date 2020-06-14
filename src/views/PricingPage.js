@@ -61,9 +61,9 @@ const tiers = [
       title: "Pay only for what you use",
       price: '5.25',
       description: [
-        'Unlimited 1:1 video calls',
-        'Accept credit card payments',
-        'Easy scheduling & reminders',
+        'Includes fees to accept credit cards',
+        'Unlimited 1:1 video calling',
+        'Easy scheduling & reminder system',
         'Automated invoicing & payments',
         'No setup fees, monthly fees, or hidden fees',
       ],

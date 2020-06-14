@@ -57,10 +57,6 @@ export default function PublicAppBar() {
                     className={classes.link}>
                 { user ? 'Go to App' : ''}
                 </Link>
-                <Link variant="button" color="textPrimary" onClick={() => {navigate('/#features')}}
-                     className={classes.link}>
-                Features
-                </Link>
                 <Link variant="button" color="textPrimary" onClick={() => {navigate('/pricing')}}
                     className={classes.link}>
                 Pricing

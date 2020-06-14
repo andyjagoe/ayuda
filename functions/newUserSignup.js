@@ -33,7 +33,7 @@ exports.handler = function(event, firestoreDb, admin, zoomHelper, emailHandler) 
             photoURL: event.photoURL,
             zoomId: zoomResponse.id,
             signedUpTime: admin.firestore.Timestamp.fromDate(new Date()),
-        });    
+        }, { merge: true });    
     })
     .then(response => {
         //console.log('Adding zoom mapping for webhook callbacks: ', response);

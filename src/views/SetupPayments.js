@@ -15,7 +15,6 @@ import { navigate } from "@reach/router"
 import { makeStyles } from '@material-ui/core/styles';
 import { UserContext } from "../providers/UserProvider";
 import { firestore } from "../firebase"
-import moment from 'moment-timezone/builds/moment-timezone-with-data-10-year-range';
 var uuid4 = require('uuid4');
 
 
@@ -118,7 +117,6 @@ export default function SetupPayments(props) {
         lastName: lastName,    
         service: service,
         state: state,
-        tz: moment.tz.guess(),  //TODO: catch any potential errors if we can't get tz
     }, { merge: true });
     } catch (error) {
       console.log(error.message);

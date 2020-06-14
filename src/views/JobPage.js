@@ -94,6 +94,9 @@ const useStyles = makeStyles((theme) => ({
     marginTop: -12,
     marginLeft: -12,
   },
+  spacingFooter: {
+    marginTop: theme.spacing(50),
+  },
 }));
 
 const JobPage = (props) => {
@@ -730,7 +733,7 @@ Password: ${jobRecord.password}
               </Button>
             </DialogActions>
         </Dialog>
-
+        <div className={classes.spacingFooter} />
         </Container>
     </React.Fragment>
   ) 

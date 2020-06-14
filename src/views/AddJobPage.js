@@ -66,6 +66,9 @@ const useStyles = makeStyles((theme) => ({
     marginTop: -12,
     marginLeft: -12,
   },
+  spacingFooter: {
+    marginTop: theme.spacing(50),
+  },
 }));
 
 
@@ -345,7 +348,7 @@ export default function AddJobPage(props) {
 
             </form>
         </div>
-
+        <div className={classes.spacingFooter} />
         </Container>
     </React.Fragment>
 

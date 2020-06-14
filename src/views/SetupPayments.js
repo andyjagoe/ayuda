@@ -41,6 +41,9 @@ const useStyles = makeStyles((theme) => ({
     submit: {
       margin: theme.spacing(3, 0, 2),
     },
+    spacingFooter: {
+      marginTop: theme.spacing(50),
+    },  
   }));
 
  
@@ -224,6 +227,7 @@ export default function SetupPayments(props) {
             </Button>
             </form>
         </div>
+        <div className={classes.spacingFooter} />
         </Container>
     </React.Fragment>
 

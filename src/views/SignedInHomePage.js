@@ -49,6 +49,9 @@ const useStyles = makeStyles((theme) => ({
   jobheader: {
     padding: theme.spacing(1),
   },
+  spacingFooter: {
+    marginTop: theme.spacing(50),
+  },
 }));
 
 
@@ -178,6 +181,7 @@ const SignedInHomePage = () => {
         </Grid>
 
       </div>
+      <div className={classes.spacingFooter} />
     </Container>
     </React.Fragment>    
   ) 

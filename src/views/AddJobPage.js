@@ -286,6 +286,12 @@ export default function AddJobPage(props) {
                       label="Call starts at"
                       id="start"
                       name="start"
+                      onOpen={() => {
+                        document.getElementById('hubspot-messages-iframe-container').style.setProperty('display', 'none', 'important');
+                      }}
+                      onClose={() => {
+                        document.getElementById('hubspot-messages-iframe-container').style.display = 'initial';
+                      }}
                       value={start}
                       onChange={val => {
                         updateEndDate(val);
@@ -306,6 +312,12 @@ export default function AddJobPage(props) {
                       label="Call ends at"
                       id="end"
                       name="end"
+                      onOpen={() => {
+                        document.getElementById('hubspot-messages-iframe-container').style.setProperty('display', 'none', 'important');
+                      }}
+                      onClose={() => {
+                        document.getElementById('hubspot-messages-iframe-container').style.display = 'initial';
+                      }}
                       value={end}
                       onChange={handleEndDateChange}
                     />

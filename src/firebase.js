@@ -36,7 +36,6 @@ export const provider = firebase.auth.GoogleAuthProvider.PROVIDER_ID;
 
 export const signOut = () => {
     auth.signOut();
-    //window.location.replace('/'); 
 };
 
 // Google OAuth Client ID, needed to support One-tap sign-up.

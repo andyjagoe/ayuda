@@ -478,6 +478,12 @@ Password: ${jobRecord.password}
                       label="When does it start?"
                       id="start"
                       name="start"
+                      onOpen={() => {
+                        document.getElementById('hubspot-messages-iframe-container').style.setProperty('display', 'none', 'important');
+                      }}
+                      onClose={() => {
+                        document.getElementById('hubspot-messages-iframe-container').style.display = 'initial';
+                      }}
                       value={start}
                       onChange={val => {
                         updateEndDate(val);
@@ -499,6 +505,12 @@ Password: ${jobRecord.password}
                       label="When does it end?"
                       id="end"
                       name="end"
+                      onOpen={() => {
+                        document.getElementById('hubspot-messages-iframe-container').style.setProperty('display', 'none', 'important');
+                      }}
+                      onClose={() => {
+                        document.getElementById('hubspot-messages-iframe-container').style.display = 'initial';
+                      }}
                       value={end}
                       onChange={handleEndDateChange}
                     />

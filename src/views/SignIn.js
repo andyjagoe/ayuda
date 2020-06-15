@@ -83,7 +83,10 @@ const uiConfig = {
             provider: provider,
             authMethod: 'https://accounts.google.com',
             // Required to enable ID token credentials for this provider.
-            clientId: CLIENT_ID
+            clientId: CLIENT_ID,
+            customParameters: {
+              prompt: 'select_account'
+            }
         }
     ],
     //credentialHelper: firebaseui.auth.CredentialHelper.GOOGLE_YOLO,

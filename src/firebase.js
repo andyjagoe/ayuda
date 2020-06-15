@@ -19,7 +19,7 @@ import "firebase/firestore";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDRSI8T66SXMenjL9u0BJgHbKcfVUqjhzE",
-    authDomain: "ayuda-9ea45.firebaseapp.com",
+    authDomain: "ayuda.live",
     databaseURL: "https://ayuda-9ea45.firebaseio.com",
     projectId: "ayuda-9ea45",
     storageBucket: "ayuda-9ea45.appspot.com",
@@ -31,8 +31,8 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 
 export const auth = firebase.auth();
-export const provider = firebase.auth.GoogleAuthProvider.PROVIDER_ID;
 export const firestore = firebase.firestore(); 
+export const provider = firebase.auth.GoogleAuthProvider.PROVIDER_ID;
 
 export const signOut = () => {
     auth.signOut();

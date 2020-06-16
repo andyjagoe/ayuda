@@ -2,7 +2,13 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /users/{userId} {
-      allow read, update, delete, create: if request.auth.uid == userId;
+      allow read, create: if request.auth.uid == userId;
+      allow update, delete: if request.auth.uid == userId
+        && request.resource.data.email == resource.data.email
+        && request.resource.data.emailVerified == resource.data.emailVerified
+        && request.resource.data.signedUpTime == resource.data.signedUpTime
+        && request.resource.data.zoomId == resource.data.zoomId        
+        ;
     }
 
     match /users/{userId}/meetings/{document=**} {

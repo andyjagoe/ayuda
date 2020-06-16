@@ -115,7 +115,7 @@ export default function MenuAppBar() {
                 <MenuItem 
                   onClick={() => { goToAccount(); }}
                 >Account</MenuItem>
-                <MenuItem onClick={() => {signOut()}}>Sign out</MenuItem>                
+                <MenuItem onClick={() => { signOut(); }}>Sign out</MenuItem>                
               </Menu>
             </div>
           )}

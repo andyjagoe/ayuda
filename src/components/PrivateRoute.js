@@ -1,11 +1,11 @@
 import React, { useContext } from "react"
+import { Redirect } from "@reach/router";
 import { UserContext } from "providers/UserProvider";
-import SignIn from "views/SignIn";
 
 
 const PrivateRoute = ({ component: Component, ...props }) => {
     const user = useContext(UserContext);
 
-    return user ? <Component {...props} /> : <SignIn {...props} />;
+    return user ? <Component {...props} /> : <Redirect from="" to="/signin" noThrow />;
 }
-export default PrivateRoute
+export default PrivateRoute 

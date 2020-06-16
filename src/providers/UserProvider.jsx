@@ -6,13 +6,19 @@ export const UserContext = createContext({ user: null});
 
 class UserProvider extends Component {
   state = {
-    user: null,
+    user: JSON.parse(localStorage.getItem('authUser')),
   };
 
   componentDidMount = () => {
-    auth.onAuthStateChanged(async userAuth => {
-      this.setState({ user: userAuth });
-    });
+    auth.onAuthStateChanged(async authUser => {
+        localStorage.setItem('authUser', JSON.stringify(authUser));
+        this.setState({ user: authUser });
+      },
+      () => {
+        localStorage.removeItem('authUser');
+        this.setState({ authUser: null });
+      }
+    );
   };  
     
   render() {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useContext } from "react";
 import MenuAppBar from 'components/MenuAppBar';
 import Container from '@material-ui/core/Container';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -11,10 +11,14 @@ import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
 import PersonIcon from '@material-ui/icons/Person';
+import InputAdornment from '@material-ui/core/InputAdornment';
 import clsx from 'clsx';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { green } from '@material-ui/core/colors';
+import Snackbar from '@material-ui/core/Snackbar';
 import { makeStyles } from '@material-ui/core/styles';
+import { UserContext } from "../providers/UserProvider";
+import { firestore } from "../firebase"
 
 
 const useStyles = makeStyles((theme) => ({
@@ -64,14 +68,25 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
+const HEADLINE_CHAR_LIMIT = 60;
+const HEADLINE_HELPER_TEXT = 'Your professional headline, like "English Teacher", "Music Instructor" or "Service Technician".'
+const BIO_CHAR_LIMIT = 2048;
+const BIO_HELPER_TEXT = 'Your biography should emphasize your experience and expertise.'
+
+
 const ProfilePage = () => {
   const classes = useStyles();
   const firstRender = useRef(true)
 
+  const user = useContext(UserContext);
+  const {uid} = user;
+
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [headline, setHeadline] = useState("");
+  const [headlineCounter, setHeadlineCounter] = useState(0);
   const [bio, setBio] = useState("");
+  const [bioCounter, setBioCounter] = useState(0);
 
   const [disable, setDisabled] = useState(true)
   const [loading, setLoading] = useState(false);
@@ -81,9 +96,47 @@ const ProfilePage = () => {
   });
 
 
+  // Handle copying and snackbar messages
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState(false);
+  const [snackbarKey, setSnackbarKey] = useState(false);
+  const handleSnackbarClick = (message, key) => {
+    setSnackbarMessage(message);
+    setSnackbarKey(key);
+    setOpenSnackbar(true);
+  };
+  const handleSnackbarClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setOpenSnackbar(false);
+  };
+
+
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const result = await firestore
+        .collection("/users")
+        .doc(uid)
+        .get()
+
+        if (!result.exists) {
+          return
+        }
+
+        setFirstName(result.data().firstName || '')
+        setLastName(result.data().lastName || '')
+        setHeadline(result.data().headline || '')
+        setBio(result.data().bio || '')
+      } catch (error) {
+          console.error(error);
+      }
+    };
+
     if (firstRender.current) {
       firstRender.current = false
+      fetchData();
       return
     }
     setDisabled(formValidation())
@@ -112,10 +165,24 @@ async function handleSubmit(event) {
     setLoading(true);
   }
 
-  setTimeout(() => {
+  try {
+    await firestore.collection('/users').doc(uid).set({
+      firstName: firstName,
+      lastName: lastName,    
+      headline: headline,
+      bio: bio,
+    }, { merge: true });
     setSuccess(true);  
     setLoading(false);
-  }, 3000);
+    handleSnackbarClick('Profile Saved','profile_saved');
+    setTimeout(() => {
+      setSuccess(false);  
+    }, 3000);  
+  } catch (error) {
+    console.log(error.message);
+    setSuccess(false);  
+    setLoading(false);
+  }
 
   setDisabled(false)
 }
@@ -147,6 +214,7 @@ async function handleSubmit(event) {
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
                 <TextField
+                    autoFocus
                     autoComplete="fname"
                     name="firstName"
                     variant="outlined"
@@ -173,18 +241,28 @@ async function handleSubmit(event) {
                 />
                 </Grid>
                 <Grid item xs={12}>
-                  <TextField
-                      autoFocus
+                  <TextField                      
                       autoComplete="headline"
                       name="headline"
                       variant="outlined"
                       required
                       fullWidth
-                      id="headline"
+                      InputProps={{
+                        endAdornment: <InputAdornment position="end">
+                            ({headlineCounter}/{HEADLINE_CHAR_LIMIT})
+                          </InputAdornment>
+                      }}
+                      inputProps={{
+                        maxLength: HEADLINE_CHAR_LIMIT
+                      }}                           
+                        id="headline"
                       label="Headline"
                       value={headline}
-                      helperText='Your professional headline, like "English Teacher", "Music Instructor" or "Service Technician".'
-                      onChange={e => setHeadline(e.target.value)}
+                      helperText={HEADLINE_HELPER_TEXT}
+                      onChange={e => {
+                        setHeadline(e.target.value);
+                        setHeadlineCounter(e.target.value.length)
+                      }}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -192,16 +270,25 @@ async function handleSubmit(event) {
                     autoComplete="bio"
                     name="bio"
                     variant="outlined"
+                    required
                     fullWidth
                     multiline
-                    inputProps={{
-                      maxLength: 2048
+                    InputProps={{
+                      endAdornment: <InputAdornment position="end">
+                          ({bioCounter}/{BIO_CHAR_LIMIT})
+                        </InputAdornment>
+                    }}
+                  inputProps={{
+                      maxLength: BIO_CHAR_LIMIT
                     }}                           
                     id="bio"
                     label="Biography"
                     value={bio}
-                    helperText='Your biography should emphasize your experience and expertise.'
-                    onChange={e => setBio(e.target.value)}
+                    helperText={BIO_HELPER_TEXT}
+                    onChange={e => {
+                      setBio(e.target.value);
+                      setBioCounter(e.target.value.length);
+                    }}
                 />
                 </Grid>
               </Grid>
@@ -223,6 +310,16 @@ async function handleSubmit(event) {
               </div>
 
               </form>
+
+            <Snackbar
+              anchorOrigin= {{ vertical: 'top', horizontal: 'center' }}
+              key={snackbarKey}
+              autoHideDuration={6000}
+              open={openSnackbar}
+              onClose={handleSnackbarClose}
+              message={snackbarMessage}
+            />
+
           </div>
           <div className={classes.spacingFooter} />
 

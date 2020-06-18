@@ -11,10 +11,8 @@ import { UserContext } from "../providers/UserProvider";
 import Jobs from 'components/Jobs';
 import Link from '@material-ui/core/Link';
 import Paper from '@material-ui/core/Paper';
-import { firestore } from "../firebase";
 import firebase from 'firebase/app';
 import 'firebase/functions';
-import moment from 'moment-timezone/builds/moment-timezone-with-data-10-year-range';
 
 
 
@@ -59,7 +57,7 @@ const useStyles = makeStyles((theme) => ({
 const SignedInHomePage = () => {
   const classes = useStyles();
   const user = useContext(UserContext);
-  const {displayName, uid} = user;
+  const {displayName} = user;
   const [totalBalance, setTotalBalance] = React.useState('');
   const [totalPayouts, setPayouts] = React.useState('');
   const firstRender = useRef(true)
@@ -68,7 +66,6 @@ const SignedInHomePage = () => {
     if (firstRender.current) {
       firstRender.current = false
       getAccountBalance()
-      checkTz()
     }
   }, [])
 
@@ -97,22 +94,7 @@ const SignedInHomePage = () => {
     });
   };
 
-  const checkTz = async () => {
-    try {
-      const userSnap = await firestore.collection("/users").doc(uid).get()
-      if (!userSnap.exists || !('tz' in userSnap.data())) {
-        await firestore.collection('/users').doc(uid).set({
-          tz: moment.tz.guess(),
-        }, { merge: true });  
-      } else {
-        console.log("skipping tz set");
-      }
-
-    } catch (error) {
-      console.error("Error: ", error);
-    }
-  }
-
+ 
   return (
     <React.Fragment>
     <MenuAppBar />

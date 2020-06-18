@@ -1,22 +1,45 @@
 import React, { Component, createContext } from "react";
 import { auth } from "../firebase";
 import { firestore } from "../firebase"
+import moment from 'moment-timezone/builds/moment-timezone-with-data-10-year-range';
 
 
 export const ProfileContext = createContext({ profile: null});
 
 class ProfileProvider extends Component {
+    constructor(props) {
+        super(props);
+    
+        this.checkTz = async (profile, uid) => {
+            try {
+              if (!('tz' in profile)) {
+                await firestore.collection('/users').doc(uid).set({
+                  tz: moment.tz.guess(),
+                }, { merge: true }); 
+                console.log("setting tz in profile");
+                const result = await firestore.collection("/users").doc(uid).get()
+                localStorage.setItem('userProfile', JSON.stringify(result.data()));
+                this.setState({ profile: result.data() });
+              }       
+            } catch (error) {
+              console.error("Error: ", error);
+            }
+        }        
+    };
+
   state = {
     user: JSON.parse(localStorage.getItem('userProfile')),
   };
 
+
   componentDidMount = () => {
     auth.onAuthStateChanged(async authUser => {
         try {
-            if ('uid' in authUser) {
+            if (authUser !==  null) {
                 const result = await firestore.collection("/users").doc(authUser.uid).get()
                 localStorage.setItem('userProfile', JSON.stringify(result.data()));
-                this.setState({ profile: result.data() });        
+                this.setState({ profile: result.data() });
+                this.checkTz(result.data(), authUser.uid)      
             }    
         } catch (error) {
             console.error(error);

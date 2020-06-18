@@ -91,6 +91,7 @@ const EditProfilePage = () => {
   const [bioCounter, setBioCounter] = useState(0);
   const [shortId, setShortId] = useState("");
   const [photoURL, setPhotoURL] = useState("");
+  const [hasLoadedProfile, setHasLoadedProfile] = useState(false)
 
   const [disable, setDisabled] = useState(true)
   const [loading, setLoading] = useState(false);
@@ -111,7 +112,7 @@ const EditProfilePage = () => {
   useEffect(() => {
     let isCancelled = false
 
-    if (profile != null && isCancelled === false) {
+    if (profile != null && isCancelled === false && !hasLoadedProfile) {
       setFirstName(profile.firstName || '')
       setLastName(profile.lastName || '')
       setHeadline(profile.headline || '')
@@ -120,10 +121,11 @@ const EditProfilePage = () => {
       if ('bio' in profile) setBioCounter(profile.bio.length)
       setShortId(profile.shortId || '')
       setPhotoURL(profile.photoURL || '')
+      setHasLoadedProfile(true)
     }
 
     if (firstRender.current) {
-      firstRender.current = false
+      firstRender.current = false  
       return
     }
     setDisabled(formValidation())

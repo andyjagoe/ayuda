@@ -29,6 +29,7 @@
     "nodemailer": "^6.4.6",
     "nodemailer-mailgun-transport": "^2.0.0",
     "pug": "^2.0.4",
+    "shortid": "^2.2.15",
     "stripe": "^8.47.0"
   },
   "devDependencies": {

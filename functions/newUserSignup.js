@@ -1,3 +1,42 @@
+const shortid = require('shortid');
+
+
+const createShortUrl = async (uid, firestoreDb) => {
+    const saveId = (short, uid, firestoreDb) => {
+        let shortUrlRef = firestoreDb.collection('id_map').doc(short);
+        return firestoreDb.runTransaction(t => {
+            return t.get(shortUrlRef).then(doc => {
+                if (doc.exists) {
+                    return Promise.reject(new Error('Short ID already exists'));
+                }
+                t.set(shortUrlRef, { uid: uid })
+                return Promise.resolve('Short id mapped successfully');
+            });
+        })        
+        .then(result => {
+            //console.log("Transaction success: ", result)
+            return short
+        })
+        .catch(err => {
+            console.log("Transaction failure ", err.message)
+            return false
+        })
+    }
+
+    var finalShortId = false;
+    var shortId = null;
+    var retries = 0;
+    while (retries < 5 && finalShortId === false) {
+        shortId = shortid.generate()
+        //console.log(`short(${retries}): ${shortId}`);
+        /* eslint-disable no-await-in-loop */
+        finalShortId = await saveId(shortId, uid, firestoreDb)
+        /* eslint-enable no-await-in-loop */
+        retries++
+    }
+
+    return finalShortId
+}
 
 
 exports.handler = async function(event, firestoreDb, admin, zoomHelper, emailHandler) {
@@ -23,12 +62,15 @@ exports.handler = async function(event, firestoreDb, admin, zoomHelper, emailHan
             }
         })
         
+        const shortId = await createShortUrl(user.uid, firestoreDb);
+
         await firestoreDb.collection("users").doc(event.uid).set({
             displayName: event.displayName,
             email: event.email,    
             emailVerified: event.emailVerified,
             photoURL: event.photoURL,
             zoomId: zoomResponse.data.id,
+            shortId: shortId || '',
             signedUpTime: admin.firestore.Timestamp.fromDate(new Date()),
         }, { merge: true });    
 

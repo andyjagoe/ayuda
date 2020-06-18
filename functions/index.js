@@ -103,6 +103,13 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'accountBalance'
     });
 }
 
+if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'publicProfile') {
+    const publicProfile = require('./publicProfile');
+    exports.publicProfile = functions.https.onCall((data, context) => {
+        return publicProfile.handler(data, context, firestoreDb);
+    });
+}
+
 if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'stripeLoginLink') {
     const stripeLoginLink = require('./stripeLoginLink');
     exports.stripeLoginLink = functions.https.onCall((data, context) => {

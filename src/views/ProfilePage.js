@@ -11,6 +11,7 @@ import Link from '@material-ui/core/Link';
 import { navigate } from "@reach/router"
 import { makeStyles } from '@material-ui/core/styles';
 import { UserContext } from "../providers/UserProvider";
+import { ProfileContext } from "../providers/ProfileProvider";
 import firebase from 'firebase/app';
 import 'firebase/functions';
 
@@ -41,6 +42,7 @@ const ProfilePage = (props) => {
   const classes = useStyles();
   const firstRender = useRef(true)
   const user = useContext(UserContext);
+  const profile = useContext(ProfileContext);
 
   const emptyRecord = {
     firstName: '',
@@ -49,34 +51,53 @@ const ProfilePage = (props) => {
     bio: '',
     photoURL: '',
   }
-  const [userRecord, setUserRecord] = useState(emptyRecord)
+  const [profileRecord, setProfileRecord] = useState(emptyRecord)
+  const [profileShortId, setProfileShortId] = useState('')
+  const [userShortId, setUserShortId] = useState('')
 
+  
   useEffect(() => {
-        const fetchData = async () => {
-            try {
-                var publicProfile = firebase.functions().httpsCallable('publicProfile');
-                const result = await publicProfile({shortId: props.shortId})
-                const profile = {
-                    firstName: result.data.firstName || '',
-                    lastName: result.data.lastName || '',
-                    headline: result.data.headline || '',
-                    bio: result.data.bio || '',
-                    photoURL: result.data.photoURL || '',
-                }
-                setUserRecord(profile);
-            } catch (error) {
-                console.error(error);
+    const fetchData = async () => {
+        try {
+            var publicProfile = firebase.functions().httpsCallable('publicProfile');
+            const result = await publicProfile({shortId: props.shortId})
+            const profile = {
+                firstName: result.data.firstName || '',
+                lastName: result.data.lastName || '',
+                headline: result.data.headline || '',
+                bio: result.data.bio || '',
+                photoURL: result.data.photoURL || '',
             }
-        };
+            setProfileRecord(profile);
+            setProfileShortId(props.shortId)
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
 
-        if (firstRender.current) {
-            firstRender.current = false
-            fetchData(); 
-            return
-          }
+    if (firstRender.current) {
+        firstRender.current = false
+        fetchData(); 
+    }
+    if (props.shortId !== profileShortId) {
+      fetchData();
+    }
+    if (profile !=  null) {
+      setUserShortId(profile.shortId)
+    }
       
-    }, [])
+
+    }, [profile, props.shortId])
+
+    
+  const isUsersProfile = () => {
+    if (props.shortId === userShortId) {
+      return true;      
+    }
+    return false;
+  }
+
 
   return (
     <React.Fragment>
@@ -88,17 +109,17 @@ const ProfilePage = (props) => {
             Home
           </Link>
           <Typography color="textPrimary">
-            {userRecord.firstName} {userRecord.lastName}
+            {profileRecord.firstName} {profileRecord.lastName}
           </Typography>
         </Breadcrumbs>
 
         <div className={classes.paper}> 
-          <Avatar className={classes.avatar} src={userRecord.photoURL} />          
+          <Avatar className={classes.avatar} src={profileRecord.photoURL} />
           <Typography component="h1" variant="h4">
-            {userRecord.firstName} {userRecord.lastName} 
+            {profileRecord.firstName} {profileRecord.lastName} 
           </Typography>
           <Typography variant="subtitle1">
-            {userRecord.headline}  
+            {profileRecord.headline}  
           </Typography>
           <Typography variant="body2" color="textSecondary">
             0 completed jobs | 0 reviews | joined March 2020
@@ -111,7 +132,7 @@ const ProfilePage = (props) => {
           >
               Share
           </Button>
-          {user ?
+          {isUsersProfile() ?
             <Button
                 fullWidth
                 variant="contained"
@@ -132,7 +153,7 @@ const ProfilePage = (props) => {
             </Button>
           }
           <Typography variant="body1">
-            {userRecord.bio}  
+            {profileRecord.bio}  
           </Typography>
         </div>
 

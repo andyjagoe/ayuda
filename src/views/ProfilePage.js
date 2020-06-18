@@ -55,6 +55,7 @@ const ProfilePage = (props) => {
   const [profileRecord, setProfileRecord] = useState(emptyRecord)
   const [profileShortId, setProfileShortId] = useState('')
   const [userShortId, setUserShortId] = useState('')
+  const [email, setEmail] = useState('')
 
   
   useEffect(() => {
@@ -88,7 +89,10 @@ const ProfilePage = (props) => {
     if (props.shortId !== profileShortId && isCancelled === false) {
       fetchData();
     }
-    if (profile !=  null && isCancelled === false) {
+    if (user !=  null) {
+      setEmail(user.email)
+    }
+    if (profile != null && isCancelled === false) {
       setUserShortId(profile.shortId)
     }
       
@@ -115,7 +119,7 @@ const ProfilePage = (props) => {
         return profileRecord.displayName
       }        
     }
-
+    
     return '';
   }
   
@@ -130,14 +134,14 @@ const ProfilePage = (props) => {
             Home
           </Link>
           <Typography color="textPrimary">
-            {formatUserName()}
+            {formatUserName()}{user? ` (${email})` : ''}
           </Typography>
         </Breadcrumbs>
 
         <div className={classes.paper}> 
           <Avatar className={classes.avatar} src={profileRecord.photoURL} />
           <Typography component="h1" variant="h4">
-            {profileRecord.firstName} {profileRecord.lastName} 
+            {profileRecord.firstName} {profileRecord.lastName}
           </Typography>
           <Typography variant="subtitle1">
             {profileRecord.headline}  

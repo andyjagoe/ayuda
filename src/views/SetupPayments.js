@@ -16,6 +16,7 @@ import MenuAppBar from 'components/MenuAppBar';
 import { navigate } from "@reach/router"
 import { makeStyles } from '@material-ui/core/styles';
 import { UserContext } from "../providers/UserProvider";
+import { ProfileContext } from "../providers/ProfileProvider";
 import { firestore } from "../firebase"
 var uuid4 = require('uuid4');
 
@@ -50,8 +51,8 @@ const useStyles = makeStyles((theme) => ({
 export default function SetupPayments(props) {
   const classes = useStyles();
   const user = useContext(UserContext);
-
   const {email, uid} = user;
+  const profile = useContext(ProfileContext);
 
   const [firstName, setFirstName] = useState("");
   const [firstNameError, setFirstNameError] = useState(null)
@@ -59,18 +60,27 @@ export default function SetupPayments(props) {
   const [lastNameError, setLastNameError] = useState(null)
   const [service, setService] = React.useState("");
   const [serviceNameError, setServiceNameError] = useState(null)
+  const [shortId, setShortId] = useState("");
+  const [hasLoadedProfile, setHasLoadedProfile] = useState(false)
 
   const firstRender = useRef(true)
   const [disable, setDisabled] = useState(true)
     
   useEffect(() => {
+    if (profile != null && !hasLoadedProfile) {
+      setFirstName(profile.firstName || '')
+      setLastName(profile.lastName || '')
+      setShortId(profile.shortId || '')
+      setHasLoadedProfile(true)
+    }
+
     if (firstRender.current) {
       firstRender.current = false
       return
     }
     setDisabled(formValidation())
     
-  }, [firstName, lastName, service])
+  }, [firstName, lastName, service, profile])
 
 
   const handleSelectChange = (event) => {
@@ -110,7 +120,7 @@ export default function SetupPayments(props) {
   stripeConnectUrl.searchParams.set("redirect_uri", `${props.location.origin}/connect-stripe`);
   stripeConnectUrl.searchParams.set("client_id", "ca_H6rAXET2pmOzBHnNrhEnwYPfPLEiZohY");
   stripeConnectUrl.searchParams.set("stripe_user[email]", email);
-  stripeConnectUrl.searchParams.set("stripe_user[url]", `https://ayuda.live/p/${uid}`); //TODO: fix url
+  stripeConnectUrl.searchParams.set("stripe_user[url]", `https://ayuda.live/p/${shortId}`);
   stripeConnectUrl.searchParams.set("stripe_user[business_type]", "individual");
   stripeConnectUrl.searchParams.set("stripe_user[country]", "US");
   

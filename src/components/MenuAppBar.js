@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useEffect, useContext, useState, useRef } from "react";
 import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -13,6 +13,7 @@ import { navigate } from "@reach/router";
 import {signOut} from '../firebase';
 import firebase from 'firebase/app';
 import 'firebase/functions';
+import { firestore } from "../firebase"
 
 
 const useStyles = makeStyles((theme) => ({
@@ -29,13 +30,43 @@ const useStyles = makeStyles((theme) => ({
 
 export default function MenuAppBar() {
   const classes = useStyles();
+  const firstRender = useRef(true)
 
   const user = useContext(UserContext);
-  const {photoURL, displayName, email} = user;
+  const {uid} = user;
 
-  const [auth, setAuth] = React.useState(true);
-  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [shortId, setShortId] = useState("");
+  const [auth, setAuth] = useState(true);
+  const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
+
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const result = await firestore
+        .collection("/users")
+        .doc(uid)
+        .get()
+
+        if (!result.exists) {
+          return
+        }
+
+        setShortId(result.data().shortId || '')
+      } catch (error) {
+          console.error(error);
+      }
+    };
+
+    if (firstRender.current) {
+      firstRender.current = false
+      fetchData();
+      return
+    }        
+  }, [])
+
+
 
   const handleChange = (event) => {
     setAuth(event.target.checked);
@@ -110,7 +141,7 @@ export default function MenuAppBar() {
                   onClick={() => { handleClose();navigate('/home'); }}
                 >Home</MenuItem>
                 <MenuItem 
-                  onClick={() => { handleClose();navigate('/profile'); }}
+                  onClick={() => { handleClose();navigate(`/p/${shortId}`); }}
                 >Profile</MenuItem>
                 <MenuItem 
                   onClick={() => { goToAccount(); }}

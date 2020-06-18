@@ -167,7 +167,6 @@ const JobPage = (props) => {
       } catch (error) {
           console.error(error);
       }
-
     };
  
     if (firstRender.current) {

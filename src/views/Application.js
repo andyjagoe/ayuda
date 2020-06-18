@@ -11,6 +11,7 @@ import PrivacyPolicyPage from "./PrivacyPolicyPage";
 import TermsOfServicePage from "./TermsOfServicePage";
 import PricingPage from "./PricingPage";
 import SupportPage from "./SupportPage";
+import EditProfilePage from "./EditProfilePage";
 import ProfilePage from "./ProfilePage";
 import AccountPage from "./AccountPage";
 import JobPage from "./JobPage";
@@ -37,6 +38,7 @@ function Application() {
       <ContactUsPage path="/contact" />
       <SupportPage path="/support" />
       <PricingPage path="/pricing" />              
+      <ProfilePage path="/p/:shortId" />
       <PrivacyPolicyPage path="/privacy" />  
       <TermsOfServicePage path="/tos" />              
       <Error path="/error" />
@@ -44,7 +46,7 @@ function Application() {
       <PrivateRoute path="/home" component={SignedInHomePage} />
       <PrivateRoute path="/setup-payments" component={SetupPayments} />
       <PrivateRoute path="/connect-stripe" component={ConnectStripe} />
-      <PrivateRoute path="/profile" component={ProfilePage} />
+      <PrivateRoute path="/profile" component={EditProfilePage} />
       <PrivateRoute path="/account" component={AccountPage} />
       <PrivateRoute path="/job/:jobId" component={JobPage} />
       <PrivateRoute path="/getjob" component={GetJobPage} />

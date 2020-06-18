@@ -45,6 +45,7 @@ const ProfilePage = (props) => {
   const profile = useContext(ProfileContext);
 
   const emptyRecord = {
+    displayName: '',
     firstName: '',
     lastName: '',
     headline: '',
@@ -63,6 +64,7 @@ const ProfilePage = (props) => {
             var publicProfile = firebase.functions().httpsCallable('publicProfile');
             const result = await publicProfile({shortId: props.shortId})
             const profile = {
+                displayName: result.data.displayName || '',
                 firstName: result.data.firstName || '',
                 lastName: result.data.lastName || '',
                 headline: result.data.headline || '',
@@ -104,6 +106,19 @@ const ProfilePage = (props) => {
     return false;
   }
 
+  // Formatting for user name
+  const formatUserName = () => {
+    if (profileRecord != null) {
+      if  (profileRecord.firstName !== '' && profileRecord.lastName !== '') {
+        return `${profileRecord.firstName} ${profileRecord.lastName}`
+      } else {
+        return profileRecord.displayName
+      }        
+    }
+
+    return '';
+  }
+  
 
   return (
     <React.Fragment>
@@ -115,7 +130,7 @@ const ProfilePage = (props) => {
             Home
           </Link>
           <Typography color="textPrimary">
-            {profileRecord.firstName} {profileRecord.lastName}
+            {formatUserName()}
           </Typography>
         </Breadcrumbs>
 

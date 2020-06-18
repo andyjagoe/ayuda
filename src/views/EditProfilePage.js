@@ -116,9 +116,9 @@ const EditProfilePage = () => {
       setFirstName(profile.firstName || '')
       setLastName(profile.lastName || '')
       setHeadline(profile.headline || '')
-      setHeadlineCounter(profile.headline.length)
+      if ('headline' in profile) setHeadlineCounter(profile.headline.length)
       setBio(profile.bio || '')
-      setBioCounter(profile.bio.length)
+      if ('bio' in profile) setBioCounter(profile.bio.length)
       setShortId(profile.shortId || '')
       setPhotoURL(profile.photoURL || '')
     }

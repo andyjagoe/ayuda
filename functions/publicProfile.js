@@ -30,6 +30,7 @@ exports.handler = function(data, context, firestoreDb) {
         } else {
             //console.log('Document data:', doc.data());
             const profile = {
+                displayName: doc.data().displayName || '',
                 firstName: doc.data().firstName || '',
                 lastName: doc.data().lastName || '',
                 headline: doc.data().headline || '',

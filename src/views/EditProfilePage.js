@@ -10,14 +10,14 @@ import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
-import PersonIcon from '@material-ui/icons/Person';
+import { ProfileContext } from "../providers/ProfileProvider";
+import { UserContext } from "../providers/UserProvider";
 import InputAdornment from '@material-ui/core/InputAdornment';
 import clsx from 'clsx';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { green } from '@material-ui/core/colors';
 import Snackbar from '@material-ui/core/Snackbar';
 import { makeStyles } from '@material-ui/core/styles';
-import { UserContext } from "../providers/UserProvider";
 import { firestore } from "../firebase"
 
 
@@ -82,6 +82,7 @@ const EditProfilePage = () => {
 
   const user = useContext(UserContext);
   const {uid, displayName} = user;
+  const profile = useContext(ProfileContext);
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -108,56 +109,31 @@ const EditProfilePage = () => {
     return displayName
   }
 
-  // Handle copying and snackbar messages
-  const [openSnackbar, setOpenSnackbar] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState(false);
-  const [snackbarKey, setSnackbarKey] = useState(false);
-  const handleSnackbarClick = (message, key) => {
-    setSnackbarMessage(message);
-    setSnackbarKey(key);
-    setOpenSnackbar(true);
-  };
-  const handleSnackbarClose = (event, reason) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-    setOpenSnackbar(false);
-  };
-
-
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const result = await firestore
-        .collection("/users")
-        .doc(uid)
-        .get()
+    let isCancelled = false
 
-        if (!result.exists) {
-          return
-        }
-
-        setFirstName(result.data().firstName || '')
-        setLastName(result.data().lastName || '')
-        setHeadline(result.data().headline || '')
-        setHeadlineCounter(result.data().headline.length)
-        setBio(result.data().bio || '')
-        setBioCounter(result.data().bio.length)
-        setShortId(result.data().shortId || '')
-        setPhotoURL(result.data().photoURL || '')
-      } catch (error) {
-          console.error(error);
-      }
-    };
+    if (profile != null && isCancelled === false) {
+      setFirstName(profile.firstName || '')
+      setLastName(profile.lastName || '')
+      setHeadline(profile.headline || '')
+      setHeadlineCounter(profile.headline.length)
+      setBio(profile.bio || '')
+      setBioCounter(profile.bio.length)
+      setShortId(profile.shortId || '')
+      setPhotoURL(profile.photoURL || '')
+    }
 
     if (firstRender.current) {
       firstRender.current = false
-      fetchData();
       return
     }
     setDisabled(formValidation())
-    
-  }, [firstName, lastName, headline, bio])
+
+    return () => {
+      isCancelled = true;
+    };
+
+  }, [firstName, lastName, headline, bio, profile])
 
 
 const formValidation = () => {
@@ -188,17 +164,16 @@ async function handleSubmit(event) {
       headline: headline,
       bio: bio,
     }, { merge: true });
+    setDisabled(false)
     setSuccess(true);  
     setLoading(false);
-    handleSnackbarClick('Profile Saved','profile_saved');
     navigate(`/p/${shortId}`);
   } catch (error) {
     console.log(error.message);
+    setDisabled(false)
     setSuccess(false);  
     setLoading(false);
   }
-
-  setDisabled(false)
 }
 
   return (
@@ -325,15 +300,6 @@ async function handleSubmit(event) {
               </div>
 
               </form>
-
-            <Snackbar
-              anchorOrigin= {{ vertical: 'top', horizontal: 'center' }}
-              key={snackbarKey}
-              autoHideDuration={6000}
-              open={openSnackbar}
-              onClose={handleSnackbarClose}
-              message={snackbarMessage}
-            />
 
           </div>
           <div className={classes.spacingFooter} />

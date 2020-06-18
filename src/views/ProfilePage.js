@@ -57,6 +57,7 @@ const ProfilePage = (props) => {
 
   
   useEffect(() => {
+    let isCancelled = false
     const fetchData = async () => {
         try {
             var publicProfile = firebase.functions().httpsCallable('publicProfile');
@@ -68,8 +69,10 @@ const ProfilePage = (props) => {
                 bio: result.data.bio || '',
                 photoURL: result.data.photoURL || '',
             }
-            setProfileRecord(profile);
-            setProfileShortId(props.shortId)
+            if (isCancelled === false) {
+              setProfileRecord(profile);
+              setProfileShortId(props.shortId)  
+            }
         } catch (error) {
             console.error(error);
         }
@@ -80,15 +83,18 @@ const ProfilePage = (props) => {
         firstRender.current = false
         fetchData(); 
     }
-    if (props.shortId !== profileShortId) {
+    if (props.shortId !== profileShortId && isCancelled === false) {
       fetchData();
     }
-    if (profile !=  null) {
+    if (profile !=  null && isCancelled === false) {
       setUserShortId(profile.shortId)
     }
       
+    return () => {
+      isCancelled = true;
+    };
 
-    }, [profile, props.shortId])
+  }, [profile, props.shortId])
 
     
   const isUsersProfile = () => {

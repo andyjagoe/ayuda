@@ -4,18 +4,25 @@ const functions = require('firebase-functions');
 exports.handler = function(data, context, firestoreDb) {
     //console.log(JSON.stringify(context.rawRequest.headers, null, 2));
 
-    const uid = data.uid;
+    const shortId = data.shortId;
 
     // Check that we have a uid
-    if (!(typeof uid === 'string') || uid.length === 0) {
+    if (!(typeof shortId === 'string') || shortId.length === 0) {
         // Throwing an HttpsError so that the client gets the error details.
         throw new functions.https.HttpsError('invalid-argument', 'The function must be called with ' +
-            'one argument "uid" containing the user id.');
+            'one argument "shortId" containing the user shortId.');
     }
     
     
-    let userRef = firestoreDb.collection('/users').doc(uid);
-    return userRef.get()
+    let idRef = firestoreDb.collection('/id_map').doc(shortId);
+    return idRef.get()
+    .then(doc => {
+        if (!doc.exists) {
+            //console.log('Short Id map not found');
+            throw new functions.https.HttpsError('not-found', 'Short ID map not found');
+        }
+        return firestoreDb.collection('/users').doc(doc.data().uid).get();
+    })
     .then(doc => {
         if (!doc.exists) {
             //console.log('User not found');

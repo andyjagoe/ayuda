@@ -16,7 +16,6 @@ import InputAdornment from '@material-ui/core/InputAdornment';
 import clsx from 'clsx';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { green } from '@material-ui/core/colors';
-import Snackbar from '@material-ui/core/Snackbar';
 import { makeStyles } from '@material-ui/core/styles';
 import { firestore } from "../firebase"
 

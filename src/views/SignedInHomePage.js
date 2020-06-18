@@ -8,6 +8,7 @@ import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
 import { navigate } from "@reach/router";
 import { UserContext } from "../providers/UserProvider";
+import { ProfileContext } from "../providers/ProfileProvider";
 import Jobs from 'components/Jobs';
 import Link from '@material-ui/core/Link';
 import Paper from '@material-ui/core/Paper';
@@ -58,9 +59,12 @@ const SignedInHomePage = () => {
   const classes = useStyles();
   const user = useContext(UserContext);
   const {displayName} = user;
+  const profile = useContext(ProfileContext);
+
   const [totalBalance, setTotalBalance] = React.useState('');
   const [totalPayouts, setPayouts] = React.useState('');
   const firstRender = useRef(true)
+
 
   useEffect(() => {
     if (firstRender.current) {
@@ -94,6 +98,17 @@ const SignedInHomePage = () => {
     });
   };
 
+  const formatUserName = () => {
+    if (profile != null) {
+      if  (profile.hasOwnProperty('firstName')) {
+        return `, ${profile.firstName}`
+      }
+      return `, ${displayName}`     
+    }
+
+    return '';
+  }
+  
  
   return (
     <React.Fragment>
@@ -117,7 +132,7 @@ const SignedInHomePage = () => {
       </Paper>
 
         <Typography component="h1" variant="h4" className={classes.welcome}>
-          Welcome, {displayName}!
+          Welcome{formatUserName()}!
         </Typography>
         
         <Typography variant="subtitle1">

@@ -51,10 +51,12 @@ const ProfilePage = (props) => {
     headline: '',
     bio: '',
     photoURL: '',
+    memberSince: '',
   }
   const [profileRecord, setProfileRecord] = useState(emptyRecord)
   const [profileShortId, setProfileShortId] = useState('')
   const [userShortId, setUserShortId] = useState('')
+  const [memberSince, setMemberSince] = useState('')
   const [email, setEmail] = useState('')
 
   
@@ -74,7 +76,8 @@ const ProfilePage = (props) => {
             }
             if (isCancelled === false) {
               setProfileRecord(profile);
-              setProfileShortId(props.shortId)  
+              setProfileShortId(props.shortId)
+              setMemberSince(`joined ${result.data.memberSince}` || '')
             }
         } catch (error) {
             console.error(error);
@@ -147,7 +150,7 @@ const ProfilePage = (props) => {
             {profileRecord.headline}  
           </Typography>
           <Typography variant="body2" color="textSecondary">
-            0 completed jobs | 0 reviews | joined March 2020
+            {/* 0 completed jobs | 0 reviews | */}{memberSince}
           </Typography>
           <Button
               fullWidth

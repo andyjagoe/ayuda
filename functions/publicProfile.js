@@ -1,4 +1,5 @@
 const functions = require('firebase-functions');
+var moment = require('moment');
 
 
 exports.handler = function(data, context, firestoreDb) {
@@ -36,6 +37,9 @@ exports.handler = function(data, context, firestoreDb) {
                 headline: doc.data().headline || '',
                 bio: doc.data().bio || '',
                 photoURL: doc.data().photoURL || '',
+                memberSince: moment(doc.data().signedUpTime
+                    .toDate())
+                    .format(('MMMM YYYY'))
             }
             return profile;
         }

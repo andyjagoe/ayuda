@@ -26,6 +26,15 @@ const useStyles = makeStyles((theme) => ({
   breadcrumb: {
     marginTop: theme.spacing(4),
   },
+  primarybutton: {
+    margin: theme.spacing(2, 0, 0),
+  },
+  secondarybutton: {
+    margin: theme.spacing(3, 0, 0),
+  },
+  bio: {
+    margin: theme.spacing(3, 0, 3),
+  },
   avatar: {
     margin: theme.spacing(1),
     backgroundColor: theme.palette.secondary.main,
@@ -125,6 +134,27 @@ const ProfilePage = (props) => {
     
     return '';
   }
+
+  // Handle sharing
+  const share = () => {
+    let url = document.location.href;
+    const canonicalElement = document.querySelector('link[rel=canonical]');
+    if (canonicalElement !== null) {
+        url = canonicalElement.href;
+    }
+
+    if (navigator.share) {
+      navigator.share({
+        title: `${formatUserName()} - ${profileRecord.headline}`,
+        text: `${formatUserName()}: ${profileRecord.headline}\n\n${profileRecord.bio}`,
+        url: url,
+      })
+        .then(() => console.log('Successful share'))
+        .catch((error) => console.log('Error sharing', error));
+    } else {
+      console.log("Not implemented ")
+    }
+  }
   
 
   return (
@@ -137,7 +167,7 @@ const ProfilePage = (props) => {
             Home
           </Link>
           <Typography color="textPrimary">
-            {formatUserName()}{user? ` (${email})` : ''}
+            {formatUserName()}{isUsersProfile() ? ` (${email})` : ''}
           </Typography>
         </Breadcrumbs>
 
@@ -156,7 +186,8 @@ const ProfilePage = (props) => {
               fullWidth
               variant="outlined"
               color="primary"
-              className={classes.submit}
+              className={classes.secondarybutton}
+              onClick={() => { share() }}
           >
               Share
           </Button>
@@ -165,22 +196,15 @@ const ProfilePage = (props) => {
                 fullWidth
                 variant="contained"
                 color="primary"
-                className={classes.submit}
+                className={classes.primarybutton}
                 onClick={() => { navigate('/profile') }}
             >
                 Edit Profile
             </Button>
             :
-            <Button
-                fullWidth
-                variant="contained"
-                color="primary"
-                className={classes.submit}
-            >
-                Ask me a question
-            </Button>
+            <div />
           }
-          <Typography variant="body1">
+          <Typography variant="body1" className={classes.bio}>
             {profileRecord.bio}  
           </Typography>
         </div>

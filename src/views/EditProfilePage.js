@@ -72,7 +72,7 @@ const useStyles = makeStyles((theme) => ({
 const HEADLINE_CHAR_LIMIT = 60;
 const HEADLINE_HELPER_TEXT = 'Your professional headline, like "English Teacher", "Music Instructor" or "Service Technician".'
 const BIO_CHAR_LIMIT = 2048;
-const BIO_HELPER_TEXT = 'Your biography should emphasize your experience and expertise.'
+const BIO_HELPER_TEXT = 'Your biography should emphasize your experience and expertise. It must be at least 60 characters.'
 
 
 const EditProfilePage = () => {
@@ -141,7 +141,8 @@ const formValidation = () => {
   if (firstName === "" 
       || lastName === ""
       || headline === ""
-      || bio === "") {
+      || bio === ""
+      || bio.length < 60) {
     return true
   }    
   return false

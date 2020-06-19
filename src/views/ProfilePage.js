@@ -12,6 +12,7 @@ import { navigate } from "@reach/router"
 import { makeStyles } from '@material-ui/core/styles';
 import { UserContext } from "../providers/UserProvider";
 import { ProfileContext } from "../providers/ProfileProvider";
+import {isMobile} from 'react-device-detect';
 import firebase from 'firebase/app';
 import 'firebase/functions';
 
@@ -143,7 +144,7 @@ const ProfilePage = (props) => {
         url = canonicalElement.href;
     }
 
-    if (navigator.share) {
+    if (navigator.share && isMobile) {
       navigator.share({
         title: `${formatUserName()} - ${profileRecord.headline}`,
         text: `${formatUserName()}: ${profileRecord.headline}\n\n${profileRecord.bio}`,

@@ -7,17 +7,18 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import HubSpotChat from  'components/HubSpotChat';
 import theme from './theme';
 
+
 function App() {
   return (
-    <UserProvider>
-      <ProfileProvider>
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          <Application />
-          <HubSpotChat />
-        </ThemeProvider>
-      </ProfileProvider>
-    </UserProvider>
+      <UserProvider>
+        <ProfileProvider>
+          <ThemeProvider theme={theme}>
+            <CssBaseline />
+            <Application />
+            <HubSpotChat />
+          </ThemeProvider>
+        </ProfileProvider>
+      </UserProvider>
   );
 }
 

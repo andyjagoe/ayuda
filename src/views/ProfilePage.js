@@ -1,16 +1,22 @@
-import React, { useEffect, useState, useRef, useContext } from "react";
+import React, { useEffect, useState, useRef, useContext, useCallback } from "react";
 import PublicAppBar from 'components/PublicAppBar';
 import MenuAppBar from 'components/MenuAppBar';
 import Container from '@material-ui/core/Container';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import Avatar from '@material-ui/core/Avatar';
+import AvatarEditor from 'react-avatar-editor'
+import Dropzone from 'react-dropzone';
+import Slider from '@material-ui/core/Slider';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import Link from '@material-ui/core/Link';
 import Dialog from '@material-ui/core/Dialog';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
+import MuiDialogTitle from '@material-ui/core/DialogTitle';
+import { withStyles } from '@material-ui/core/styles';
+import CloseIcon from '@material-ui/icons/Close';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import TextField from '@material-ui/core/TextField';
 import IconButton from "@material-ui/core/IconButton";
@@ -46,6 +52,35 @@ function CopyIcon(props) {
     </SvgIcon>
   );
 }
+
+
+const styles = (theme) => ({
+  root: {
+    margin: 0,
+    padding: theme.spacing(2),
+  },
+  closeButton: {
+    position: 'absolute',
+    right: theme.spacing(1),
+    top: theme.spacing(1),
+    color: theme.palette.grey[500],
+  },
+});
+
+
+const MyDialogTitle = withStyles(styles)((props) => {
+  const { children, classes, onClose, ...other } = props;
+  return (
+    <MuiDialogTitle disableTypography className={classes.root} {...other}>
+      <Typography variant="h6">{children}</Typography>
+      {onClose ? (
+        <IconButton aria-label="close" className={classes.closeButton} onClick={onClose}>
+          <CloseIcon />
+        </IconButton>
+      ) : null}
+    </MuiDialogTitle>
+  );
+});
 
 
 const useStyles = makeStyles((theme) => ({  
@@ -107,6 +142,7 @@ const ProfilePage = (props) => {
   const [profileRecord, setProfileRecord] = useState(emptyRecord)
   const [profileShortId, setProfileShortId] = useState('')
   const [userShortId, setUserShortId] = useState('')
+  const [avatarImage, setAvatarImage] = useState('')
   const [memberSince, setMemberSince] = useState('')
   const [email, setEmail] = useState('')
 
@@ -128,6 +164,7 @@ const ProfilePage = (props) => {
             if (isCancelled === false) {
               setProfileRecord(profile);
               setProfileShortId(props.shortId)
+              setAvatarImage(profile.photoURL)
               setMemberSince(`joined ${result.data.memberSince}` || '')
             }
         } catch (error) {
@@ -211,7 +248,38 @@ const ProfilePage = (props) => {
   }
 
 
-  // Handle Dialog
+
+
+  // Handle Avatar
+  const [scale, setScale] = useState(1.2)
+  const handleScale = (event, newValue) => {
+    setScale(parseFloat(newValue))
+  }
+  const onDrop = useCallback((acceptedFiles) => {
+    acceptedFiles.forEach((file) => {
+      const reader = new FileReader()
+
+      reader.onabort = () => console.log('file reading was aborted')
+      reader.onerror = () => console.log('file reading has failed')
+      reader.onload = () => {
+      // Do whatever you want with the file contents
+        const binaryStr = reader.result
+      }
+      //reader.readAsArrayBuffer(file)
+      setAvatarImage(file)
+    })
+    
+  }, [])
+
+  const [openAvatarDialog, toggleOpenAvatarDialog] = useState(false);
+  const handleOpenAvatarDialog = () => {
+    toggleOpenAvatarDialog(true);
+  };
+  const handleCloseAvatarDialog = () => {
+    toggleOpenAvatarDialog(false);
+  };
+  
+  // Handle Share Dialog
   const [openDialog, toggleOpenDialog] = useState(false);
   const handleOpenDialog = () => {
     toggleOpenDialog(true);
@@ -254,7 +322,12 @@ const ProfilePage = (props) => {
         </Breadcrumbs>
 
         <div className={classes.paper}> 
-          <Avatar className={classes.avatar} src={profileRecord.photoURL} />
+          <Avatar 
+            className={classes.avatar} 
+            src={profileRecord.photoURL} 
+            onClick={() => {if(isUsersProfile()) handleOpenAvatarDialog() }}
+          />
+
           <Typography component="h1" variant="h4">
             {profileRecord.firstName} {profileRecord.lastName}
           </Typography>
@@ -349,6 +422,74 @@ const ProfilePage = (props) => {
             <DialogActions>
               <Button onClick={handleCloseDialog} color="primary">
                 Done
+              </Button>
+            </DialogActions>
+        </Dialog>
+
+        <Dialog open={openAvatarDialog} 
+            onClose={handleCloseAvatarDialog} 
+            aria-labelledby="form-dialog-avatar"
+            maxWidth="sm"
+          >
+            <MyDialogTitle 
+              id="form-dialog-avatar" 
+              onClose={handleCloseAvatarDialog}
+            >              
+              Edit photo
+            </MyDialogTitle>
+            <DialogContent>
+              <Dropzone 
+                name='zone1'
+                noClick 
+                onDrop={onDrop}
+              >
+                {({getRootProps, getInputProps}) => (
+                  <section>
+                    <div {...getRootProps()}>
+                      <input {...getInputProps()} />
+                      <AvatarEditor
+                        image={avatarImage}
+                        width={250}
+                        height={250}
+                        border={50}
+                        borderRadius={125}
+                        color={[255, 255, 255, 0.6]} // RGBA
+                        scale={scale}
+                        rotate={0}
+                      />                  
+                    </div>
+                  </section>
+                )}
+              </Dropzone>      
+              <Slider
+                name="scale"
+                defaultValue={1.2}
+                aria-labelledby="discrete-slider"
+                valueLabelDisplay="auto"
+                step={0.1}
+                min={1}
+                max={2}
+                onChange={handleScale}                
+              />
+            </DialogContent>
+            <DialogActions>
+              <Dropzone 
+                name='zone2'
+                onDrop={onDrop}
+              >
+                {({getRootProps, getInputProps}) => (
+                  <section>
+                    <div {...getRootProps()}>
+                      <input {...getInputProps()} />
+                      <Button color="primary">
+                        Change Photo
+                      </Button>
+                    </div>
+                  </section>
+                )}
+              </Dropzone>
+              <Button onClick={handleCloseAvatarDialog} color="primary">
+                Save
               </Button>
             </DialogActions>
         </Dialog>

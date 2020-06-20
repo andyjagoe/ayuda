@@ -18,6 +18,8 @@ import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import { withStyles } from '@material-ui/core/styles';
 import CloseIcon from '@material-ui/icons/Close';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import Alert from '@material-ui/lab/Alert';
+import Collapse from '@material-ui/core/Collapse';
 import TextField from '@material-ui/core/TextField';
 import IconButton from "@material-ui/core/IconButton";
 import InputAdornment from "@material-ui/core/InputAdornment";
@@ -251,10 +253,21 @@ const ProfilePage = (props) => {
 
 
   // Handle Avatar
+  const setEditorRef = useRef()
   const [scale, setScale] = useState(1.2)
+
   const handleScale = (event, newValue) => {
     setScale(parseFloat(newValue))
   }
+
+  const handleSave = () => {
+    handleCloseAvatarDialog()
+    if (setEditorRef){
+      const canvasScaled = setEditorRef.current.getImageScaledToCanvas()
+      console.log("got cropped image")
+    }
+  }
+
   const onDrop = useCallback((acceptedFiles) => {
     acceptedFiles.forEach((file) => {
       const reader = new FileReader()
@@ -267,18 +280,39 @@ const ProfilePage = (props) => {
       }
       //reader.readAsArrayBuffer(file)
       setAvatarImage(file)
-    })
-    
+    })    
   }, [])
+
+  const onFilesRejected = useCallback((fileRejections) => {
+    if (fileRejections.length > 1)  {
+      setAlertMessage(`Only one file may be added`)
+      setShowAlert(true)       
+    } else if (fileRejections[0].errors[0].code === 'file-invalid-type') {
+      setAlertMessage('Only JPEG and PNG files supported')
+      setShowAlert(true)  
+    } else if(fileRejections[0].file.size > avatarMaxSize) {
+      const sizeInMB = (avatarMaxSize / (1024*1024)).toFixed(2);
+      setAlertMessage(`Maximum file size is ${sizeInMB} MB`)
+      setShowAlert(true)   
+    }
+  }, [])
+
+  const avatarMaxSize = 5242880;
+  const [alertMessage, setAlertMessage] = useState('Error');
+  const [showAlert, setShowAlert] = useState(false);
 
   const [openAvatarDialog, toggleOpenAvatarDialog] = useState(false);
   const handleOpenAvatarDialog = () => {
+    setAvatarImage(profile.photoURL)
+    setShowAlert(false)
     toggleOpenAvatarDialog(true);
   };
+
   const handleCloseAvatarDialog = () => {
     toggleOpenAvatarDialog(false);
   };
   
+
   // Handle Share Dialog
   const [openDialog, toggleOpenDialog] = useState(false);
   const handleOpenDialog = () => {
@@ -437,17 +471,32 @@ const ProfilePage = (props) => {
             >              
               Edit photo
             </MyDialogTitle>
+            
             <DialogContent>
+              <Collapse in={showAlert}>
+                <Alert severity="error">
+                  {alertMessage}
+                </Alert>
+              </Collapse>
+
               <Dropzone 
                 name='zone1'
                 noClick 
                 onDrop={onDrop}
+                onDropRejected={onFilesRejected}
+                accept='image/jpeg, image/png'
+                minSize={0}
+                maxSize={avatarMaxSize}
+                multiple={false}
               >
-                {({getRootProps, getInputProps}) => (
-                  <section>
+                {({getRootProps, getInputProps, isDragActive, isDragReject}) => {
+                  if (isDragActive && !isDragReject) setShowAlert(false);
+                  return  (
+                    <section>
                     <div {...getRootProps()}>
                       <input {...getInputProps()} />
                       <AvatarEditor
+                        ref={setEditorRef}
                         image={avatarImage}
                         width={250}
                         height={250}
@@ -459,7 +508,8 @@ const ProfilePage = (props) => {
                       />                  
                     </div>
                   </section>
-                )}
+                  )
+                }}
               </Dropzone>      
               <Slider
                 name="scale"
@@ -475,20 +525,29 @@ const ProfilePage = (props) => {
             <DialogActions>
               <Dropzone 
                 name='zone2'
+                noDrag
                 onDrop={onDrop}
+                onDropRejected={onFilesRejected}
+                accept='image/jpeg, image/png'
+                minSize={0}
+                maxSize={avatarMaxSize}
+                multiple={false}
               >
-                {({getRootProps, getInputProps}) => (
-                  <section>
-                    <div {...getRootProps()}>
-                      <input {...getInputProps()} />
-                      <Button color="primary">
-                        Change Photo
-                      </Button>
-                    </div>
-                  </section>
-                )}
+                {({getRootProps, getInputProps, isDragActive, isDragReject}) => {
+                  if (isDragActive && !isDragReject) setShowAlert(false);
+                  return (
+                    <section>
+                      <div {...getRootProps()}>
+                        <input {...getInputProps()} />
+                        <Button color="primary">
+                          Change Photo
+                        </Button>
+                      </div>
+                    </section>
+                  )
+                }}
               </Dropzone>
-              <Button onClick={handleCloseAvatarDialog} color="primary">
+              <Button onClick={handleSave} color="primary">
                 Save
               </Button>
             </DialogActions>

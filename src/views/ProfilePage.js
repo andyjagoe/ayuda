@@ -28,11 +28,15 @@ import copy from 'copy-to-clipboard';
 import Snackbar from '@material-ui/core/Snackbar';
 import { navigate } from "@reach/router"
 import { makeStyles } from '@material-ui/core/styles';
+import clsx from 'clsx';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import { green } from '@material-ui/core/colors';
 import { UserContext } from "../providers/UserProvider";
 import { ProfileContext } from "../providers/ProfileProvider";
 import {isMobile} from 'react-device-detect';
 import firebase from 'firebase/app';
 import 'firebase/functions';
+import { firestore } from "../firebase"
 import {
   EmailShareButton,
   FacebookShareButton,
@@ -45,6 +49,7 @@ import {
   LinkedinIcon,
   TwitterIcon,
 } from "react-share";
+import axios from 'axios';
 
 
 function CopyIcon(props) {
@@ -123,6 +128,29 @@ const useStyles = makeStyles((theme) => ({
   spacingFooter: {
     marginTop: theme.spacing(50),
   },
+  root: {
+    display: 'flex',
+    alignItems: 'center',
+  },
+  wrapper: {
+    margin: theme.spacing(3, 0, 2),
+    position: 'relative',
+    width: '100%',
+  },
+  buttonSuccess: {
+    backgroundColor: green[500],
+    '&:hover': {
+      backgroundColor: green[700],
+    },
+  },
+  buttonProgress: {
+    color: green[500],
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    marginTop: -12,
+    marginLeft: -12,
+  },  
 }));
 
 
@@ -141,6 +169,7 @@ const ProfilePage = (props) => {
     photoURL: '',
     memberSince: '',
   }
+  let isCancelled = false
   const [profileRecord, setProfileRecord] = useState(emptyRecord)
   const [profileShortId, setProfileShortId] = useState('')
   const [userShortId, setUserShortId] = useState('')
@@ -150,30 +179,7 @@ const ProfilePage = (props) => {
 
   
   useEffect(() => {
-    let isCancelled = false
-    const fetchData = async () => {
-        try {
-            var publicProfile = firebase.functions().httpsCallable('publicProfile');
-            const result = await publicProfile({shortId: props.shortId})
-            const profile = {
-                displayName: result.data.displayName || '',
-                firstName: result.data.firstName || '',
-                lastName: result.data.lastName || '',
-                headline: result.data.headline || '',
-                bio: result.data.bio || '',
-                photoURL: result.data.photoURL || '',
-            }
-            if (isCancelled === false) {
-              setProfileRecord(profile);
-              setProfileShortId(props.shortId)
-              setAvatarImage(profile.photoURL)
-              setMemberSince(`joined ${result.data.memberSince}` || '')
-            }
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
+    isCancelled = false
 
     if (firstRender.current) {
         firstRender.current = false
@@ -194,6 +200,30 @@ const ProfilePage = (props) => {
     };
 
   }, [profile, props.shortId])
+
+
+  const fetchData = async () => {    
+    try {
+        var publicProfile = firebase.functions().httpsCallable('publicProfile');
+        const result = await publicProfile({shortId: props.shortId})
+        const profile = {
+            displayName: result.data.displayName || '',
+            firstName: result.data.firstName || '',
+            lastName: result.data.lastName || '',
+            headline: result.data.headline || '',
+            bio: result.data.bio || '',
+            photoURL: `${result.data.photoURL}?${new Date().getTime()}` || '',
+        }
+        if (isCancelled === false) {
+          setProfileRecord(profile);
+          setProfileShortId(props.shortId)
+          setAvatarImage(profile.photoURL)
+          setMemberSince(`joined ${result.data.memberSince}` || '')
+        }
+    } catch (error) {
+        console.error(error);
+    }
+  };
 
     
   const isUsersProfile = () => {
@@ -260,12 +290,56 @@ const ProfilePage = (props) => {
     setScale(parseFloat(newValue))
   }
 
-  const handleSave = () => {
-    handleCloseAvatarDialog()
+  const handleSave = async () => {
     if (setEditorRef){
+      setShowAlert(false)
+      setDisabled(true)
+  
+      if (!loading) {
+        setSuccess(false);
+        setLoading(true);
+      }
+  
       const canvasScaled = setEditorRef.current.getImageScaledToCanvas()
-      console.log("got cropped image")
+      const dataUrl = canvasScaled.toDataURL()
+      var blobData = dataURItoBlob(dataUrl);
+
+      try {
+        // Get permission to upload
+        var getUploadAvatarUrl = firebase.functions().httpsCallable('getUploadAvatarUrl');
+        const result = await getUploadAvatarUrl()
+
+        // Upload to S3
+        const options = { headers: { 'Content-Type': 'image/png' }};        
+        await axios.put(result.data.signedRequest,blobData,options)
+        // Update user profile
+        await firestore.collection('/users').doc(user.uid).set({
+          photoURL: result.data.url,
+        }, { merge: true });
+
+        fetchData();
+        setDisabled(false)
+        setSuccess(true);
+        setLoading(false);  
+        handleCloseAvatarDialog()
+
+      } catch (error) {
+        console.error(error);
+        setDisabled(false)
+        setSuccess(false);
+        setLoading(false);
+      }    
     }
+
+  }
+
+  const dataURItoBlob = (dataURI) => {
+    var binary = atob(dataURI.split(',')[1]);
+    var array = [];
+    for(var i = 0; i < binary.length; i++) {
+        array.push(binary.charCodeAt(i));
+    }
+    return new Blob([new Uint8Array(array)], {type: 'image/png'});
   }
 
   const onDrop = useCallback((acceptedFiles) => {
@@ -275,7 +349,6 @@ const ProfilePage = (props) => {
       reader.onabort = () => console.log('file reading was aborted')
       reader.onerror = () => console.log('file reading has failed')
       reader.onload = () => {
-      // Do whatever you want with the file contents
         const binaryStr = reader.result
       }
       //reader.readAsArrayBuffer(file)
@@ -309,6 +382,7 @@ const ProfilePage = (props) => {
   };
 
   const handleCloseAvatarDialog = () => {
+    setSuccess(false);
     toggleOpenAvatarDialog(false);
   };
   
@@ -323,23 +397,31 @@ const ProfilePage = (props) => {
   };
 
 
-    // Handle copying and snackbar messages
-    const [openSnackbar, setOpenSnackbar] = useState(false);
-    const [snackbarMessage, setSnackbarMessage] = useState(false);
-    const [snackbarKey, setSnackbarKey] = useState(false);
-    const handleSnackbarClick = (text, message, key) => {
-      copy(text);
-      setSnackbarMessage(message);
-      setSnackbarKey(key);
-      setOpenSnackbar(true);
-    };
-    const handleSnackbarClose = (event, reason) => {
-      if (reason === 'clickaway') {
-        return;
-      }
-      setOpenSnackbar(false);
-    };
-  
+  // Handle copying and snackbar messages
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState(false);
+  const [snackbarKey, setSnackbarKey] = useState(false);
+  const handleSnackbarClick = (text, message, key) => {
+    copy(text);
+    setSnackbarMessage(message);
+    setSnackbarKey(key);
+    setOpenSnackbar(true);
+  };
+  const handleSnackbarClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setOpenSnackbar(false);
+  };
+
+  // Handle save loading animation
+  const [disable, setDisabled] = useState(false)
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const buttonClassname = clsx({
+    [classes.buttonSuccess]: success,
+  });
+ 
 
   return (
     <React.Fragment>
@@ -498,6 +580,7 @@ const ProfilePage = (props) => {
                       <AvatarEditor
                         ref={setEditorRef}
                         image={avatarImage}
+                        crossOrigin='anonymous'
                         width={250}
                         height={250}
                         border={50}
@@ -539,17 +622,34 @@ const ProfilePage = (props) => {
                     <section>
                       <div {...getRootProps()}>
                         <input {...getInputProps()} />
-                        <Button color="primary">
-                          Change Photo
-                        </Button>
+                          <div className={classes.root}>
+                          <div className={classes.wrapper}>
+                            <Button color="primary">
+                              Change Photo
+                            </Button>
+                          </div>
+                        </div>
                       </div>
                     </section>
                   )
                 }}
               </Dropzone>
-              <Button onClick={handleSave} color="primary">
-                Save
-              </Button>
+              <div className={classes.root}>
+                <div className={classes.wrapper}>
+                  <Button
+                    type="submit"
+                    color="primary"
+                    className={buttonClassname}
+                    disabled={disable}
+                    onClick={handleSave}
+                  >
+                    Save
+                  </Button>
+                  {loading && <CircularProgress size={24} className={classes.buttonProgress} />}
+                </div>
+              </div>
+
+
             </DialogActions>
         </Dialog>
 

@@ -110,6 +110,13 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'publicProfile')
     });
 }
 
+if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'getUploadAvatarUrl') {
+    const getUploadAvatarUrl = require('./getUploadAvatarUrl');
+    exports.getUploadAvatarUrl = functions.https.onCall((data, context) => {
+        return getUploadAvatarUrl.handler(data, context, firestoreDb);
+    });
+}
+
 if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'stripeLoginLink') {
     const stripeLoginLink = require('./stripeLoginLink');
     exports.stripeLoginLink = functions.https.onCall((data, context) => {

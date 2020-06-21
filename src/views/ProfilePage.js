@@ -308,10 +308,6 @@ const ProfilePage = (props) => {
         // Get permission to upload
         var getUploadAvatarUrl = firebase.functions().httpsCallable('getUploadAvatarUrl');
         const result = await getUploadAvatarUrl()
-        console.log (result)
-
-        console.log (result.data.signedRequest.fields)
-        console.log (result.data.signedRequest.url)
 
         // Upload to S3
         let formData = new FormData();
@@ -390,17 +386,16 @@ const ProfilePage = (props) => {
   const [showAlert, setShowAlert] = useState(false);
 
   const [openAvatarDialog, toggleOpenAvatarDialog] = useState(false);
-  const handleOpenAvatarDialog = () => {
-    document.getElementById('hubspot-messages-iframe-container').style.setProperty('display', 'none', 'important');
-    setAvatarImage(profile.photoURL)
+  const handleOpenAvatarDialog = () => {    
     setShowAlert(false)
     toggleOpenAvatarDialog(true);
+    document.getElementById('hubspot-messages-iframe-container').style.setProperty('display', 'none', 'important');
   };
 
-  const handleCloseAvatarDialog = () => {
-    document.getElementById('hubspot-messages-iframe-container').style.display = 'initial';
+  const handleCloseAvatarDialog = () => {    
     setSuccess(false);
     toggleOpenAvatarDialog(false);
+    document.getElementById('hubspot-messages-iframe-container').style.display = 'initial';
   };
   
 

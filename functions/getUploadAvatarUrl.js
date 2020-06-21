@@ -46,7 +46,7 @@ exports.handler = async function(data, context, firestoreDb) {
         })
         return {
             signedRequest: signedRequest,
-            url: `https://${S3_BUCKET}.s3.amazonaws.com/${fileName}`
+            url: `https://${S3_BUCKET}.s3-${functions.config().aws.region}.amazonaws.com/${fileName}`
         }        
     } catch (error) {
         console.error(error);

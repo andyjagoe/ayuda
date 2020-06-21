@@ -50,6 +50,8 @@ import {
   TwitterIcon,
 } from "react-share";
 import axios from 'axios';
+import useMediaQuery from '@material-ui/core/useMediaQuery';
+import { useTheme } from '@material-ui/core/styles';
 
 
 function CopyIcon(props) {
@@ -212,12 +214,12 @@ const ProfilePage = (props) => {
             lastName: result.data.lastName || '',
             headline: result.data.headline || '',
             bio: result.data.bio || '',
-            photoURL: `${result.data.photoURL}?${new Date().getTime()}` || '',
+            photoURL: result.data.photoURL || '',
         }
         if (isCancelled === false) {
           setProfileRecord(profile);
           setProfileShortId(props.shortId)
-          setAvatarImage(profile.photoURL)
+          getAvatarImage(profile.photoURL)
           setMemberSince(`joined ${result.data.memberSince}` || '')
         }
     } catch (error) {
@@ -283,6 +285,8 @@ const ProfilePage = (props) => {
 
 
   // Handle Avatar
+  const theme = useTheme();
+  const fullScreen = useMediaQuery(theme.breakpoints.down('xs'));
   const setEditorRef = useRef()
   const [scale, setScale] = useState(1.2)
 
@@ -344,6 +348,20 @@ const ProfilePage = (props) => {
 
   }
 
+  const getAvatarImage = async (url) => {
+    const response = await fetch(url, { cache: 'no-store' });
+    const buffer = await response.arrayBuffer();
+
+    let binary = '';
+    const bytes = [].slice.call(new Uint8Array(buffer));
+    bytes.forEach(b => binary += String.fromCharCode(b));
+    const base64 = window.btoa(binary);
+
+    const src = `data:image/jpeg;base64,${base64}`;
+
+    setAvatarImage(src)
+  }
+
   const dataURItoBlob = (dataURI) => {
     var binary = atob(dataURI.split(',')[1]);
     var array = [];
@@ -389,13 +407,15 @@ const ProfilePage = (props) => {
   const handleOpenAvatarDialog = () => {    
     setShowAlert(false)
     toggleOpenAvatarDialog(true);
-    document.getElementById('hubspot-messages-iframe-container').style.setProperty('display', 'none', 'important');
+    const hubspot = document.getElementById('hubspot-messages-iframe-container')
+    if (hubspot != null)  hubspot.style.setProperty('display', 'none', 'important');
   };
 
   const handleCloseAvatarDialog = () => {    
     setSuccess(false);
     toggleOpenAvatarDialog(false);
-    document.getElementById('hubspot-messages-iframe-container').style.display = 'initial';
+    const hubspot = document.getElementById('hubspot-messages-iframe-container')
+    if (hubspot != null)  hubspot.style.display = 'initial';
   };
   
 
@@ -452,7 +472,7 @@ const ProfilePage = (props) => {
         <div className={classes.paper}> 
           <Avatar 
             className={classes.avatar} 
-            src={profileRecord.photoURL} 
+            src={avatarImage} 
             onClick={() => {if(isUsersProfile()) handleOpenAvatarDialog() }}
           />
 
@@ -558,6 +578,7 @@ const ProfilePage = (props) => {
             onClose={handleCloseAvatarDialog} 
             aria-labelledby="form-dialog-avatar"
             maxWidth="sm"
+            fullScreen={fullScreen}
           >
             <MyDialogTitle 
               id="form-dialog-avatar" 

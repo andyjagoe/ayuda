@@ -111,7 +111,7 @@ const useStyles = makeStyles((theme) => ({
   },
   avatar: {
     margin: theme.spacing(1),
-    backgroundColor: theme.palette.secondary.main,
+    backgroundColor: 'transparent',
     width: theme.spacing(15),
     height: theme.spacing(15),
   },
@@ -308,10 +308,25 @@ const ProfilePage = (props) => {
         // Get permission to upload
         var getUploadAvatarUrl = firebase.functions().httpsCallable('getUploadAvatarUrl');
         const result = await getUploadAvatarUrl()
+        console.log (result)
+
+        console.log (result.data.signedRequest.fields)
+        console.log (result.data.signedRequest.url)
 
         // Upload to S3
-        const options = { headers: { 'Content-Type': 'image/png' }};        
-        await axios.put(result.data.signedRequest,blobData,options)
+        let formData = new FormData();
+        formData.append("Content-Type", "image/png");
+        Object.entries(result.data.signedRequest.fields).forEach(([k, v]) => {
+	        formData.append(k, v);
+        });
+        formData.append("file", blobData);
+        await axios({
+          method: 'post',
+          url: result.data.signedRequest.url,
+          data: formData,
+          headers: {'Content-Type': 'multipart/form-data' }
+        })
+
         // Update user profile
         await firestore.collection('/users').doc(user.uid).set({
           photoURL: result.data.url,
@@ -376,12 +391,14 @@ const ProfilePage = (props) => {
 
   const [openAvatarDialog, toggleOpenAvatarDialog] = useState(false);
   const handleOpenAvatarDialog = () => {
+    document.getElementById('hubspot-messages-iframe-container').style.setProperty('display', 'none', 'important');
     setAvatarImage(profile.photoURL)
     setShowAlert(false)
     toggleOpenAvatarDialog(true);
   };
 
   const handleCloseAvatarDialog = () => {
+    document.getElementById('hubspot-messages-iframe-container').style.display = 'initial';
     setSuccess(false);
     toggleOpenAvatarDialog(false);
   };

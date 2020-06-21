@@ -23,19 +23,25 @@ exports.handler = async function(data, context, firestoreDb) {
     const fileName = `avatars/${uid}/avatar.png`;
 
     const s3 = new AWS.S3();
+
     const s3Params = {
         Bucket: S3_BUCKET,
-        Key: fileName,
         Expires: 500,
-        ContentType: 'image/png',
-        ACL: 'public-read',
-    };
+		Fields: {
+            key: fileName,
+            ACL: 'public-read'
+		},
+		Conditions: [
+			["content-length-range", 0, 5242880], 
+            ["starts-with", "$Content-Type", "image/png"],
+		]
+	};
     
     try {
         const signedRequest  = await new Promise((resolve, reject) => {
-            s3.getSignedUrl('putObject', s3Params, (err, url) => {
+            s3.createPresignedPost(s3Params, (err, data) => {
               if (err) reject(err)
-              else resolve(url)
+              else resolve(data)
             })
         })
         return {

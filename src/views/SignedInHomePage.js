@@ -120,6 +120,23 @@ const SignedInHomePage = () => {
     return false;
   }
 
+  const getstartedNavigation = () => {
+    if(hasPayments()) {
+      navigate('/getstarted?step=3')
+      return
+    }
+    if(profile != null
+      && profile.hasOwnProperty('firstName') && profile.firstName !== ''
+      && profile.hasOwnProperty('lastName') && profile.lastName !== ''
+      && profile.hasOwnProperty('headline') && profile.headilne !== ''
+      && profile.hasOwnProperty('bio') && profile.bio !== ''
+      ) {
+        navigate('/getstarted?step=2')
+        return
+    }
+    navigate('/getstarted')
+  }
+
  
   return (
     <React.Fragment>
@@ -161,7 +178,7 @@ const SignedInHomePage = () => {
                 variant="contained"
                 color="primary"
                 onClick={() => { hasPayments() ? 
-                    navigate('/getjob') : navigate('/getstarted') }}
+                    navigate('/getjob') : getstartedNavigation() }}
                 className={classes.submit}
               >
                 {hasPayments()? 'Get Jobs' : 'Get Started Now'}

@@ -307,7 +307,7 @@ const EditProfilePage = (props) => {
           photoURL: result.data.url,
         }, { merge: true });
 
-        getAvatarImage(profile.photoURL || '')
+        getAvatarImage(result.data.url)
         setDisabledAvatar(false)
         setSuccessAvatar(true);
         setLoadingAvatar(false);  

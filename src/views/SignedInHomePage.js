@@ -6,7 +6,7 @@ import Grid from '@material-ui/core/Grid';
 import AddIcon from '@material-ui/icons/Add';
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
-import { navigate } from "@reach/router";
+  import { navigate } from "@reach/router";
 import { UserContext } from "../providers/UserProvider";
 import { ProfileContext } from "../providers/ProfileProvider";
 import Jobs from 'components/Jobs';
@@ -124,7 +124,7 @@ const SignedInHomePage = () => {
             <Typography component="h1" variant="h3">
               ${totalBalance} 
             </Typography>
-            <Link variant="body2" color="textSecondary" onClick={() => { goToAccount(); }}>
+            <Link variant="body2" onClick={() => { goToAccount(); }}>
               Recent payouts: ${totalPayouts}
             </Link>
           </Grid>
@@ -145,10 +145,10 @@ const SignedInHomePage = () => {
                 fullWidth
                 variant="contained"
                 color="primary"
-                onClick={() => { navigate('/getjob'); }}
+                onClick={() => { navigate('/getstarted'); }}
                 className={classes.submit}
               >
-                Get Jobs
+                Get Started
               </Button>
             </Grid>
         </Grid>

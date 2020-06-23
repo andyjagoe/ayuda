@@ -18,6 +18,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { UserContext } from "../providers/UserProvider";
 import { ProfileContext } from "../providers/ProfileProvider";
 import { firestore } from "../firebase"
+const queryString = require('query-string');
 var uuid4 = require('uuid4');
 
 
@@ -50,6 +51,8 @@ const useStyles = makeStyles((theme) => ({
  
 export default function SetupPayments(props) {
   const classes = useStyles();
+  const parsed = queryString.parse(props.location.search);
+
   const user = useContext(UserContext);
   const {email, uid} = user;
   const profile = useContext(ProfileContext);
@@ -71,7 +74,7 @@ export default function SetupPayments(props) {
       setFirstName(profile.firstName || '')
       setLastName(profile.lastName || '')
       setShortId(profile.shortId || '')
-      setHasLoadedProfile(true)
+      setHasLoadedProfile(true)      
     }
 
     if (firstRender.current) {
@@ -116,13 +119,33 @@ export default function SetupPayments(props) {
   }
 
 
-  const stripeConnectUrl = new URL("https://connect.stripe.com/express/oauth/authorize");
-  stripeConnectUrl.searchParams.set("redirect_uri", `${props.location.origin}/connect-stripe`);
-  stripeConnectUrl.searchParams.set("client_id", "ca_H6rAXET2pmOzBHnNrhEnwYPfPLEiZohY");
-  stripeConnectUrl.searchParams.set("stripe_user[email]", email);
-  stripeConnectUrl.searchParams.set("stripe_user[url]", `https://ayuda.live/p/${shortId}`);
-  stripeConnectUrl.searchParams.set("stripe_user[business_type]", "individual");
-  stripeConnectUrl.searchParams.set("stripe_user[country]", "US");
+  const getStripeConnectUrl = () => {
+    const stripeConnectUrl = new URL("https://connect.stripe.com/express/oauth/authorize");
+    stripeConnectUrl.searchParams.set("client_id", "ca_H6rAXET2pmOzBHnNrhEnwYPfPLEiZohY");
+    stripeConnectUrl.searchParams.set("stripe_user[email]", email);
+    stripeConnectUrl.searchParams.set("stripe_user[url]", `https://ayuda.live/p/${shortId}`);
+    stripeConnectUrl.searchParams.set("stripe_user[business_type]", "individual");
+    stripeConnectUrl.searchParams.set("stripe_user[country]", "US");
+
+    if (!parsed.r) {
+      stripeConnectUrl.searchParams.set("redirect_uri", `${props.location.origin}/connect-stripe`);
+      return stripeConnectUrl
+    }
+
+    try  {
+      const referer = parsed.r
+      if (referer === 'getstarted') {
+        stripeConnectUrl.searchParams.set("redirect_uri", `${props.location.origin}/connect-stripe?r=getstarted`);
+      } else {
+        stripeConnectUrl.searchParams.set("redirect_uri", `${props.location.origin}/connect-stripe`);
+      }
+    } catch (error) {
+      console.log("Error setting referer");
+    }
+
+    return stripeConnectUrl
+  }
+
   
   async function handleSubmit(event) {
     event.preventDefault();
@@ -139,6 +162,7 @@ export default function SetupPayments(props) {
     } catch (error) {
       console.log(error.message);
     }
+    const stripeConnectUrl = getStripeConnectUrl()
     stripeConnectUrl.searchParams.set("stripe_user[first_name]", firstName);
     stripeConnectUrl.searchParams.set("stripe_user[last_name]", lastName);
     stripeConnectUrl.searchParams.set("state", state);

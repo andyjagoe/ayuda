@@ -35,6 +35,7 @@ import 'firebase/functions';
 import axios from 'axios';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import { useTheme } from '@material-ui/core/styles';
+const queryString = require('query-string');
 
 
 const styles = (theme) => ({
@@ -127,9 +128,10 @@ const BIO_CHAR_LIMIT = 2048;
 const BIO_HELPER_TEXT = 'Your biography should emphasize your experience and expertise. It must be at least 60 characters.'
 
 
-const EditProfilePage = () => {
+const EditProfilePage = (props) => {
   const classes = useStyles();
   const firstRender = useRef(true)
+  const parsed = queryString.parse(props.location.search);
 
   const user = useContext(UserContext);
   const {uid, displayName} = user;
@@ -191,47 +193,64 @@ const EditProfilePage = () => {
   }, [firstName, lastName, headline, bio, profile])
 
 
-const formValidation = () => {
-  if (firstName === "" 
-      || lastName === ""
-      || headline === ""
-      || bio === ""
-      || bio.length < 60) {
-    return true
-  }    
-  return false
-}
-
-
-async function handleSubmit(event) {
-  event.preventDefault();
-  
-  setDisabled(true)
-
-  if (!loading) {
-    setSuccess(false);
-    setLoading(true);
+  const formValidation = () => {
+    if (firstName === "" 
+        || lastName === ""
+        || headline === ""
+        || bio === ""
+        || bio.length < 60) {
+      return true
+    }    
+    return false
   }
 
-  try {
-    await firestore.collection('/users').doc(uid).set({
-      firstName: firstName,
-      lastName: lastName,    
-      headline: headline,
-      bio: bio,
-    }, { merge: true });
-    setDisabled(false)
-    setSuccess(true);  
-    setLoading(false);
-    navigate(`/p/${shortId}`);
-  } catch (error) {
-    console.log(error.message);
-    setDisabled(false)
-    setSuccess(false);  
-    setLoading(false);
-  }
-}
 
+  async function handleSubmit(event) {
+    event.preventDefault();
+    
+    setDisabled(true)
+
+    if (!loading) {
+      setSuccess(false);
+      setLoading(true);
+    }
+
+    try {
+      await firestore.collection('/users').doc(uid).set({
+        firstName: firstName,
+        lastName: lastName,    
+        headline: headline,
+        bio: bio,
+      }, { merge: true });
+      setDisabled(false)
+      setSuccess(true);  
+      setLoading(false);
+      saveSuccessNavigation();
+    } catch (error) {
+      console.log(error.message);
+      setDisabled(false)
+      setSuccess(false);  
+      setLoading(false);
+    }
+  }
+
+
+  const saveSuccessNavigation =  () => {
+    if (!parsed.r) {   
+      navigate(`/p/${shortId}`);
+      return
+    }
+
+    try  {
+      const referer = parsed.r
+      if (referer === 'getstarted') {
+        navigate(`/getstarted?step=1`);
+      }    
+    } catch (error) {
+      console.log("Error setting referer");
+      navigate(`/p/${shortId}`);
+    }
+  }
 
   // Handle Avatar
   const [disableAvatar, setDisabledAvatar] = useState(false)

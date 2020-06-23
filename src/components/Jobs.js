@@ -1,5 +1,8 @@
 import React, { Component } from "react";
 import JobCell from './JobCell';
+import Typography from '@material-ui/core/Typography';
+import Link from '@material-ui/core/Link';
+import { navigate } from "@reach/router";
 import { UserContext } from "../providers/UserProvider";
 import { firestore } from "../firebase";
 var moment = require('moment');
@@ -57,9 +60,16 @@ export default class Jobs extends Component {
 
         return (
             <div className="jobs">
-                {this.state.jobs.map(job => {
-                return <JobCell jobRecord={job.data} key={job.id} jobKey={job.id}/>    
-                })}
+                {this.state.jobs.length > 0 ? 
+                this.state.jobs.map(job => {
+                    return <JobCell jobRecord={job.data} key={job.id} jobKey={job.id}/>    
+                }) 
+                : 
+                <Typography variant="body2" color="textSecondary">
+                    No jobs on your schedule yet. <Link onClick={() => { navigate('/addjob'); }}>
+                    Add one?</Link>
+
+                </Typography>}
             </div>
         );
     }

@@ -16,6 +16,7 @@ import ProfilePage from "./ProfilePage";
 import AccountPage from "./AccountPage";
 import JobPage from "./JobPage";
 import GetJobPage from "./GetJobPage";
+import GetStarted from "./GetStarted";
 import AddJobPage from "./AddJobPage";
 import Authorize from "./Authorize";
 import Checkout from "./Checkout";
@@ -50,6 +51,7 @@ function Application() {
       <PrivateRoute path="/account" component={AccountPage} />
       <PrivateRoute path="/job/:jobId" component={JobPage} />
       <PrivateRoute path="/getjob" component={GetJobPage} />
+      <PrivateRoute path="/getstarted" component={GetStarted} />
       <PrivateRoute path="/addjob" component={AddJobPage} />
     </ScrollToTop>
   </Router>

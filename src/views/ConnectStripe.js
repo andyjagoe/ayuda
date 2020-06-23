@@ -54,7 +54,7 @@ export default function ConnectStripe(props) {
                 setResultMessage('Stripe connected successfully')
                 setResultSeverity('success')
                 setIsLoading(false)
-                navigate('/home');
+                handleSuccessNavigation();
             }).catch(function(error) {
                 console.log(error.message);
                 setResultMessage(error.message)
@@ -73,7 +73,24 @@ export default function ConnectStripe(props) {
             setResultSeverity('error')
         }    
     }, [parsed]);
+
+
+    const handleSuccessNavigation =  () => {
+        if (!parsed.r) {   
+            navigate('/home');
+            return
+        }
     
+        try  {
+          const referer = parsed.r
+          if (referer === 'getstarted') {
+            navigate(`/getstarted?step=3`);
+          }    
+        } catch (error) {
+          console.log("Error setting referer");
+          navigate('/home');
+        }
+      }
   
   return (
     <React.Fragment>

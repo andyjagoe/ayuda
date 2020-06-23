@@ -70,6 +70,7 @@ exports.handler = async function(event, firestoreDb, admin, zoomHelper, emailHan
             emailVerified: event.emailVerified,
             photoURL: event.photoURL,
             zoomId: zoomResponse.data.id,
+            paymentsEnabled: false,
             shortId: shortId || '',
             signedUpTime: admin.firestore.Timestamp.fromDate(new Date()),
         }, { merge: true });    

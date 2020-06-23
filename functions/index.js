@@ -16,13 +16,6 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'newUserSignup')
     });
 }
 
-if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'isEnabledForPayments') {
-    const isEnabledForPayments = require('./isEnabledForPayments');
-    exports.isEnabledForPayments = functions.https.onCall((data, context) => {
-        return isEnabledForPayments.handler(data, context, firestoreDb);
-    });
-}
-
 if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'connectStripe') {
     const connectStripe = require('./connectStripe');
     exports.connectStripe = functions.https.onCall((data, context) => {

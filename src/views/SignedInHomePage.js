@@ -6,7 +6,7 @@ import Grid from '@material-ui/core/Grid';
 import AddIcon from '@material-ui/icons/Add';
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
-  import { navigate } from "@reach/router";
+import { navigate } from "@reach/router";
 import { UserContext } from "../providers/UserProvider";
 import { ProfileContext } from "../providers/ProfileProvider";
 import Jobs from 'components/Jobs';
@@ -108,7 +108,18 @@ const SignedInHomePage = () => {
 
     return '';
   }
-  
+
+  const hasPayments = () => {
+    if (profile != null) {
+      if  (profile.hasOwnProperty('paymentsEnabled') && profile.paymentsEnabled === true) {
+        return true
+      }
+      return false
+    }
+
+    return false;
+  }
+
  
   return (
     <React.Fragment>
@@ -136,7 +147,11 @@ const SignedInHomePage = () => {
         </Typography>
         
         <Typography variant="subtitle1">
-          Add jobs to your schedule to get started.
+        { hasPayments() ? 
+          'Add jobs to your schedule to get started.'
+          :
+          ''
+        }
         </Typography>
 
         <Grid container spacing={2}>
@@ -145,10 +160,11 @@ const SignedInHomePage = () => {
                 fullWidth
                 variant="contained"
                 color="primary"
-                onClick={() => { navigate('/getstarted'); }}
+                onClick={() => { hasPayments() ? 
+                    navigate('/getjob') : navigate('/getstarted') }}
                 className={classes.submit}
               >
-                Get Started
+                {hasPayments()? 'Get Jobs' : 'Get Started Now'}
               </Button>
             </Grid>
         </Grid>

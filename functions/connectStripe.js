@@ -78,6 +78,11 @@ exports.handler = function(data, context, firestoreDb) {
     })
     .then(response => {
         //console.log('Stripe connect successful: ', response);
+        return firestoreDb.collection('/users').doc(uid).set({
+            paymentsEnabled: true,
+        }, { merge: true });
+    })
+    .then(response => {
         return true;
     })
     .catch(err => {

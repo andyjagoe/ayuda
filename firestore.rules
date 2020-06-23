@@ -8,6 +8,7 @@ service cloud.firestore {
         && request.resource.data.emailVerified == resource.data.emailVerified
         && request.resource.data.signedUpTime == resource.data.signedUpTime
         && request.resource.data.zoomId == resource.data.zoomId        
+        && request.resource.data.paymentsEnabled == resource.data.paymentsEnabled        
         ;
     }
 

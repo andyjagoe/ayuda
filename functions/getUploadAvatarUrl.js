@@ -5,7 +5,7 @@ AWS.config.update({
     secretAccessKey: functions.config().aws.secretaccesskey,
     region: functions.config().aws.region,
 });
-const S3_BUCKET =  'ayuda-avatars-prod'
+const S3_BUCKET =  functions.config().aws.avatarbucket
 
 exports.handler = async function(data, context, firestoreDb) {
     //console.log(JSON.stringify(context.rawRequest.headers, null, 2));

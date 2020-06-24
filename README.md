@@ -3,6 +3,7 @@ Setup requires setting the following Firebase environment variables prior to dep
 * aws.accesskeyid
 * aws.secretaccesskey
 * aws.region
+* aws.avatarbucket
 * zoom.apikey
 * zoom.refreshtoken
 

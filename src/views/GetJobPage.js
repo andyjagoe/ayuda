@@ -457,7 +457,7 @@ ${pitchFooter()}`
                 <TwitterShareButton url={shareUrl()} title={shareTitle()}>
                   <TwitterIcon size={64} round />
                 </TwitterShareButton>        
-                <LinkedinShareButton url={shareUrl()}>
+                <LinkedinShareButton url={shareUrl()} summary={shareText()}>
                   <LinkedinIcon size={64} round />
                 </LinkedinShareButton>
             </DialogContent>

@@ -1,7 +1,7 @@
+const functions = require('firebase-functions');
+const stripe = require('stripe')(functions.config().stripe.secretkey);
 const moment = require('moment');
 const _ = require('lodash');
-const stripe = require('stripe')('sk_test_K0y591XvPNiX9UJaxdaZcSK6');
-
 
 
 const getJobStatus = async (uid, jobId, firestoreDb) => {

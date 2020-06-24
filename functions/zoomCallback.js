@@ -1,4 +1,5 @@
-const zoomVerificationToken = 'ZLXFn9VjQS2cHoG_y0_GUg';
+const functions = require('firebase-functions');
+const zoomVerificationToken = functions.config().zoom.verificationtoken;
 
 
 exports.handler = async function(req, res, firestoreDb, admin, zoomHelper, taskHandler) {

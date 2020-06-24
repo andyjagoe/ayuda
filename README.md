@@ -4,8 +4,11 @@ Setup requires setting the following Firebase environment variables prior to dep
 * aws.secretaccesskey
 * aws.region
 * aws.avatarbucket
+* stripe.secretkey
+* stripe.endpointsecret
 * zoom.apikey
 * zoom.refreshtoken
+* zoom.verificationtoken
 
 For example: 
 `firebase functions:config:set zoom.jwttoken="JWT token for API access" zoom.refreshtoken="refresh token to create new JWT tokens"`

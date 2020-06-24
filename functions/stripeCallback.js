@@ -1,6 +1,6 @@
 const functions = require('firebase-functions');
-const stripe = require('stripe')('sk_test_K0y591XvPNiX9UJaxdaZcSK6');
-const endpointSecret = 'whsec_wKTP8VhOGpyFV37lvjNZ5ExHoImAkq54';
+const stripe = require('stripe')(functions.config().stripe.secretkey);
+const endpointSecret = functions.config().stripe.endpointsecret;
 
 
 exports.handler = async function(req, res, firestoreDb, admin) {

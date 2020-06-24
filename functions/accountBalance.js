@@ -1,6 +1,6 @@
 const functions = require('firebase-functions');
 const moment = require('moment');
-var stripe = require('stripe')('sk_test_K0y591XvPNiX9UJaxdaZcSK6');
+const stripe = require('stripe')(functions.config().stripe.secretkey);
 
 
 exports.handler = async function(data, context, firestoreDb, admin) {

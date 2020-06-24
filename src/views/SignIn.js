@@ -92,9 +92,9 @@ const uiConfig = {
     //credentialHelper: firebaseui.auth.CredentialHelper.GOOGLE_YOLO,
     credentialHelper: firebaseui.auth.CredentialHelper.ACCOUNT_CHOOSER_COM,
     // Terms of service url.
-    'tosUrl': 'https://ayuda.live/tos',
+    'tosUrl': `${window.location.origin}/tos`,
     // Privacy policy url.
-    'privacyPolicyUrl': 'https://ayuda.live/privacy'
+    'privacyPolicyUrl': `${window.location.origin}/privacy`
 };
 
 

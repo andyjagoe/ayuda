@@ -149,8 +149,8 @@ exports.handler = async function(data, context, firestoreDb, billing) {
             customer: customerRecord.stripe_id,
             client_reference_id: `${uid}|${id}`,
             submit_type:  'book',
-            success_url: 'https://ayuda.live/authorize_success?session_id={CHECKOUT_SESSION_ID}',
-            cancel_url: 'https://ayuda.live',
+            success_url: `${functions.config().ayuda.url}/authorize_success?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: functions.config().ayuda.url,
         })
 
         return {sessionId: stripeSession.id, hasValidAuth: false}

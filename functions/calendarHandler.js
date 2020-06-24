@@ -1,3 +1,4 @@
+const functions = require('firebase-functions');
 const { google, outlook, yahoo, ics } = require('calendar-link');
 const ical = require('ical-generator');
 const moment = require('moment');
@@ -16,7 +17,7 @@ const generateICal = (user, jobRecord, method) => {
                 summary: jobRecord.topic,
                 description: getInvitationMarkup(user, jobRecord),
                 organizer: `${user.name} <ayuda@ayuda.live>`, //must use this email since we send from it
-                url: `https://ayuda.live/job/${jobRecord.ref_id}`,
+                url: `${functions.config().ayuda.url}/job/${jobRecord.ref_id}`,
                 uid: jobRecord.ref_id,
             }
         ]   

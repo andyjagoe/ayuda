@@ -83,11 +83,11 @@ const formatJobDoc = (jobDoc, customerDoc, rateDoc) => {
 
 const getCalendarLinks = (user, jobRecord) => {
     return {
-        google_url: `https://ayuda.live/calendar?calendar=google&id=${jobRecord.ref_id}&uid=${user.uid}`,
-        outlook_url: `https://ayuda.live/calendar?calendar=outlook&id=${jobRecord.ref_id}&uid=${user.uid}`,
-        yahoo_url: `https://ayuda.live/calendar?calendar=yahoo&id=${jobRecord.ref_id}&uid=${user.uid}`,
-        ics_url: `https://ayuda.live/calendar?calendar=ics&id=${jobRecord.ref_id}&uid=${user.uid}`,
-        download_url: `https://ayuda.live/calendar?calendar=download&id=${jobRecord.ref_id}&uid=${user.uid}`,
+        google_url: `${productURL}/calendar?calendar=google&id=${jobRecord.ref_id}&uid=${user.uid}`,
+        outlook_url: `${productURL}/calendar?calendar=outlook&id=${jobRecord.ref_id}&uid=${user.uid}`,
+        yahoo_url: `${productURL}/calendar?calendar=yahoo&id=${jobRecord.ref_id}&uid=${user.uid}`,
+        ics_url: `${productURL}/calendar?calendar=ics&id=${jobRecord.ref_id}&uid=${user.uid}`,
+        download_url: `${productURL}/calendar?calendar=download&id=${jobRecord.ref_id}&uid=${user.uid}`,
     };
 }
 
@@ -130,7 +130,7 @@ const sendAddJobProviderEmail = (user, jobRecord, customerDoc, rateDoc) => {
             support_email: supportEmail,
             preheader: 'Your job has been scheduled and the Zoom meeting details are below.',
             current_job_doc: formatJobDoc(jobRecord, customerDoc, rateDoc),
-            job_url: `https://ayuda.live/job/${jobRecord.ref_id}`,
+            job_url: `${productURL}/job/${jobRecord.ref_id}`,
             calendar_links: getCalendarLinks(user, jobRecord),
         },        
     }
@@ -184,7 +184,7 @@ const sendAuthorizeJobClientEmail = (user, jobRecord, customerDoc, rateDoc) => {
             preheader: `Billing details are required to hold your appointment with ${user.name}.`,
             email: customerDoc.email, 
             customer_name: customerDoc.name,
-            action_url: `https://ayuda.live/authorize?id=${jobRecord.ref_id}` 
+            action_url: `${productURL}/authorize?id=${jobRecord.ref_id}` 
                 + `&uid=${user.uid}&cid=${customerDoc.id}&rid=${rateDoc.id}`,
             job_date_time: moment
                 .unix(jobRecord.t.seconds)
@@ -225,7 +225,7 @@ const sendChangeJobProviderEmail = (
             preheader: `Your job for has been updated.`,
             current_job_doc: formatJobDoc(currentJobDoc, currentCustomerDoc, currentRateDoc),
             new_job_doc: formatJobDoc(newJobDoc, newCustomerDoc, newRateDoc),
-            job_url: `https://ayuda.live/job/${currentJobDoc.ref_id}`,
+            job_url: `${productURL}/job/${currentJobDoc.ref_id}`,
             calendar_links: getCalendarLinks(user, newJobDoc),
         },  
     }
@@ -337,7 +337,7 @@ const sendConfirmedJobProviderEmail = (user, jobRecord, customerDoc, rateDoc) =>
             support_email: supportEmail,
             preheader: `Your job for ${customerDoc.name} has been confirmed.`,
             current_job_doc: formatJobDoc(jobRecord, customerDoc, rateDoc),
-            job_url: `https://ayuda.live/job/${jobRecord.ref_id}`,
+            job_url: `${productURL}/job/${jobRecord.ref_id}`,
             calendar_links: getCalendarLinks(user, jobRecord),
         },        
     }
@@ -390,7 +390,7 @@ const sendReminderJobProviderEmail = (user, jobRecord, customerDoc, rateDoc, typ
             preheader: `Your job for ${customerDoc.name} has been confirmed.`,
             current_job_doc: formatJobDoc(jobRecord, customerDoc, rateDoc),
             type: type,
-            job_url: `https://ayuda.live/job/${jobRecord.ref_id}`,
+            job_url: `${productURL}/job/${jobRecord.ref_id}`,
             calendar_links: getCalendarLinks(user, jobRecord),
         },        
     }

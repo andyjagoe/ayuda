@@ -13,6 +13,8 @@ Setup requires setting the following Firebase environment variables prior to dep
 For example: 
 `firebase functions:config:set zoom.jwttoken="JWT token for API access" zoom.refreshtoken="refresh token to create new JWT tokens"`
 
+Valid status settings for jobs:
+* pending, authorized -> Confirmed, started, completed, paid, cancelled
 
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).

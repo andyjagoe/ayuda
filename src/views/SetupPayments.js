@@ -123,7 +123,7 @@ export default function SetupPayments(props) {
     const stripeConnectUrl = new URL("https://connect.stripe.com/express/oauth/authorize");
     stripeConnectUrl.searchParams.set("client_id", "ca_H6rAXET2pmOzBHnNrhEnwYPfPLEiZohY");
     stripeConnectUrl.searchParams.set("stripe_user[email]", email);
-    stripeConnectUrl.searchParams.set("stripe_user[url]", `https://ayuda.live/p/${shortId}`);
+    stripeConnectUrl.searchParams.set("stripe_user[url]", `${props.location.origin}/p/${shortId}`);
     stripeConnectUrl.searchParams.set("stripe_user[business_type]", "individual");
     stripeConnectUrl.searchParams.set("stripe_user[country]", "US");
 

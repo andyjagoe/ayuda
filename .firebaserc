@@ -1,5 +1,6 @@
 {
   "projects": {
-    "default": "ayuda-9ea45"
+    "default": "ayuda-9ea45",
+    "development": "ayuda-development"
   }
 }

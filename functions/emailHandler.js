@@ -27,7 +27,7 @@ const email = new Email({
             }
         },
         message: {
-            from: 'Ayuda Live <ayuda@ayuda.live>'
+            from: `Ayuda Live <${functions.config().ayuda.fromemail}>`
         },
         transport: transporter,
         juiceResources: {
@@ -41,7 +41,7 @@ const email = new Email({
 
 const productName = 'Ayuda Live'
 const productURL = functions.config().ayuda.url || 'https://ayuda.live'
-const supportEmail = 'support@ayuda.live'
+const supportEmail = functions.config().ayuda.supportemail
 
 
 const formatToName = (user) => {

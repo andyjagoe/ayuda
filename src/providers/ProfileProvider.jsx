@@ -45,7 +45,11 @@ class ProfileProvider extends Component {
                   }, err => {
                     console.log(`Error: ${err}`);
                   })
-            }    
+            } else  {
+              localStorage.removeItem('userProfile');
+              this.setState({ profile: null });
+              this.unsubscribe && this.unsubscribe();      
+            }
         } catch (error) {
             console.error(error);
         }

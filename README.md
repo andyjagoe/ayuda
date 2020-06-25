@@ -4,6 +4,10 @@ Setup requires setting the following Firebase environment variables prior to dep
 * aws.secretaccesskey
 * aws.region
 * aws.avatarbucket
+* gcloud.tasks.serviceaccountemail
+* gcloud.tasks.project
+* gcloud.tasks.queue
+* gcloud.tasks.location
 * stripe.secretkey
 * stripe.endpointsecret
 * zoom.apikey

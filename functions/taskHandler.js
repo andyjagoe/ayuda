@@ -1,10 +1,11 @@
+const functions = require('firebase-functions');
 const moment = require('moment');
 const {CloudTasksClient} = require('@google-cloud/tasks');
 const cloudTasksClient = new CloudTasksClient();
-const serviceAccountEmail = 'cloud-tasks@ayuda-9ea45.iam.gserviceaccount.com';
-const project = 'ayuda-9ea45';
-const queue = 'tasks';
-const location = 'us-central1';
+const serviceAccountEmail = functions.config().gcloud.tasks.serviceaccountemail;
+const project = functions.config().gcloud.tasks.project;
+const queue = functions.config().gcloud.tasks.queue;
+const location = functions.config().gcloud.tasks.location;
 
 
 

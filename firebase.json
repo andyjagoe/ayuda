@@ -12,6 +12,7 @@
     ]
   },
   "hosting": {
+    "predeploy": "npm run build:$GCLOUD_PROJECT",
     "public": "build",
     "ignore": [
       "firebase.json",

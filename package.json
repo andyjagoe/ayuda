@@ -44,10 +44,10 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "start:dev": "env-cmd -f ./.env.dev npm run-script start",
-    "build:dev": "env-cmd -f ./.env.dev npm run-script build",
-    "start:prod": "env-cmd -f ./.env.prod npm run-script start",
-    "build:prod": "env-cmd -f ./.env.prod npm run-script build"
+    "start:ayuda-development": "env-cmd -f ./.env.ayuda-development npm run-script start",
+    "build:ayuda-development": "env-cmd -f ./.env.ayuda-development npm run-script build",
+    "start:ayuda-9ea45": "env-cmd -f ./.env.ayuda-9ea45 npm run-script start",
+    "build:ayuda-9ea45": "env-cmd -f ./.env.ayuda-9ea45 npm run-script build"
   },
   "eslintConfig": {
     "extends": "react-app"

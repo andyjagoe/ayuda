@@ -12,7 +12,7 @@ class ProfileProvider extends Component {
     
         this.checkTz = async (profile, uid) => {
             try {
-              if (!('tz' in profile)) {
+              if (profile == null || !(profile.hasOwnProperty('tz'))) { 
                 await firestore.collection('/users').doc(uid).set({
                   tz: moment.tz.guess(),
                 }, { merge: true }); 
@@ -32,9 +32,11 @@ class ProfileProvider extends Component {
     auth.onAuthStateChanged(async authUser => {
         try {
             if (authUser !==  null) {
+                console.log(authUser.uid)
                 const result = await firestore.collection("/users").doc(authUser.uid).get()
                 localStorage.setItem('userProfile', JSON.stringify(result.data()));
                 this.setState({ profile: result.data() });
+                console.log(result.data())
                 this.checkTz(result.data(), authUser.uid)
                 this.unsubscribe = firestore
                   .collection("/users")
@@ -48,7 +50,6 @@ class ProfileProvider extends Component {
             } else  {
               localStorage.removeItem('userProfile');
               this.setState({ profile: null });
-              this.unsubscribe && this.unsubscribe();      
             }
         } catch (error) {
             console.error(error);

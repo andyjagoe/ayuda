@@ -23,6 +23,16 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 In the project directory, you can run:
 
+### `npm start build:dev`
+
+The same as running 'npm start' but loads the .env.dev firebase config values for the dev environment (https://ayuda-development.web.app)
+
+
+### `npm start build:prod`
+
+The same as running 'npm start' but loads the .env.prod firebase config values for the production environment (https://ayuda.live)
+
+
 ### `npm start`
 
 Runs the app in the development mode.<br />
@@ -35,6 +45,17 @@ You will also see any lint errors in the console.
 
 Launches the test runner in the interactive watch mode.<br />
 See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+
+
+### `npm run build:dev`
+
+The same as running 'npm run build' but loads the .env.dev firebase config values for the dev environment (https://ayuda-development.web.app)
+
+
+### `npm run build:prod`
+
+The same as running 'npm run build' but loads the .env.prod firebase config values for the production environment (https://ayuda.live)
+
 
 ### `npm run build`
 

@@ -18,14 +18,14 @@ import "firebase/firestore";
 
 
 const firebaseConfig = {
-    apiKey: "AIzaSyDRSI8T66SXMenjL9u0BJgHbKcfVUqjhzE",
-    authDomain: "ayuda.live",
-    databaseURL: "https://ayuda-9ea45.firebaseio.com",
-    projectId: "ayuda-9ea45",
-    storageBucket: "ayuda-9ea45.appspot.com",
-    messagingSenderId: "197813704421",
-    appId: "1:197813704421:web:bed6a8a8234079307da60c",
-    measurementId: "G-BL2E385K85"
+    apiKey: process.env.REACT_APP_API_KEY,
+    authDomain: process.env.REACT_APP_AUTH_DOMAIN,
+    databaseURL: process.env.REACT_APP_DATABASE_URL,
+    projectId: process.env.REACT_APP_PROJECT_ID,
+    storageBucket: process.env.REACT_APP_STORAGE_BUCKET,
+    messagingSenderId: process.env.REACT_APP_MESSAGING_SENDER_ID,
+    appId: process.env.REACT_APP_APP_ID,
+    measurementId: process.env.REACT_APP_MEASUREMENT_ID
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -40,4 +40,4 @@ export const signOut = () => {
 
 // Google OAuth Client ID, needed to support One-tap sign-up.
 // Set to null if One-tap sign-up is not supported.
-export const CLIENT_ID = '197813704421-a00f9qlrtc3q48amcebaod8h2ece4p6n.apps.googleusercontent.com';
+export const CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID //'';

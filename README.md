@@ -22,7 +22,7 @@ Valid status settings for jobs:
 
 ## Deployment
 
-### firebase deploy -m "github commit ID"
+### `firebase deploy -m "github commit ID"`
 
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).

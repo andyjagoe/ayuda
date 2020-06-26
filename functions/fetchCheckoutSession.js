@@ -32,6 +32,7 @@ exports.handler = async function(data, context, firestoreDb, billing) {
     const uid = data.uid;
     const cid = data.cid;
     const rid = data.rid;
+    const now = data.now;
 
     if (!(typeof id === 'string') || id.length === 0) {
         console.log('The function must be called with one argument "id".') 
@@ -127,7 +128,7 @@ exports.handler = async function(data, context, firestoreDb, billing) {
         const charge = rateRecord.rate * (jobRecord.d / 60) * 100
         const transfer = billing.calculateTransfer(charge)
 
-        const stripeSession = await stripe.checkout.sessions.create({
+        let stripeSessionData = {
             payment_method_types: ['card'],
             line_items: [{
                 name: `${jobRecord.topic} @ ${rateDescription} per hour.`,
@@ -138,7 +139,6 @@ exports.handler = async function(data, context, firestoreDb, billing) {
                 quantity: 1,
             }],
             payment_intent_data: {
-                capture_method: 'manual',
                 setup_future_usage: 'on_session', 
                 description: `${dateDescription} @ ${rateDescription} per hour`,
                 transfer_data: {
@@ -151,7 +151,12 @@ exports.handler = async function(data, context, firestoreDb, billing) {
             submit_type:  'book',
             success_url: `${functions.config().ayuda.url}/authorize_success?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: functions.config().ayuda.url,
-        })
+        }
+        if (now === null) {
+            stripeSessionData.payment_intent_data.capture_method = 'manual';
+        }
+        console.log(JSON.stringify(stripeSessionData))
+        const stripeSession = await stripe.checkout.sessions.create(stripeSessionData)
 
         return {sessionId: stripeSession.id, hasValidAuth: false}
 

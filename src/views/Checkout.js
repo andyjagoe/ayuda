@@ -59,13 +59,13 @@ export default function Checkout(props) {
             console.log('The function must be called with one argument "rid".')
             return
         }
-
         try {
             var fetchCheckoutSession = firebase.functions().httpsCallable('fetchCheckoutSession');
             const snap = await fetchCheckoutSession({uid: parsed.uid, 
                                         id: parsed.id,
                                         cid: parsed.cid,
-                                        rid: parsed.rid
+                                        rid: parsed.rid,
+                                        now: parsed.now,
                                         });
             const sessionId = snap.data.sessionId
             const stripe = await stripePromise;

@@ -153,7 +153,7 @@ const SignedInHomePage = () => {
               ${totalBalance} 
             </Typography>
             <Link variant="body2" onClick={() => { goToAccount(); }}>
-              Recent payouts: ${totalPayouts}
+              Recent payouts: ${totalPayouts} 
             </Link>
           </Grid>
         </Grid>

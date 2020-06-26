@@ -44,7 +44,8 @@ export default function Authorize(props) {
             const snap = await fetchCheckoutSession({uid: parsed.uid, 
                                         id: parsed.id,
                                         cid: parsed.cid,
-                                        rid: parsed.rid
+                                        rid: parsed.rid,
+                                        now: parsed.now,
                                         });
             if (snap.data.hasValidAuth === true) {
               navigate('/authorize_success', { state: { success_message: snap.data.successMessage } })

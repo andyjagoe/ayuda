@@ -10,7 +10,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import firebase from 'firebase/app';
 import 'firebase/functions';
 import { loadStripe } from '@stripe/stripe-js';
-const stripePromise = loadStripe(process.env.REACT_APP_PUBLIC_KEY);
+const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLIC_KEY);
 const queryString = require('query-string');
  
 

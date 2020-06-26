@@ -8,7 +8,7 @@ import OnboardingAppBar from 'components/OnboardingAppBar';
 import Grid from '@material-ui/core/Grid';
 import { makeStyles } from '@material-ui/core/styles';
 import { loadStripe } from '@stripe/stripe-js';
-const stripePromise = loadStripe(process.env.REACT_APP_PUBLIC_KEY);
+const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLIC_KEY);
 const queryString = require('query-string');
  
 

@@ -121,7 +121,7 @@ export default function SetupPayments(props) {
 
   const getStripeConnectUrl = () => {
     const stripeConnectUrl = new URL("https://connect.stripe.com/express/oauth/authorize");
-    stripeConnectUrl.searchParams.set("client_id", process.env.REACT_APP_CLIENT_ID);
+    stripeConnectUrl.searchParams.set("client_id", process.env.REACT_APP_STRIPE_CLIENT_ID);
     stripeConnectUrl.searchParams.set("stripe_user[email]", email);
     stripeConnectUrl.searchParams.set("stripe_user[url]", `${props.location.origin}/p/${shortId}`);
     stripeConnectUrl.searchParams.set("stripe_user[business_type]", "individual");

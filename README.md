@@ -20,6 +20,10 @@ For example:
 Valid status settings for jobs:
 * pending, authorized -> Confirmed, started, completed, paid, cancelled
 
+## Deployment
+
+### firebase deploy -m "github commit ID"
+
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 

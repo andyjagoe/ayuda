@@ -65,7 +65,7 @@ export default function Checkout(props) {
                                         id: parsed.id,
                                         cid: parsed.cid,
                                         rid: parsed.rid,
-                                        now: parsed.now,
+                                        invoice: parsed.invoice,
                                         });
             const sessionId = snap.data.sessionId
             const stripe = await stripePromise;

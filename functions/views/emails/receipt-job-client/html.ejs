@@ -10,7 +10,7 @@
                         <table class="purchase" width="100%" cellpadding="0" cellspacing="0" role="presentation">
                           <tr>
                             <td>
-                              <h3>Invoice# <%= receipt_id %></h3></td>
+                              <h3>Invoice# <%= receipt.invoiceId %></h3></td>
                             <td>
                               <h3 class="align-right"><%= receipt_date %></h3></td>
                           </tr>
@@ -28,7 +28,7 @@
                                 <tr>
                                   <td width="80%" class="purchase_item">
                                     <span class="f-fallback">
-                                    <%= current_job_doc.topic  %>: <%= current_job_doc.job_date_time %> for 
+                                    <%= current_job_doc.topic  %>: <%= job_date %> for 
                                     <%= (receipt.lengthInSeconds/60).toFixed(2)  %> minutes @ <%= current_job_doc.rate_name %> per hour
                                   </span>
                                 </td>

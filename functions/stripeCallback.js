@@ -18,10 +18,10 @@ exports.handler = async function(req, res, firestoreDb, admin) {
     switch (event.type) {
         case 'checkout.session.completed':
             console.log('checkout.session.completed')
-            //console.log(JSON.stringify(event.data))
+            console.log(`Checkout session ${JSON.stringify(event.data)}`)
             await handleCheckoutSucceeded(
                 event.data.object.payment_intent, 
-                event.data.object.client_reference_id, 
+                event.data.object.client_reference_id,
                 firestoreDb,
                 admin
             )
@@ -40,23 +40,32 @@ exports.handler = async function(req, res, firestoreDb, admin) {
     
 }
 
-function handleCheckoutSucceeded(paymentIntent, client_reference_id, firestoreDb, admin) {
-    const [uid, job_id] = client_reference_id.split('|')
-    return firestoreDb.collection('/users')
-    .doc(uid)
-    .collection('meetings')
-    .doc(job_id)
-    .set({
-        payment_intent: paymentIntent,
-        payment_intent_t: admin.firestore.Timestamp.fromDate(new Date()),
-        status: 'authorized'
-    }, { merge: true })
-    .then(ref => {
-        console.log('Job successfully updated');
-        return true;
-    })
-    .catch(error => {
-        console.error("updateJob Error: ", error);
-        return false;
-    });
+const handleCheckoutSucceeded = async (paymentIntent, client_reference_id, firestoreDb, admin) => {
+    const [uid, job_id, invoiceId] = client_reference_id.split('|')
+
+    try {
+        const intent = await stripe.paymentIntents.retrieve(paymentIntent)
+        console.log(`PaymentIntent ${JSON.stringify(intent)}`)
+        let status = 'authorized'
+        if (intent.capture_method === 'automatic') {
+            console.log('set status paid')
+            status = 'paid'
+        } 
+
+        await firestoreDb.collection('/users')
+        .doc(uid)
+        .collection('meetings')
+        .doc(job_id)
+        .set({
+            payment_intent: paymentIntent,
+            payment_intent_t: admin.firestore.Timestamp.fromDate(new Date()),
+            invoiceId: invoiceId,
+            status: status
+        }, { merge: true })
+
+        return true
+    } catch (error) {
+        console.error("Error: ", error);
+        return false
+    }
 }

@@ -124,6 +124,15 @@ if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'stripeCallback'
     });
 }
 
+if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'receiptCreatedTasks') {
+    const receiptCreatedTasks = require('./receiptCreatedTasks');
+    exports.receiptCreatedTasks = functions.firestore
+    .document('/billing/{uid}/meetings/{meeting_id}/receipts/{receipt_id}')
+    .onCreate((snapshot, context) => {    
+        return receiptCreatedTasks.handler(snapshot, context, firestoreDb, emailHandler);
+    });
+}
+
 if (!process.env.FUNCTION_NAME || process.env.FUNCTION_NAME === 'zoomCallback') {
     const zoomCallback = require('./zoomCallback');
     exports.zoomCallback = functions.https.onRequest((req, res) => {

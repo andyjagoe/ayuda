@@ -427,7 +427,7 @@ const sendReminderJobClientEmail = (user, jobRecord, customerDoc, rateDoc, type)
 }
 
 
-const sendReceiptJobProviderEmail = (user, jobRecord, customerDoc, rateDoc, receipt, receiptId) => {
+const sendReceiptJobProviderEmail = (user, jobRecord, customerDoc, rateDoc, receipt, invoice) => {
     const receipt_job_provider = {
         template: "receipt-job-provider",
         message: {
@@ -440,8 +440,8 @@ const sendReceiptJobProviderEmail = (user, jobRecord, customerDoc, rateDoc, rece
             preheader: `You've received a payment from ${customerDoc.name}.`,
             current_job_doc: formatJobDoc(jobRecord, customerDoc, rateDoc),
             receipt: receipt,
+            job_date: moment(invoice.meetingStarted.toDate()).tz(jobRecord.tz).format('MMMM Do, YYYY'),
             receipt_date: moment.unix(receipt.created.seconds).tz(jobRecord.tz).format('MMMM Do, YYYY'),
-            receipt_id: receiptId,
         },        
     }
 
@@ -449,7 +449,7 @@ const sendReceiptJobProviderEmail = (user, jobRecord, customerDoc, rateDoc, rece
 }
 
 
-const sendReceiptJobClientEmail = (user, jobRecord, customerDoc, rateDoc, receipt, receiptId) => {
+const sendReceiptJobClientEmail = (user, jobRecord, customerDoc, rateDoc, receipt, invoice) => {
     const receipt_job_client = {
         template: "receipt-job-client",
         message: {
@@ -465,12 +465,65 @@ const sendReceiptJobClientEmail = (user, jobRecord, customerDoc, rateDoc, receip
             preheader: `This email is the receipt for your session with ${user.name}. No payment is due.`,
             current_job_doc: formatJobDoc(jobRecord, customerDoc, rateDoc),
             receipt: receipt,
+            job_date: moment(invoice.meetingStarted.toDate()).tz(jobRecord.tz).format('MMMM Do, YYYY'),
             receipt_date: moment.unix(receipt.created.seconds).tz(jobRecord.tz).format('MMMM Do, YYYY'),
-            receipt_id: receiptId,
         },
     }
 
     return email.send(receipt_job_client)
+}
+
+
+const sendInvoiceJobProviderEmail = (user, jobRecord, customerDoc, rateDoc, invoiceId, invoice) => {
+    const invoice_job_provider = {
+        template: "invoice-job-provider",
+        message: {
+            to: formatToName(user),
+        },
+        locals: {                 
+            name: user.name,
+            product_name: productName,
+            support_email: supportEmail,
+            preheader: `You've sent an invoice to ${customerDoc.name}.`,
+            current_job_doc: formatJobDoc(jobRecord, customerDoc, rateDoc),
+            lengthInSeconds: invoice.meetingLengthInSeconds,
+            charge: invoice.stripeCharge,
+            job_date: moment(invoice.meetingStarted.toDate()).tz(jobRecord.tz).format('MMMM Do, YYYY'),
+            invoice_date: moment().tz(jobRecord.tz).format('MMMM Do, YYYY'),
+            invoice_id: invoiceId,
+        },        
+    }
+
+    return email.send(invoice_job_provider)
+}
+
+
+const sendInvoiceJobClientEmail = (user, jobRecord, customerDoc, rateDoc, invoiceId, invoice) => {
+    const invoice_job_client = {
+        template: "invoice-job-client",
+        message: {
+            to: formatToName({
+                name: customerDoc.name,
+                email: customerDoc.email
+            }),
+        },
+        locals: {                 
+            name: user.name,
+            product_name: productName,
+            support_email: supportEmail,
+            preheader: `This email is the invoice for your session with ${user.name}.`,
+            current_job_doc: formatJobDoc(jobRecord, customerDoc, rateDoc),
+            action_url: `${productURL}/authorize?id=${jobRecord.ref_id}&uid=${user.uid}` 
+                + `&cid=${customerDoc.id}&rid=${rateDoc.id}&invoice=${invoiceId}`,
+            lengthInSeconds: invoice.meetingLengthInSeconds,
+            charge: invoice.stripeCharge,
+            job_date: moment(invoice.meetingStarted.toDate()).tz(jobRecord.tz).format('MMMM Do, YYYY'),
+            invoice_date: moment().tz(jobRecord.tz).format('MMMM Do, YYYY'),
+            invoice_id: invoiceId,
+        },
+    }
+
+    return email.send(invoice_job_client)
 }
 
 
@@ -490,4 +543,6 @@ module.exports = {
     sendReminderJobClientEmail,
     sendReceiptJobProviderEmail,
     sendReceiptJobClientEmail,
+    sendInvoiceJobProviderEmail,
+    sendInvoiceJobClientEmail,
 }

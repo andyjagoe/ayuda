@@ -18,7 +18,6 @@ exports.handler = async function(req, res, firestoreDb, admin) {
     switch (event.type) {
         case 'checkout.session.completed':
             console.log('checkout.session.completed')
-            console.log(`Checkout session ${JSON.stringify(event.data)}`)
             await handleCheckoutSucceeded(
                 event.data.object.payment_intent, 
                 event.data.object.client_reference_id,
@@ -45,23 +44,24 @@ const handleCheckoutSucceeded = async (paymentIntent, client_reference_id, fires
 
     try {
         const intent = await stripe.paymentIntents.retrieve(paymentIntent)
-        console.log(`PaymentIntent ${JSON.stringify(intent)}`)
         let status = 'authorized'
+        let updateData = {
+            payment_intent: paymentIntent,
+            payment_intent_t: admin.firestore.Timestamp.fromDate(new Date()),
+            invoiceId: invoiceId,
+            status: status
+        }
+
         if (intent.capture_method === 'automatic') {
-            console.log('set status paid')
-            status = 'paid'
+            updateData.status = 'paid'
+            updateData.invoiceId = invoiceId
         } 
 
         await firestoreDb.collection('/users')
         .doc(uid)
         .collection('meetings')
         .doc(job_id)
-        .set({
-            payment_intent: paymentIntent,
-            payment_intent_t: admin.firestore.Timestamp.fromDate(new Date()),
-            invoiceId: invoiceId,
-            status: status
-        }, { merge: true })
+        .set(updateData, { merge: true })
 
         return true
     } catch (error) {

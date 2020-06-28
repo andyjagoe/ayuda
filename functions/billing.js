@@ -134,6 +134,7 @@ const runBilling  = async (user, jobId, hostZoomId, jobDoc, customerDoc, rateDoc
             return false
         }
 
+        
         // Collect payment
         const payment = await stripe.paymentIntents.capture(
             jobDoc.payment_intent,
@@ -146,40 +147,16 @@ const runBilling  = async (user, jobId, hostZoomId, jobDoc, customerDoc, rateDoc
             `${payment.amount_received} total - ${payment.amount_received - payment.transfer_data.amount} fee ` +
             ` = ${payment.transfer_data.amount} `)
 
+
         // Mark jobRecord as paid
         await firestoreDb.collection('/users')
         .doc(user.uid)
         .collection('meetings')
         .doc(jobId)
         .set({
-            status: 'paid'
+            status: 'paid',
+            invoiceId: invoiceResult.id,
         }, { merge: true })
-
-        /*
-        // Store record of payment with details needed for a receipt
-        const receipt =  {
-            description: payment.description,
-            created: admin.firestore.Timestamp.fromDate(new Date()),
-            billing_segments: itemizedBillingSegments,
-            lengthInSeconds: meetingLengthInSeconds,
-            rate: rateDoc.rate,
-            stripe_cust_id: payment.customer,
-            cust_id: jobDoc.payer_id,
-            rate_id: jobDoc.rate_id,
-            topic: jobDoc.topic,
-            total_paid: payment.amount_received,
-            provider_received: payment.transfer_data.amount,
-            statement_descriptor: payment.charges.data[0].calculated_statement_descriptor,
-            payment_method_details: payment.charges.data[0].payment_method_details,
-        }
-        const receiptResult = await firestoreDb.collection('/billing')
-        .doc(user.uid)
-        .collection('meetings')
-        .doc(jobId)
-        .collection("receipts")
-        .add(receipt)
-        
-        */
 
         return true
     } catch (error) {

@@ -46,7 +46,7 @@ export default function AuthorizeSuccess(props) {
     function loadSuccessMessage(props) {
       try {
         if (parsed.invoice) {
-          setSuccessMessage(`Invoice paid successfully: ${parsed.invoice}`)
+          setSuccessMessage(`Invoice paid successfully.`)
           return
         }
         const msg = props.location.state.success_message

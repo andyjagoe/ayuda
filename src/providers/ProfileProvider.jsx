@@ -32,11 +32,9 @@ class ProfileProvider extends Component {
     auth.onAuthStateChanged(async authUser => {
         try {
             if (authUser !==  null) {
-                console.log(authUser.uid)
                 const result = await firestore.collection("/users").doc(authUser.uid).get()
                 localStorage.setItem('userProfile', JSON.stringify(result.data()));
                 this.setState({ profile: result.data() });
-                console.log(result.data())
                 this.checkTz(result.data(), authUser.uid)
                 this.unsubscribe = firestore
                   .collection("/users")

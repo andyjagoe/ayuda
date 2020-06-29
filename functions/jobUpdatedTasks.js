@@ -1,3 +1,5 @@
+const functions = require('firebase-functions');
+const stripe = require('stripe')(functions.config().stripe.secretkey);
 const _ = require('lodash/core');
 const moment = require('moment');
 
@@ -36,9 +38,10 @@ exports.handler = async function(change, context, firestoreDb, emailHandler, tas
         try {
             // 'completed' is after meeting ends provided both parties were on and min charge > $1
             await taskHandler.cancelAllReminders(uid, newJobDoc.ref_id, firestoreDb)        
-            //TODO: send emails that meeting has been completed
             const when = admin.firestore.Timestamp.fromDate(new Date())
             await taskHandler.scheduleBillingForJob(uid, newJobDoc.ref_id, when, firestoreDb)
+
+            //TODO: send emails that meeting has been completed
 
             return null           
         } catch (error) {
@@ -53,9 +56,37 @@ exports.handler = async function(change, context, firestoreDb, emailHandler, tas
             const { user,  userDoc, newCustomerDoc, newRateDoc 
             } = await getSnaps( uid, currentJobDoc, newJobDoc, firestoreDb)
 
-            //TODO: send receipt emails that billing is completed
-
+            await taskHandler.cancelAllReminders(uid, newJobDoc.ref_id, firestoreDb)        
             await zoomHelper.removeZoomMap(userDoc.zoomId, newJobDoc, firestoreDb)
+
+            const { meetingLengthInSeconds, itemizedBillingSegments } = 
+            await billing.calculateMeetingLength(uid, newJobDoc.ref_id, userDoc.zoomId, firestoreDb)
+    
+            const intent = await stripe.paymentIntents.retrieve(newJobDoc.payment_intent)
+            const receipt =  {
+                invoiceId: newJobDoc.invoiceId,
+                description: intent.description,
+                created: admin.firestore.Timestamp.fromDate(new Date()),
+                billing_segments: itemizedBillingSegments,
+                lengthInSeconds: meetingLengthInSeconds,
+                rate: newRateDoc.rate,
+                stripe_cust_id: intent.customer,
+                cust_id: newJobDoc.payer_id,
+                rate_id: newJobDoc.rate_id,
+                topic: newJobDoc.topic,
+                total_paid: intent.amount_received,
+                provider_received: intent.transfer_data.amount,
+                statement_descriptor: intent.charges.data[0].calculated_statement_descriptor,
+                payment_method_details: intent.charges.data[0].payment_method_details,
+            }
+            const receiptResult = await firestoreDb.collection('/billing')
+            .doc(uid)
+            .collection('meetings')
+            .doc(newJobDoc.ref_id)
+            .collection("receipts")
+            .add(receipt)
+
+            // Receipt email sending handled by db listener for new receipts.
 
             return null           
         } catch (error) {

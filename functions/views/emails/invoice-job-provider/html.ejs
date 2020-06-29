@@ -2,14 +2,14 @@
 
                       <div class="f-fallback">
                         <h1>Hi, <%= current_job_doc.customer_name %>!</h1>
-                        <p>You received a payment of $<%= (receipt.provider_received /100).toFixed(2) %> from <%= current_job_doc.customer_name %>. 
-                          Funds are usually available for transfer to your bank account in 1-2 business days.</p>
+                        <p>You sent an invoice of $<%= (charge/100).toFixed(2) %> to <%= current_job_doc.customer_name %>. 
+                          You will be notified when payment is received.</p>
                         <table class="purchase" width="100%" cellpadding="0" cellspacing="0" role="presentation">
                           <tr>
                             <td>
-                              <h3>Invoice# <%= receipt.invoiceId %></h3></td>
+                              <h3>Invoice# <%= invoice_id %></h3></td>
                             <td>
-                              <h3 class="align-right"><%= receipt_date %></h3></td>
+                              <h3 class="align-right"><%= invoice_date %></h3></td>
                           </tr>
                           <tr>
                             <td colspan="2">
@@ -26,27 +26,17 @@
                                   <td width="80%" class="purchase_item">
                                     <span class="f-fallback">
                                     <%= current_job_doc.topic  %>: <%= job_date %> for 
-                                    <%= (receipt.lengthInSeconds/60).toFixed(2)  %> minutes @ <%= current_job_doc.rate_name %> per hour
+                                    <%= (lengthInSeconds/60).toFixed(2)  %> minutes @ <%= current_job_doc.rate_name %> per hour
                                   </span>
                                 </td>
-                                  <td class="align-right" width="20%" class="purchase_item"><span class="f-fallback">$<%= (receipt.total_paid /100).toFixed(2)  %></span></td>
+                                  <td class="align-right" width="20%" class="purchase_item"><span class="f-fallback">$<%= (charge /100).toFixed(2)  %></span></td>
                                 </tr>
-                                <tr>
-                                  <td width="80%" class="purchase_item">
-                                    <span class="f-fallback">
-                                    Service fee
-                                  </span>
-                                </td>
-                                  <td class="align-right" width="20%" class="purchase_item"><span class="f-fallback">
-                                    ($<%= ((receipt.total_paid - receipt.provider_received) /100).toFixed(2)  %>)</span></td>
-                                </tr>
-
                                 <tr>
                                   <td width="80%" class="purchase_footer" valign="middle">
                                     <p class="f-fallback purchase_total purchase_total--label">Total</p>
                                   </td>
                                   <td width="20%" class="purchase_footer" valign="middle">
-                                    <p class="f-fallback purchase_total">$<%= (receipt.provider_received /100).toFixed(2)  %></p>
+                                    <p class="f-fallback purchase_total">$<%= (charge /100).toFixed(2)  %></p>
                                   </td>
                                 </tr>
                               </table>

@@ -74,7 +74,7 @@ const runBilling  = async (user, jobId, hostZoomId, jobDoc, customerDoc, rateDoc
 
 
         const { meetingLengthInSeconds, itemizedBillingSegments } = 
-        await billing.calculateMeetingLength(user.uid, jobId, hostZoomId, firestoreDb)
+        await calculateMeetingLength(user.uid, jobId, hostZoomId, firestoreDb)
 
 
         const charge = (meetingLengthInSeconds  / 3600) * rateDoc.rate
@@ -89,9 +89,29 @@ const runBilling  = async (user, jobId, hostZoomId, jobDoc, customerDoc, rateDoc
             return false
         }
 
+
+        // Create invoice
+        const invoiceData = {
+            meetingLengthInSeconds: meetingLengthInSeconds,
+            transfer:  transfer,
+            charge: charge,
+            stripeCharge: stripeCharge,
+            meetingStarted: itemizedBillingSegments[0].start_time
+        }
+        const invoiceResult = await firestoreDb.collection('/billing')
+        .doc(user.uid)
+        .collection('meetings')
+        .doc(jobId)
+        .collection("invoices")
+        .add(invoiceData)
+
+
         if  (!('payment_intent' in jobDoc)) {
-            console.log(`We have no authorization for job: ${JSON.stringify(jobDoc)}`)
-            //TODO: kick off authorization/payment request to client
+            console.log(`Send invoice, no authorization for job`)
+            emailHandler.sendInvoiceJobProviderEmail(user, jobDoc, customerDoc, rateDoc, 
+                invoiceResult.id, invoiceData)
+            emailHandler.sendInvoiceJobClientEmail(user, jobDoc, customerDoc, rateDoc, 
+                invoiceResult.id, invoiceData)
             return false
         }
 
@@ -104,7 +124,7 @@ const runBilling  = async (user, jobId, hostZoomId, jobDoc, customerDoc, rateDoc
             return false
         } else if (intent.status !== 'requires_capture') {
             console.error(`Unexpected status: ${intent.status}`)
-            //TODO: send out request for new payment/authorization
+            //TODO: Handle unexpected error condition
             return false
         }
 
@@ -114,6 +134,7 @@ const runBilling  = async (user, jobId, hostZoomId, jobDoc, customerDoc, rateDoc
             return false
         }
 
+        
         // Collect payment
         const payment = await stripe.paymentIntents.capture(
             jobDoc.payment_intent,
@@ -126,47 +147,16 @@ const runBilling  = async (user, jobId, hostZoomId, jobDoc, customerDoc, rateDoc
             `${payment.amount_received} total - ${payment.amount_received - payment.transfer_data.amount} fee ` +
             ` = ${payment.transfer_data.amount} `)
 
+
         // Mark jobRecord as paid
         await firestoreDb.collection('/users')
         .doc(user.uid)
         .collection('meetings')
         .doc(jobId)
         .set({
-            status: 'paid'
+            status: 'paid',
+            invoiceId: invoiceResult.id,
         }, { merge: true })
-
-        // Store record of payment with details needed for a receipt
-        const receipt =  {
-            description: payment.description,
-            created: admin.firestore.Timestamp.fromDate(new Date()),
-            billing_segments: itemizedBillingSegments,
-            lengthInSeconds: meetingLengthInSeconds,
-            rate: rateDoc.rate,
-            stripe_cust_id: payment.customer,
-            cust_id: jobDoc.payer_id,
-            rate_id: jobDoc.rate_id,
-            topic: jobDoc.topic,
-            total_paid: payment.amount_received,
-            provider_received: payment.transfer_data.amount,
-            statement_descriptor: payment.charges.data[0].calculated_statement_descriptor,
-            payment_method_details: payment.charges.data[0].payment_method_details,
-        }
-        const receiptResult = await firestoreDb.collection('/billing')
-        .doc(user.uid)
-        .collection('meetings')
-        .doc(jobId)
-        .collection("receipts")
-        .add(receipt)
-
-        //console.log(`Receipt: ${JSON.stringify(receiptResult)} ${JSON.stringify(receipt)}`)
-        //console.log(`Receipt Id: ${JSON.stringify(receiptResult.id)}`)
-        //console.log(`paymentResult: ${JSON.stringify(payment)}`)
-
-        // Send receipt/processed emails to provider and client
-        await emailHandler.sendReceiptJobClientEmail(user, jobDoc, customerDoc, rateDoc, receipt, receiptResult.id)
-        await emailHandler.sendReceiptJobProviderEmail(user, jobDoc, customerDoc, rateDoc, receipt, receiptResult.id)
-        
-        //TODO: error checking that email sent successfully
 
         return true
     } catch (error) {

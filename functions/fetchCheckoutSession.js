@@ -32,6 +32,7 @@ exports.handler = async function(data, context, firestoreDb, billing) {
     const uid = data.uid;
     const cid = data.cid;
     const rid = data.rid;
+    const invoiceId = data.invoice;
 
     if (!(typeof id === 'string') || id.length === 0) {
         console.log('The function must be called with one argument "id".') 
@@ -120,38 +121,62 @@ exports.handler = async function(data, context, firestoreDb, billing) {
                     successMessage: "Your session is already booked"}
         }
     
-
         // Create Stripe session
         const dateDescription = formatDateDescription(jobRecord)
         const rateDescription = formatRateDescription(rateRecord)
-        const charge = rateRecord.rate * (jobRecord.d / 60) * 100
-        const transfer = billing.calculateTransfer(charge)
 
-        const stripeSession = await stripe.checkout.sessions.create({
+        let stripeSessionData = {
             payment_method_types: ['card'],
             line_items: [{
                 name: `${jobRecord.topic} @ ${rateDescription} per hour.`,
-                description: `${dateDescription}. Cancel any time. You will not be charged ` +
-                    `until your session is complete.`,
-                amount: charge,
                 currency: rateRecord.currency.toLowerCase(),
                 quantity: 1,
             }],
             payment_intent_data: {
-                capture_method: 'manual',
                 setup_future_usage: 'on_session', 
                 description: `${dateDescription} @ ${rateDescription} per hour`,
+                statement_descriptor_suffix: userSnap.data().displayName.slice(0,15),
                 transfer_data: {
                     destination: stripeRecord.stripe_user_id,
-                    amount: transfer 
                 }
             },
             customer: customerRecord.stripe_id,
-            client_reference_id: `${uid}|${id}`,
-            submit_type:  'book',
+            client_reference_id: `${uid}|${id}|${invoiceId}`,
+            submit_type: 'book',
             success_url: `${functions.config().ayuda.url}/authorize_success?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: functions.config().ayuda.url,
-        })
+        }
+
+        if (invoiceId === null) {
+            const charge = rateRecord.rate * (jobRecord.d / 60) * 100
+            const transfer = billing.calculateTransfer(charge)
+            stripeSessionData.line_items[0].amount = charge;
+            stripeSessionData.payment_intent_data.transfer_data.amount = transfer;
+            stripeSessionData.payment_intent_data.capture_method = 'manual';
+            stripeSessionData.line_items[0].description = `${dateDescription}. Cancel any time. You will ` +
+            `not be charged until your session is complete.`;
+        } else {
+            invoiceSnap = await firestoreDb.collection('/billing').doc(uid)
+                .collection('meetings').doc(id).collection('invoices').doc(invoiceId).get()
+            if (!invoiceSnap.exists) {
+                console.log('No such invoice!') 
+                throw new functions.https.HttpsError('failed-precondition', 'Unable to verify invoice.');
+            }
+            const invoiceDoc = invoiceSnap.data()
+            stripeSessionData.line_items[0].amount = invoiceDoc.stripeCharge;
+            stripeSessionData.payment_intent_data.transfer_data.amount = invoiceDoc.transfer;
+            const sessionStarted = moment(invoiceDoc.meetingStarted.toDate()).tz(jobRecord.tz).format('MMMM Do')
+            const sessionMinutes = (invoiceDoc.meetingLengthInSeconds/60).toFixed(2)
+            stripeSessionData.line_items[0].description = `${sessionStarted} for ${sessionMinutes} minutes`;            
+            stripeSessionData.payment_intent_data.description = 
+                `${sessionStarted} @ ${rateDescription} per hour for ${sessionMinutes} minutes`;
+            stripeSessionData.submit_type = 'pay';      
+            stripeSessionData.success_url = 
+                `${functions.config().ayuda.url}/authorize_success?session_id={CHECKOUT_SESSION_ID}&invoice=` +
+                `${invoiceId}`;
+            }
+
+        const stripeSession = await stripe.checkout.sessions.create(stripeSessionData)
 
         return {sessionId: stripeSession.id, hasValidAuth: false}
 

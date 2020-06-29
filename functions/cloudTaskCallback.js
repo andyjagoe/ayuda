@@ -89,13 +89,17 @@ const handleMeetingCompleted = async (uid, jobId, zoomId, rateDoc, firestoreDb, 
             .set({
                 status: 'completed'
             }, { merge: true })
+            
+            return true
         }
 
+        console.log("This meeting does not meet criteria to be billabale.")
     } catch (error) {
         console.error(error);
         console.log(`handleMeetingCompleted Error: ${JSON.stringify(error)}`)
     }
 
+    return false
 }
 
 

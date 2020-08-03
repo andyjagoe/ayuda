@@ -78,8 +78,8 @@ const runBilling  = async (user, jobId, hostZoomId, jobDoc, customerDoc, rateDoc
 
 
         const charge = (meetingLengthInSeconds  / 3600) * rateDoc.rate
-        const stripeCharge = Math.round(charge * 100)
-        const transfer = calculateTransfer(stripeCharge)
+        let stripeCharge = Math.round(charge * 100)
+        let transfer = calculateTransfer(stripeCharge)
         console.log(`Rate: ${rateDoc.rate} Charge: ${charge} stripeCharge: ${stripeCharge}`)
 
         const stripeSnap = await firestoreDb.collection('/stripe').doc(user.uid).get()
@@ -113,7 +113,7 @@ const runBilling  = async (user, jobId, hostZoomId, jobDoc, customerDoc, rateDoc
             emailHandler.sendInvoiceJobClientEmail(user, jobDoc, customerDoc, rateDoc, 
                 invoiceResult.id, invoiceData)
             return false
-        }
+        }   
 
         const intent = await stripe.paymentIntents.retrieve(jobDoc.payment_intent)            
         //console.log(`PaymentIntent: ${JSON.stringify(intent)}`)
@@ -129,11 +129,18 @@ const runBilling  = async (user, jobId, hostZoomId, jobDoc, customerDoc, rateDoc
         }
 
         if (intent.amount_capturable < stripeCharge)  {
-            console.error(`Authorization insufficient ${intent.amount_capturable} < ${stripeCharge}`)
-            //TODO: send out request for new payment/authorization
-            return false
-        }
+            console.log(`Authorization insufficient ${intent.amount_capturable} < ${stripeCharge}`)
+            stripeCharge = intent.amount_capturable
+            transfer = calculateTransfer(intent.amount_capturable)
 
+            if ((meetingLengthInSeconds/60) - jobDoc.d > 10) {
+                console.log(`Meeting outside grace period. Send supplemental invoice. 
+                Actual: ${meetingLengthInSeconds/60} Expected: ${jobDoc.d} 
+                Difference: ${(meetingLengthInSeconds/60) - jobDoc.d}`)
+
+                //TODO: send supplementary invoice
+            }
+        }
         
         // Collect payment
         const payment = await stripe.paymentIntents.capture(

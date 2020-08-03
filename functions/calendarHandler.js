@@ -32,7 +32,7 @@ const getInvitationMarkup = (user, jobRecord, productName) => {
     .unix(jobRecord.t.seconds)
     .tz(jobRecord.tz)  
     .format(('MMMM Do, h:mm a'));
-    return `${user.name} (${user.email}) is inviting you to a scheduled ${productName} meeting.
+    return `${user.name} (${user.email}) is inviting you to a scheduled ${functions.config().ayuda.url} meeting.
 
 Topic: ${jobRecord.topic}
 Time: ${formattedstart}

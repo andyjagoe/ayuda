@@ -1,7 +1,7 @@
 # Zoom-based business platform. The easiest way to get paid for consulting, coaching or anything you do by Zoom video call.
 
-[Buyer/Seller Transaction Flow](https://miro.com/app/board/o9J_klABOX0=/?moveToWidget=3074457349888715941&cot=12)
-[Seller Web App Flow](https://miro.com/app/board/o9J_klABOX0=/?moveToWidget=3074457349911125357&cot=12)
+* [Buyer/Seller Transaction Flow](https://miro.com/app/board/o9J_klABOX0=/?moveToWidget=3074457349888715941&cot=12)
+* [Seller Web App Flow](https://miro.com/app/board/o9J_klABOX0=/?moveToWidget=3074457349911125357&cot=12)
 
 ## Use Cases
 * Online consulting (medical, legal, financial, therapy, veterinary, spiritual, design, health/beauty)

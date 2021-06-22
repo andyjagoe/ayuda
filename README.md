@@ -1,3 +1,17 @@
+# Zoom-based business platform. The easiest way to get paid for consulting, coaching or anything you do by Zoom video call.
+
+[Buyer/Seller Transaction Flow](https://miro.com/app/board/o9J_klABOX0=/?moveToWidget=3074457349888715941&cot=12)
+[Seller Web App Flow](https://miro.com/app/board/o9J_klABOX0=/?moveToWidget=3074457349911125357&cot=12)
+
+## Use Cases
+* Online consulting (medical, legal, financial, therapy, veterinary, spiritual, design, health/beauty)
+* Online lessons (music, language, computer, hobby/craft, performing arts, visual arts, cooking)
+* Online academic tutoring (k12, college, math, reading, writing, SAT)
+* Online coaching (personal trainer, nutrition, golf, yoga)
+* Online babysitting / companionship
+* Online service/repairs (appliances, plumbing, electrical, construction, DIY)
+
+
 ## Deployment
 
 ### `firebase deploy -m "github commit ID"`
